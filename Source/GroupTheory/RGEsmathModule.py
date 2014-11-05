@@ -211,6 +211,15 @@ class adjoint(Function):
 #Other functions 
 ########################################################################################################
 
+def summatrix(llist):
+	if llist != []:
+		out = llist[0] 
+		for ll in llist[1:]: 
+			out += ll
+		return out
+	else :
+		return Integer(0)
+
 def DynkinIndex(Mod, x, ScalarsOrFermions) : 
 	"""Calculates the Dynkin Index for a given group in a given model and for the Scalar or Fermions representation."""
 	out = sum([x[1].S2(val.Qnb[x[0]])*multiplicity(x,part,val,Mod) 
@@ -238,6 +247,15 @@ def multiplicity(x,part,val,Mod) :
 	Multiplicity = [el if el != 0 else 1 for el in Multiplicity]#when the dim is zero i.e. singlet the multiplicity should be one
 	out = val.Gen*functools.reduce(operator.mul,Multiplicity)
 	return out
+
+def multiplicityKin(pp,model):
+	"""returns the multiplicity of pp for the abelian sector"""
+	out = [getdimIrrep(pp.Qnb[name],g)
+			for name,g,t in model.NonUGaugeGroups]
+	out = [el if el != 0 else 1 for el in out ]
+	out = functools.reduce(operator.mul,out,1)*pp.Gen
+	return out
+
 
 def SimplifyTraces(expression,Mod) : 
 	"""Simplify the traces of the Yukawa, especially gets the minus sign outside"""
@@ -287,13 +305,28 @@ def SimplifyTraces(expression,Mod) :
 	return temp
 
 
+
+
 def DeterminOrdering(model,Final):
-	"""Determin the ordering of the Structure"""
-	if type(Final) != Add : 
-		Final = [Final]
+	"""Wrapper to include the kinetic mixing case"""
+	if type(Final) != Add and type(Final) != tMM: 
+		Final = [[Final]]
+	elif type(Final) == tMM : 
+		Final = [el.args for el in Final]
 	else :
-		Final = Final.args
+		Final = [Final.args]
 	OrderedTerm = []
+	for term in Final:
+		OrderedTerm.append(determinordering(model,term))
+	if len(OrderedTerm) == 1 : 
+		OrderedTerm = OrderedTerm[0]
+	return OrderedTerm
+	
+
+
+def determinordering(model,Final):
+	"""Determin the ordering of the Structure"""
+	OrderedTerm  = []	
 	for term in Final :
 		args = term.args	
 		Out,In,Factor = [],[],[]
@@ -580,4 +613,197 @@ def analyseterm(term,structure,model) :
 		loggingCritical("Error this is not implemented, contact the authors",verbose=True)
 		exit()
 
-
+#def DeterminOrdering(model,Final):
+#	"""Determin the ordering of the Structure"""
+#	if type(Final) != Add and type(Final) != tMM: 
+#		Final = [[Final]]
+#	elif type(Final) == tMM : 
+#		Final = [el.args for el Final]
+#	else :
+#		Final = [Final.args]
+#	OrderedTerm = []
+#	for term in Final :
+#		args = term.args	
+#		Out,In,Factor = [],[],[]
+#		#separtate teh expression in three parts
+#		for iel,el in enumerate(args):
+#			if hasattr(el,'is_trace'):
+#				In.append(el.arg)
+#			elif hasattr(el,'arg') and not(hasattr(el,'is_trace')) or (type(el) == adjoint and hasattr(el.args[0],'arg')) :
+#				Out.append(el)
+#			else :
+#				Factor.append(el) 
+#		if Out == In and In == [] : 
+#			OrderedTerm.append(term)
+#		else :
+#			Factor = functools.reduce(operator.mul,Factor,1)
+#			assert len(In) == 1 or len(In) == 0 
+#			#Here we have to be carefull
+#			if len(In) == 1 and hasattr(In[0],'arg') :
+#				In = In
+#			elif len(In) == 1 : 
+#				In = list(In[0].args)
+#			else :
+#				In = In
+#			FOutIndices,FInIndices,ToRemove = [],[],[]
+#			for iel,el in enumerate(In) :
+#				el = el.arg if hasattr(el,'arg') else el.args[0].arg
+#				if model.Particles[str(el[0])].Gen != 1 and model.Particles[str(el[1])].Gen != 1 :
+#					FInIndices.append((el[0],el[1]))
+#				elif model.Particles[str(el[0])].Gen != 1 and model.Particles[str(el[1])].Gen == 1 :
+#					FInIndices.append((el[0],))
+#				elif model.Particles[str(el[0])].Gen == 1 and model.Particles[str(el[1])].Gen != 1 :
+#					FInIndices.append((el[1],))
+#				else :
+#					#Take the term out of In and multiply the Factor with it since it is a scalar anyway
+#					tp = In[iel]
+#					if type(tp) == adjoint :
+#						Factor = Factor * In[iel].args[0].Symb.conjugate()
+#					else :
+#						Factor = Factor * In[iel].Symb
+#					ToRemove.append(iel)
+#			#Change the name of the outgoing particles.Add an f for fix index
+#			In = [el for iel,el in enumerate(In) if not(iel in ToRemove)]
+#			for idx,el in enumerate(Out) :
+#				el = el.arg if hasattr(el,'arg') else el.args[0].arg
+#				if model.Particles[str(el[0])].Gen != 1 and model.Particles[str(el[1])].Gen != 1 :
+#					if idx == 0 : 
+#						if len(Out) != 1 :
+#							FOutIndices.append((Symbol(str(el[0])+'_f'),el[1]))
+#						else :
+#							FOutIndices.append((Symbol(str(el[0])+'_f'),Symbol(str(el[1])+'_f')))
+#					elif idx == len(Out) -1 :
+#						FOutIndices.append((el[0],Symbol(str(el[1])+'_f')))
+#					else :
+#						FOutIndices.append((el[0],el[1]))
+#				elif model.Particles[str(el[0])].Gen != 1 and model.Particles[str(el[1])].Gen == 1 :
+#					if idx == 0 : 
+#						FOutIndices.append((Symbol(str(el[0])+'_f'),))
+#					else :
+#						FOutIndices.append((el[0],))
+#				elif model.Particles[str(el[0])].Gen == 1 and model.Particles[str(el[1])].Gen != 1 :
+#					if idx == len(Out) - 1 : 
+#						FOutIndices.append((Symbol(str(el[1])+'_f'),))
+#					else :	
+#						FOutIndices.append((el[1],))
+#				else :
+#					FOutIndices.append(())
+#			#Get back only the symbols
+#			def extractsymbs(lOutorIn):
+#				cplist = []
+#				for el in lOutorIn : 
+#					Transpose = False
+#					Toadd = 0
+#					if type(el) != adjoint : 
+#						if hasattr(el,'arg') : 
+#							Transpose = False if el.arg == model.DefOrderYuk[str(el.Symb)] else True
+#						Toadd = el.Symb.transpose() if Transpose else el.Symb
+#					elif len(model.DimYuk[str(el.args[0].Symb)]) != 0 :
+#						if hasattr(el.args[0],'arg') : 
+#							Transpose = False if el.args[0].arg == model.DefOrderYuk[str(el.args[0].Symb)][::-1] else True
+#						Toadd = el.args[0].Symb.conjugate() if Transpose else el.args[0].Symb.adjoint()#we apply transpose on the adjoint
+#					else :
+#						Toadd =  el.args[0].Symb.conjugate()
+#					cplist.append(Toadd)
+#				return cplist
+#			#Old
+#			#Out = [el.Symb if type(el) != adjoint else (el.args[0].Symb.adjoint() if len(model.DimYuk[str(el.args[0].Symb)]) == 2 else el.args[0].Symb.conjugate()) for el in Out ]
+#			#In = [el.Symb if type(el) != adjoint else (el.args[0].Symb.adjoint() if len(model.DimYuk[str(el.args[0].Symb)]) == 2 else el.args[0].Symb.conjugate()) for el in In]
+#			Out = extractsymbs(Out)
+#			In = extractsymbs(In)
+#			skip = []
+#			Comb = [Out,In]
+#			CombIndices = [FOutIndices,FInIndices]
+#			Res = []
+#			for iT,Term in enumerate(Comb) :
+#				Indices = CombIndices[iT]
+#				if Term == [] :
+#					pass 
+#				else :
+#					while True : 
+#						#breaking conditions for in and out terms
+#						if len(Term) == 1 :
+#							#Reconstruct the skip terms
+#							skip = [model.Classes[str(el[0])](el[1]) if str(el[0]) in model.Classes and el[1] != () else 
+#									(Symbol(str(el[0].args[0]),commutative=True).conjugate() if type(el[0]) == conjugate and el[1] == () else (
+#										Symbol(str(el[0]),commutative=True) if str(el[0]) in model.Classes and el[1] == () else el[0] )) for el in skip]
+#							#In case Term is a Yukawa it is necessarily the last one of skip
+#							if str(Term[0]) in model.Classes :
+#								if (len(Indices) == 1 and Indices[0] == ()) or Indices == [] :
+#									Term = Symbol(str(Term[0]),commutative=True)
+#								elif Indices != [] :
+#									if len(Indices) == 1 and skip != [] and type(skip[0]) == MatM:
+#										if Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
+#											Indices[-1] = Indices[-1][0],Symbol(str(Indices[-1][1]).split('_')[0]+'1_f')
+#										Term = model.Classes[str(Term[0])](*Indices[-1]).transpose()
+#									else :
+#										if Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
+#											Indices[-1] = Indices[-1][0],Symbol(str(Indices[-1][1]).split('_')[0]+'1_f')
+#										Term = model.Classes[str(Term[0])](*Indices[-1])
+#								else :
+#									loggingCritical("error in determining the product",verbose=True)
+#									exit()
+#							#identify traces
+#							elif len(Indices) == 1 and Indices[0] != () and len(Indices[0]) == 2 :
+#								if Indices[0][0] == Indices[0][1] and len(str(Indices[0][0]).split('_')) == 1 :
+#									#it is a trace
+#									Term = trace(Term[0])
+#									Term = Term.update()
+#								elif Indices[0][0] == Indices[0][1] and len(str(Indices[0][0]).split('_')) == 2 :
+#									#We have to modify the name of the two outgoing particles in this case
+#									Indices[0] = Indices[0][0],Symbol(str(Indices[0][1]).split('_')[0] + '1_f')
+#									Term[0].indices = Indices[0]
+#									Term[0] = Term[0].update()
+#									Term = Term[0]
+#								else :
+#									Term = Term[0]
+#							elif (len(skip) == 1 and len(Term) == 1
+#									and hasattr(skip[0],'indices') and hasattr(Term[0],'indices')
+#									and len(skip[0].indices) == 1 and len(Term[0].indices) == 1 
+#									and len(str(skip[0].indices[0]).split('_')) != 2
+#									and skip[0].indices[0] == Term[0].indices[0]):
+#								#then goddamm it it is a SP 
+#								Term = SP(skip[0],Term[0])
+#								Term = Term.update()
+#								skip = []#empty the skip so that we don't multiply by its content below
+#							else : 
+#								Term = Term[0]
+#							skip0 = functools.reduce(operator.mul,skip,1)
+#							#At this stage it might be that the skip term is a trace
+#							if type(Term) == MatM and (len(Term.indices) == 2 and Term.indices[0] == Term.indices[1] and len(str(Term.indices[0]).split('_'))== 1):
+#								#it is a trace
+#								Term = trace(*Term.arg)
+#							#At this stage it might be that the skip term is a trace
+#							if type(skip0) == MatM and (len(skip0.indices) == 2 and skip0.indices[0] == skip0.indices[1] and len(str(skip0.indices[0]).split('_'))== 1):
+#								#it is a trace
+#								skip0 = trace(*skip0.arg)
+#							Term = skip0*Term
+#							if type(Term)==list :
+#								exit("ERROR in determin product")	
+#							Res.append(Term)
+#							#empty the skip list 
+#							skip = []
+#							break
+#						#ordering of the terms
+#						tterm = Term[:2]
+#						indices = Indices[:2]
+#						res = analyseterm(tterm,indices,model)
+#						Term = Term[2:]
+#						Indices = Indices[2:]
+#						if res != 'skip':
+#							Term.insert(0,res)
+#							if hasattr(res,'indices'):# and res.indices != ():
+#								Indices.insert(0,res.indices)
+#						else :
+#							Term.insert(0,tterm[1])
+#							if len(indices) != 1 :#if there is only one index left it should not be stored in skip
+#								skip.append((tterm[0],indices[0]))
+#								Indices.insert(0,indices[1])
+#							else :
+#								skip.append((tterm[0],()))
+#								Indices.insert(0,indices[0])
+#			OrderedTerm.append(Factor*functools.reduce(operator.mul,Res,1))
+#	res = sum(OrderedTerm)
+#	#replace the symbols
+#	return res
+#

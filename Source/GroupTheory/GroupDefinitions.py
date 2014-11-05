@@ -20,9 +20,13 @@ class SUn(object):
 		#Repr of the algebra or the fundamental
 		self.Matrices = db[self._absname]['Matrices']
 		self.HBMat = db[self._absname]['HBmat']
+#		self.Matrices1 = db1[self._absname]['Matrices']
+#		self.HBMat1 = db1[self._absname]['HBmat']
 		self.Fond = db[self._absname]['Fond']
 		self.Adj = db[self._absname]['Adj']
-		self.fabc = self.GetStructureConstants()
+		#depricated: sparse matrices used -> calculated in the db
+		#self.fabc = self.GetStructureConstants(check=True)
+		self.fabc = db[self._absname]['Struc']
 		#transformation
 		self.fabc = (tuple(flatten(self.fabc)),self.fabc.shape)
 		#Convert the  matrices into tuples that can be passed to the symbolic functions
@@ -39,12 +43,16 @@ class SUn(object):
 		if not(HB) :
 			assert ferm1 == ferm2
 			mat = self.Matrices[ferm1]
-			mat = (mat['mat'],mat['shape'])
+			#for sparse matrices
+			#mat = (mat['mat'],mat['shape'])
+			#mat = mat['mat']
 		else  :
 			assert ferm1[1] == ferm2[1] #i.e. same representation
 			#read the sequence i.e. PiPi PiSig SigPi 
 			mat = self.HBMat[ferm1[1]][(ferm1[0],ferm2[0])]
-			mat = (mat['mat'],mat['shape'])
+			#for sparse matrices
+			#mat = (mat['mat'],mat['shape'])
+			#mat = mat['mat']
 		return mat
 
 	def OuterMatrixProduct(self,M1,M2):
@@ -90,34 +98,34 @@ class SUn(object):
 			out += el
 		return out
 
-	def GetStructureConstants(self,check=False):
-		W = MatrixSymbol('W',self.d,1)
-		V = MatrixSymbol('V',self.d,1)
-		Vec1 = self.sumperso([W[i,0]*Matrix(self.Matrices[self.Fond]['mat'][i]) for i in range(self.d)])
-		Vec2 = self.sumperso([V[i,0]*Matrix(self.Matrices[self.Fond]['mat'][i]) for i in range(self.d)])
-		ResTrace =[sum([
-			-2*(Matrix(self.Matrices[self.Fond]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(self.Matrices[self.Fond]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j]
-			for j in range(self.N)
-			for k in range(self.N)
-			for l in range(self.N)
-			for m in range(self.N)
-			if (Matrix(self.Matrices[self.Fond]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(self.Matrices[self.Fond]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j] != 0])
-			for i in range(self.d)]
-		Structures = [[[I*(el.diff(W[i,0])).diff(V[j,0]) for i in range(self.d)] for j in range(self.d)]for el in ResTrace]
-		Structures = np.array(Structures).reshape(self.d,self.d,self.d)
-		if check :
-			Check = [Matrix(self.Matrices[self.Fond]['mat'][i])*Matrix(self.Matrices[self.Fond]['mat'][j]) - Matrix(self.Matrices[self.Fond]['mat'][j])*Matrix(self.Matrices[self.Fond]['mat'][i]) - self.sumperso([I*Structures[i,j,k]*Matrix(self.Matrices[self.Fond]['mat'][k])
-					for k in range(self.d)])
-					for i in range(self.d)
-					for j in range(self.d)
-					]
-			Check = all([el == zeros((self.N,self.N)) for el in Check])
-			if Check:
-				return Structures
-			else : 
-				print "ERROR while determining the structure constants"
-		else :
-			return Structures
+#	def GetStructureConstants(self,check=False):
+#		W = MatrixSymbol('W',self.d,1)
+#		V = MatrixSymbol('V',self.d,1)
+#		Vec1 = self.sumperso([W[i,0]*Matrix(self.Matrices1[self.Fond]['mat'][i]) for i in range(self.d)])
+#		Vec2 = self.sumperso([V[i,0]*Matrix(self.Matrices1[self.Fond]['mat'][i]) for i in range(self.d)])
+#		ResTrace =[sum([
+#			-2*(Matrix(self.Matrices1[self.Fond]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(self.Matrices1[self.Fond]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j]
+#			for j in range(self.N)
+#			for k in range(self.N)
+#			for l in range(self.N)
+#			for m in range(self.N)
+#			if (Matrix(self.Matrices1[self.Fond]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(self.Matrices1[self.Fond]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j] != 0])
+#			for i in range(self.d)]
+#		Structures = [[[I*(el.diff(W[i,0])).diff(V[j,0]) for i in range(self.d)] for j in range(self.d)]for el in ResTrace]
+#		Structures = np.array(Structures).reshape(self.d,self.d,self.d)
+#		if check :
+#			Check = [Matrix(self.Matrices1[self.Fond]['mat'][i])*Matrix(self.Matrices1[self.Fond]['mat'][j]) - Matrix(self.Matrices1[self.Fond]['mat'][j])*Matrix(self.Matrices1[self.Fond]['mat'][i]) + self.sumperso([I*Structures[i,j,k]*Matrix(self.Matrices1[self.Fond]['mat'][k])
+#					for k in range(self.d)])
+#					for i in range(self.d)
+#					for j in range(self.d)
+#					]
+#			Check = all([el == zeros((self.N,self.N)) for el in Check])
+#			if Check:
+#				return Structures
+#			else : 
+#				print "ERROR while determining the structure constants"
+#		else :
+#			return Structures
 
 class U1(object):
 	"""Defines the U1 group class.

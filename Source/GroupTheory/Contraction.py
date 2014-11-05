@@ -30,6 +30,7 @@ try :
 	Version = False
 	from sympy import Wild,Symbol,Function,symbols,pi,Rational,zeros,I,sqrt,eye,Matrix,MatrixSymbol,KroneckerDelta,flatten,pprint,IndexedBase,Idx,Integer,Add,Mul,Indexed,Sum,conjugate,adjoint,__version__,Mod
 	from sympy.physics.secondquant import evaluate_deltas
+	from sympy.matrices.matrices import MutableMatrix as tMM
 	if __version__ != '0.7.2' and __version__ != '0.7.3' :
 		Version = True
 		raise ImportError
@@ -43,6 +44,8 @@ except ImportError :
 localdir = os.path.realpath(os.path.dirname(__file__))
 fdb = open(localdir+'/CGCs.pickle','r')
 db = pickle.load(fdb)
+#fdb1 = open(localdir+'/CGCsmat.pickle','r')
+#db1 = pickle.load(fdb1)
 fdb.close()
 
 def GetContractionFactor(dic,Group):
@@ -126,13 +129,23 @@ class Ts(Function):
 	is_commutative = True
 
 	@classmethod
+	#for the sparse matrices
+#	def eval(cls,A,mats,f1,f2):
+#		if type(A) != Symbol and type(f1) != Symbol and type(f2) != Symbol :
+#			#reconstruct the matrix 
+#			mat = mats[0][A]
+#			dim = mats[-1]
+#			mat = np.array(mat).reshape(dim)
+#			return mat[f1-1,f2-1]
 	def eval(cls,A,mats,f1,f2):
 		if type(A) != Symbol and type(f1) != Symbol and type(f2) != Symbol :
 			#reconstruct the matrix 
-			mat = mats[0][A]
-			dim = mats[-1]
-			mat = np.array(mat).reshape(dim)
-			return mat[f1-1,f2-1]
+			for el in mats[A] : 
+				if el != ():
+					if (f1-1,f2-1)== el[0:2]:
+						return el[-1]
+			return 0
+
 
 
 ################
