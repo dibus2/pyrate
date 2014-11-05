@@ -6,3 +6,5 @@ results/
 models/private/
 #all the .pyc files
 *.pyc
+#logfiles
+logFile*.log
