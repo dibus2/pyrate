@@ -1,3 +1,8 @@
+This is the README file of PyR@TE version 1.1.4 and onward. 
+
+The PyR@TE project is now managed by git.
+
+
 This is the README.txt file of PyR@TE version 1.0.0 
 
 PyR@TE is a python code that calculates the Renormalization Group Equations for any non supersymmetric model. After the gauge groups, the particle contents as well as the scalar potential have been define in a model file, PyR@TE calculates the RGEs for the required parameters at the one- or two-loop level.
@@ -50,6 +55,5 @@ This will start a web interface in which you can select the available notebook. 
 For suggestions, bug reports or any comments please contact us at : 
 
 florian.lyonnet at lpsc.in2p3.fr
-
 
 
