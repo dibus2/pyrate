@@ -1,0 +1,6 @@
+#the result directory should never be considered
+results/
+
+#private model files not public
+#
+models/private/

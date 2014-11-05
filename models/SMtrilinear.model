@@ -1,0 +1,64 @@
+# YAML 1.1
+---
+Author: Florian Lyonnet
+Date: 11.04.2013
+Name: Trilinear
+Groups: {'U1': U1, 'SU2L': SU2, 'SU3c': SU3}
+
+##############################
+#Fermions assumed weyl spinors
+##############################
+
+Fermions: {
+   uR: {Gen: ng, Qnb:{ U1: 2/3, SU2L: 1, SU3c: 3}},
+   uRbar: {Gen: ng, Qnb:{ U1: -2/3, SU2L: 1, SU3c: -3}},
+   Q: {Gen: ng, Qnb:{ U1: 1/6, SU2L: 2, SU3c: 3}}
+}
+#############
+#Real Scalars
+#############
+
+RealScalars: {
+  si : {U1: 0, SU2L: 1, SU3c: 1}
+}
+
+################
+#Complex Scalars
+################
+
+CplxScalars: {
+  H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, SU2L: 2, SU3c: 1}},
+  H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: -1/2, SU2L: -2, SU3c: 1}}
+}
+
+Potential: {
+
+#######################################
+# All particles must be defined above !
+#######################################
+ 
+Yukawas:{
+  Y_s: {Fields : [si,uR,uRbar], Norm: 1, latex: Y_s},
+  Y_u: {Fields: [Q,uRbar,H], Norm: 1, latex: Y_u}
+ },
+
+QuarticTerms: {
+ lambda_1 : {Fields : [H,H*,H,H*], Norm: 1/2, latex: \lambda_1},
+ lambda_2 : {Fields : [si,si,si,si], Norm: 1, latex: \lambda_2},
+ lambda_3 : {Fields : [H,H*,si,si], Norm: 1/2,latex: \lambda_3}
+ },
+
+ScalarMasses: {
+ mu_1 : {Fields: [H,H*], Norm: 1, latex: \mu_1},
+ mu_s : {Fields: [si,si], Norm: 1, latex: \mu_s}
+ },
+
+#Note that the Fermion Mass is assumed Complex can be set to real using Cplx 
+FermionMasses:{
+ m_Q: {Fields: [uR,uRbar], Norm: 1, latex: \m_Q, Cplx: True}
+ },
+TrilinearTerms: {
+ kappa_s : {Fields: [si,si,si], Norm: 1, latex: \kappa_s},
+ L : {Fields: [H,H*,si], Norm: 1, latex: L}
+ }
+}

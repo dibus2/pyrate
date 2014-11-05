@@ -1,0 +1,57 @@
+September 8th 2014:
+Bug introduced in pyrate-1.1.3 fixed. All the gauge groups were being added a dummy Group. Thanks to Debtosh Chowdhury for bringing this to my attention.
+
+July 23rd:
+Create a dummy SU(n) group when only abelian group factors are present because it is required for the algorithm that perform the derivative of the potential.
+e.g. phi^4 theory
+
+june 5th:
+Bug fixed in the mixing of multiple quartic terms when some scalars were charged under several groups, pyrate was skipping the calculation.
+Also removed the "letter" option in the latex output
+Thanks to Daniel Busbridge for bringing this issue to my attention
+
+May 12th : 
+Bug  fixed in the latex output when a yukawa with identical two fermions was generated --> Wrong indices
+Thanks to K. Karnike
+
+April 24th:
+1) Corrected an output visual namely that when calculating combinations because it was impossible to disentengle everything, some "+0+0" appeared in the results
+
+February 25th:
+
+1) Implementation of the possibility to deal with sum of terms
+2) Improve the disentangle and if not possible then calculate a possible
+combination 
+3) Merge the skip and Only options
+
+December 6th :
+
+1) remove the need to declare the real degrees of freedom for the complex scalar fields. 
+2) Corrected all the models correspondingly
+Note that you can still use the old definition
+
+
+
+October 29 : 
+Introduction of the Neglecting term list
+October 29 :
+
+Fix of the logfile system
+
+October 22 :
+
+Fix when a gauge group is spectator. 
+Add a check for the qnbs of the real degrees of freedom versus the cplx fields it comes from
+
+October 11 :
+
+Fix in the product matrix reconstruction 
+plus input file when anything that looks like MatM is used for parameters
+October 10 : 
+description:
+bug fixed in the recognition of the real component of the field when there is a + sign
+files : 
+Particles.py
+
+
+

@@ -1,0 +1,50 @@
+# YAML 1.1
+---
+Author: Florian Lyonnet
+Date: 9.08.2013
+Name: BiD
+Groups: {'U1': U1, 'SU2L': SU2, 'SU2R': SU2}
+
+##############################
+#Fermions assumed weyl spinors
+##############################
+Fermions: {
+   QL: {Gen: 3, Qnb:{ U1: 1/6, SU2L: 2, SU2R: 1}},
+   QR: {Gen: 3, Qnb:{ U1: -1/6, SU2L: 1, SU2R: 2}},
+   LL: {Gen: 3, Qnb:{ U1: -1/2, SU2L: 2, SU2R: 1}},
+   LR: {Gen: 3, Qnb:{ U1: 1/2, SU2L: 1, SU2R: 2}},
+}
+
+#############
+#Real Scalars
+#############
+
+RealScalars: {
+}
+
+#################
+#Complex Scalars 
+#################
+
+CplxScalars: {
+  H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 0, SU2L: 2, SU2R: 2}},
+  H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 0, SU2L: -2, SU2R: -2}}
+}
+
+Potential: {
+
+#######################################
+# All particles must be defined above !
+#######################################
+ 
+Yukawas:{
+ 'Y_{q}': {Fields: [H,QL,QR], Norm: 1}, 
+ 'Y_{l}': {Fields: [H,LL,LR], Norm: 1} 
+ },
+QuarticTerms: {
+ 'lambda_1' : {Fields : [H,H*,H,H*], Norm : 1/2}
+ },
+ScalarMasses: {
+ '\mu_1' : {Fields : [H*,H], Norm : 1}
+ }
+}

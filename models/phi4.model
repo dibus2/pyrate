@@ -1,0 +1,43 @@
+# YAML 1.1
+---
+Author: Florian Lyonnet
+Date: 11.04.2013
+Name: SM
+Groups: {'U1': U1}
+
+##############################
+#Fermions assumed weyl spinors
+##############################
+Fermions: {
+}
+
+#############
+#Real Scalars
+#############
+
+RealScalars: {
+   phi: {'U1': 0}
+}
+
+##########################################################################
+#Complex Scalars : have to be expressed in terms of Real Scalars see above
+##########################################################################
+
+CplxScalars: {
+}
+
+Potential: {
+
+#######################################
+# All particles must be defined above !
+#######################################
+ 
+Yukawas:{
+ },
+QuarticTerms: {
+ '\lambda_1' : {Fields : [phi,phi,phi,phi], Norm : 1/24},
+ },
+ScalarMasses: {
+ '\mu_1' : {Fields : [phi,phi], Norm : 1/2}
+ }
+}

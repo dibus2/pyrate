@@ -1,0 +1,60 @@
+# YAML 1.1
+---
+Author: Florian Lyonnet
+Date: 11.04.2013
+Name: B-L
+Groups: {'U1': U1,'U1BL': U1, 'SU2L': SU2, 'SU3c': SU3}
+
+##############################
+#Fermions assumed weyl spinors
+##############################
+Fermions: {
+   Qbar: {Gen: 3, Qnb:{ U1: -1/6,  U1BL: -1/3, SU2L: -2, SU3c: -3}},
+   Lbar: {Gen: 3, Qnb:{ U1: 1/2,   U1BL: 1,  SU2L: -2, SU3c: 1}},
+   uR: {Gen: 3, Qnb:{   U1: 2/3,   U1BL: 1/3,  SU2L: 1,  SU3c: 3}},
+   dR: {Gen: 3, Qnb:{   U1: -1/3,  U1BL: 1/3,  SU2L: 1,  SU3c: 3}},
+   eR: {Gen: 3, Qnb:{   U1: -1,    U1BL: -1, SU2L: 1,  SU3c: 1}},
+   nuR: {Gen: 3, Qnb:{   U1: 0,    U1BL: -1, SU2L: 1,  SU3c: 1}}
+}
+
+#############
+#Real Scalars
+#############
+
+RealScalars: {
+}
+
+#################
+#Complex Scalars 
+#################
+
+CplxScalars: {
+  H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, U1BL: 0, SU2L: 2, SU3c: 1}},
+  H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: -1/2,U1BL: 0, SU2L: -2, SU3c: 1}},
+  S*: {RealFields: [s1,-I*s2], Norm: 1/Sqrt(2), Qnb : {U1: 0, U1BL: 2, SU2L: 1, SU3c: 1}},
+  S: {RealFields: [s1,I*s2], Norm: 1/Sqrt(2), Qnb : {U1: 0, U1BL: -2, SU2L: 1, SU3c: 1}}
+}
+
+Potential: {
+
+#######################################
+# All particles must be defined above !
+#######################################
+ 
+Yukawas:{
+  'Y_{u}': {Fields: [Qbar,uR,H*], Norm: 1},
+  'Y_{d}': {Fields: [Qbar,dR,H], Norm: 1},
+  'Y_{e}': {Fields: [Lbar,eR,H], Norm: 1},
+  'Y_{l}': {Fields: [Lbar,nuR,H*], Norm: 1},
+  'Y_{H}': {Fields: [nuR,nuR,S*], Norm: 1}
+ },
+QuarticTerms: {
+ '\lambda_1' : {Fields : [H,H*,H,H*], Norm : 1},
+ '\lambda_3' : {Fields : [H,H*,S,S*], Norm : 1},
+ '\lambda_2' : {Fields : [S,S*,S,S*], Norm : 1}
+ },
+ScalarMasses: {
+ 'm_H': {Fields : [H*,H], Norm : 1},
+ '\mu_1' : {Fields : [S,S*], Norm : 1}
+ }
+}

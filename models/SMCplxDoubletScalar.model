@@ -1,0 +1,59 @@
+# YAML 1.1
+# #This is the A.4 Model of 1203.5106
+---
+Author: Florian Lyonnet
+Date: 26.07.2013
+Name: SMCplexDoubletScalar
+Groups: {'U1': U1, 'SU2L': SU2, 'SU3c': SU3}
+
+##############################
+#Fermions assumed weyl spinors
+##############################
+Fermions: {
+   Qbar: {Gen: 3, Qnb:{ U1: -1/6, SU2L: -2, SU3c: -3}},
+   Lbar: {Gen: 3, Qnb:{ U1: 1/2, SU2L: -2, SU3c: 1}},
+   uR: {Gen: 3, Qnb:{ U1: 2/3, SU2L: 1, SU3c: [1,0]}},
+   dR: {Gen: 3, Qnb:{ U1: -1/3, SU2L: 1, SU3c: 3}},
+   eR: {Gen: 3, Qnb:{ U1: -1, SU2L: 1, SU3c: 1}},
+}
+
+#############
+#Real Scalars
+#############
+
+RealScalars: {
+}
+
+#################
+#Complex Scalars 
+#################
+
+CplxScalars: {
+  H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, SU2L: 2, SU3c: 1}},
+  H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: -1/2, SU2L: -2, SU3c: 1}},
+  D: {RealFields: [PiD,I*SigmaD], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, SU2L: 2, SU3c: 1}},
+  D*: {RealFields: [PiD,-I*SigmaD], Norm: 1/Sqrt(2), Qnb : {U1: -1/2, SU2L: -2, SU3c: 1}},
+}
+
+Potential: {
+
+#######################################
+# All particles must be defined above !
+#######################################
+ 
+Yukawas:{
+  'Y_{u}': {Fields: [Qbar,uR,H*], Norm: 1},
+  'Y_{d}': {Fields: [Qbar,dR,H], Norm: 1},
+  'Y_{e}': {Fields: [Lbar,eR,H], Norm: 1}
+ },
+QuarticTerms: {
+ '\lambda_1' : {Fields : [H,H*,H,H*], Norm : 1/2},
+ '\lambda_D' : {Fields: [D,D*,D,D*], Norm : 1/2},
+ '\kappa_D ' : {Fields: [D,D*,H,H*], Norm : 1/2},
+ '\Pkappa_D' : {Fields: [D,H*,H,D*], Norm : 1/2}
+ },
+ScalarMasses: {
+ '\mu_H' : {Fields : [H,H*], Norm : 1},
+ '\mu_D' : {Fields : [D,D*], Norm : 1}
+ }
+}
