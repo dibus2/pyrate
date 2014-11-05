@@ -1,0 +1,55 @@
+This is the README.txt file of PyR@TE version 1.0.0 
+
+PyR@TE is a python code that calculates the Renormalization Group Equations for any non supersymmetric model. After the gauge groups, the particle contents as well as the scalar potential have been define in a model file, PyR@TE calculates the RGEs for the required parameters at the one- or two-loop level.
+
+
+1. Installation
+
+PyR@TE is free software under the copyleft of the http://www.gnu.org/copyleft/gpl.html, GNU General Public License and can be downloaded from the following web page:
+
+http://pyrate.hepforge.org
+
+To install PyR@TE, simply open a shell and type:
+cd $HOME
+wget http://pyrate.hepforge.org/downloads/pyrate-1.0.0.tar.gz
+tar xfvz pyrate-1.0.0.tar.gz
+cd pyrate-1.0.0/
+
+2. Dependencies 
+
+Please, make sure that you have the required versions for the dependencies especially for the following packages : 
+SymPy(0.7.2), NumPy(1.7.1), PyYaml(3.10).
+
+3. Running PyR@TE
+
+To run PyR@TE, open a shell, change to the directory where it is installed and enter:
+
+python pyR@TE.py -m models/SM.model 
+
+The option -m or --Model is used to read in a model file, in this case the SM.
+
+Because the calculations can be quite time-consuming, PyR@TE does not calculate them by default. Rather, the user has complete freedom over the parts of the calculation he needs. For instance, to calculate the RGEs for the gauge, Yukawa or quartic couplings, one would add the options --Gauge-Couplings, --Yukawas, --Quartic-Couplings, respectively, or alternatively -gc, -yu or -qc:
+
+python pyR@TE.py -m ./models/SM.model -gc -yu -qc 
+
+By default the results are stored in the subdirectory results but this can be changed by setting the option --Results | -res
+
+4. Output
+
+The default output is a LaTeX file containing the results of the RGEs calculated as well as a summary of the model for which the calculation was done. Note, that several over options are available (including solving the RGEs numerically) and we refer the user to the paper for more details. 
+
+5. Interactive mode
+
+A very convenient way of running PyR@TE is to use the IPython Notebook tool offered by ipython. To do so, first make sure that you have ipython installed and then start ipython notebook from within the PyR@TE directory by typing : 
+
+ipython notebook
+
+This will start a web interface in which you can select the available notebook. Open InteractivePyRaTE.ipynb and follow the instructions.
+
+
+For suggestions, bug reports or any comments please contact us at : 
+
+florian.lyonnet at lpsc.in2p3.fr
+
+
+
