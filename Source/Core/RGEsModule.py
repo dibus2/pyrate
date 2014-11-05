@@ -3,9 +3,9 @@ import re as regular #avoid the double definition of real part of sympy
 from RGEsDefinition import *
 from ModelsClass import	Model,loggingInfo,loggingDebug,loggingCritical
 from RGEsmathModule import SimplifyTraces
-from Yukawas import *
+from Yukawaskin import *
 from QuarticCouplings import *
-from GaugeCouplings import *
+from GaugeCouplingskin import *
 from ScalarMass import *
 from FermionMass import *
 from Trilinear import *
