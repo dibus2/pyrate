@@ -4,10 +4,10 @@ import re as regular #avoid the double definition of real part of sympy
 from RGEsDefinition import *
 from ModelsClass import	Model,loggingInfo,loggingDebug,loggingCritical
 from RGEsmathModule import DynkinIndex,DynkinCasimir,DeterminOrdering,summatrix,multiplicityKin,multiplicity
+
 ################################################################################
-#Gauge Couplings transformation rules 
+#Gauge Couplings transformation rules including kinetic mixing
 ################################################################################
-#update global variables 
 
 #powe 3
 def CompileGaugeCouplings(model,Translated,x,Weyl,GutNorm): 
