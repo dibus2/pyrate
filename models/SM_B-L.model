@@ -42,19 +42,19 @@ Potential: {
 #######################################
  
 Yukawas:{
-  'Y_{u}': {Fields: [Qbar,uR,H*], Norm: 1},
+#  'Y_{u}': {Fields: [Qbar,uR,H*], Norm: 1},
   'Y_{d}': {Fields: [Qbar,dR,H], Norm: 1},
-  'Y_{e}': {Fields: [Lbar,eR,H], Norm: 1},
-  'Y_{l}': {Fields: [Lbar,nuR,H*], Norm: 1},
-  'Y_{H}': {Fields: [nuR,nuR,S*], Norm: 1}
+#  'Y_{e}': {Fields: [Lbar,eR,H], Norm: 1},
+#  'Y_{l}': {Fields: [Lbar,nuR,H*], Norm: 1},
+#  'Y_{H}': {Fields: [nuR,nuR,S*], Norm: 1}
  },
 QuarticTerms: {
- '\lambda_1' : {Fields : [H,H*,H,H*], Norm : 1},
- '\lambda_3' : {Fields : [H,H*,S,S*], Norm : 1},
- '\lambda_2' : {Fields : [S,S*,S,S*], Norm : 1}
+# '\lambda_1' : {Fields : [H,H*,H,H*], Norm : 1},
+# '\lambda_3' : {Fields : [H,H*,S,S*], Norm : 1},
+# '\lambda_2' : {Fields : [S,S*,S,S*], Norm : 1}
  },
 ScalarMasses: {
- 'm_H': {Fields : [H*,H], Norm : 1},
- '\mu_1' : {Fields : [S,S*], Norm : 1}
+# 'm_H': {Fields : [H*,H], Norm : 1},
+# '\mu_1' : {Fields : [S,S*], Norm : 1}
  }
 }

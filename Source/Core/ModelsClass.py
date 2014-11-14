@@ -1945,7 +1945,7 @@ class Model(object) :
 			else :
 				res = sum(flatten([multiplicityKin(pp,self)*(pp.W.transpose()*self.Particles[str(label[0])].W)**2 for pp in self.Scalars.values()]))
 			self.InvariantResults[key] = res
-		return res
+			return res
 
 
 	def Casimirkin(self,label):
