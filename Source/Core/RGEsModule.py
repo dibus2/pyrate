@@ -219,7 +219,7 @@ def Translate(RGE, model, RunSettings):
                                                 loggingCritical('\t\t\t WARNING skipping {} ...'.format(elemineq),verbose=True)
                                             else :
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
-                                                Translated[mef][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
+                                                Translated[mf][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
 				Translated[mf] = CompileFM(Translated,mf,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 				loggingInfo('\t\t Compiling the results for the Yukawa...done',verbose=RunSettings['vInfo'])
