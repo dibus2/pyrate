@@ -10,8 +10,9 @@ except :
     exit("Error while importing one of the modules `sys,os,argparse,yaml`")
 
 welcomemessage = """\n\n\n\n\t\t==================================================================================\n
-\t\t\t\tPyR@TE version 1.1.5 released September ?, 2014\n
-\t\t\tF. Lyonnet, I. Schienbein, F.Staub, A.Wingerter, arxiv 1309.7030
+=======
+\t\t\t\tPyR@TE version 1.1.5 released November 13, 2014\n
+\t\t\tF. Lyonnet, I. Schienbein, F.Staub, A.Wingerter, arxiv 1309.7030\n
 \t\t==================================================================================\n
 """
 print(welcomemessage)

@@ -4,5 +4,7 @@ results/
 #private model files not public
 #
 models/private/
-#all the .pyc files
+
+#all .pyc
+#
 *.pyc
