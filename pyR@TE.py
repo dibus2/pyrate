@@ -4,6 +4,7 @@ try :
     import sys
     import argparse
     import os
+    import pdb
     wd = os.getcwd()
     sys.path.append(wd+'/Source/Core')
 except :
@@ -328,7 +329,7 @@ else :
 	ListLagrangian = model.Potential.keys()
 	StrucYuk = {}
 	if RunSettings['Export'] :
-		Check = all([True if RunSettings[Translation[el]] else False for el in ListLagrangian])
+		Check = all([True if RunSettings[Translation[el]] else False for el in ListLagrangian if model.Potential[el] != {}])
 		Check = Check and RunSettings['Gauge-Couplings']
 		if not(Check) and (not(RunSettings['All-Contributions'])) or RunSettings['Only'] != {} : 
 			loggingCritical("\n**WARNING** : options --Export cannot be carried out because all the required terms have not been set to True or Only is being used.\n Please use the --All-Contributions switch or set all the terms to True.\n",verbose=RunSettings['vCritical'])
@@ -435,7 +436,7 @@ else :
 
 	#Importing the requesting modules
 	from ToMathematica import TranslateToMathematica
-	from ExportBetaFunction import ExportBetaFunction
+	from ExportBetaFunction import ExportBetaFunction,ExportBetaToCpp
 	from latexRGEs import writeLatexOutput
 
 	#############
@@ -498,8 +499,11 @@ else :
 	########################
 	if RunSettings['Export'] and Check :
 		loggingInfo("Exporting the results to a python function...",verbose=RunSettings['vInfo'])
-		ExportBetaFunction(model,FinalRGEForTranslation,RunSettings,StrucYuk)
-		loggingInfo("\t\t...done")
+		pythonoutput = ExportBetaFunction(model,FinalRGEForTranslation,RunSettings,StrucYuk)
+		loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
+		loggingInfo("Exporting the results to a c++ function...",verbose=RunSettings['vInfo'])
+		ExportBetaToCpp(pythonoutput,'BetaFunction{}.cpp'.format(model._Name))
+		loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
 	loggingCritical('End of the run.',verbose = RunSettings['vCritical'])
 	#mv the logging into results
 	os.system('mv {} {}'.format(RunSettings['LogFile'],RunSettings['Results']))

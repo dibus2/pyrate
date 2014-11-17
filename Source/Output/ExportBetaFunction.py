@@ -1,6 +1,7 @@
 try :
 	import sys
 	import os
+	import pdb
 	cwd = os.getcwd()
 	sys.path.append('../GroupTheory')
 	from sympy import latex
@@ -8,6 +9,7 @@ except ImportError :
 	exit('error while loading modules in latexRGEs.py')
 from Contraction import *
 from ToMathematica import ToMathematicaNotation,findclosingbracket
+
 def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
 	#kappa 
 	kappa = (4*pi)**2
@@ -197,6 +199,92 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
 	f = open('{}/{}'.format(settings['Results'],'SolveRGEs.py'),'w')
 	f.write(CodeStrI)
 	f.close()
+	return '{}/{}'.format(settings['Results'],Name)
+
+
+
+def ExportBetaToCpp(FileNumpyBeta,settings={}):
+    """
+    This is the export function of the beta function in Cpp function that can then be compiled into a c++ library that can then be Loaded with PyR@TE Solving wrapper.
+    This is a script that translate the result of Numpy directly into Cpp compatible function using Template. The idea is that it should be possible to translate numpy functions into cpp without re-running the code (two-Loop G221 are taking for ever ~ 4 days 10 Gb of memory"""
+    try :
+        numpybeta = file(FileNumpyBeta,'r').readlines()
+    except IOError : 
+        print("Error could not read the BetaFunction.py file, skipping C++ export")
+        pass
+    names = [el for el in numpybeta if el.find('return') != -1 ][0]
+    names = reg.split('[, \[\]]',names)
+    names = [el for el in names if reg.search(el,"['0''1''2''3''4''5''6''7''8''9']") == None and el.find('return') ==-1 and el != '\n'] 
+    names = list(set(names))
+    #number of rges, whatch out each matrix is counted as one element
+    nbrge = len(names) 
+    MatrixNames = [el for el in numpybeta if el.find('np.matrix') != -1]
+    Dim = [reg.search('.*np.zeros\(\((.),(.).*',el) for el in MatrixNames]
+    MatrixNames = [reg.split('\t|=',el)[1] for el in MatrixNames]
+    MatrixNames = [el.split(' ')[0] for el in MatrixNames]
+    Init = [[reg.search(r'.*({})\[(.),(.)\][ ]*=[ ]*y\[(.{{1,2}})\].*'.format(el),line) for el in MatrixNames] for line in numpybeta]
+    Init = [(el.group(1),el.group(2),el.group(3),el.group(4)) for el in sum(Init,[]) if el != None]
+    if len(Dim) != len(MatrixNames) : 
+        print("error, while writing the interface to  c++, please report to the authors")
+        pass
+    else :
+        Yuks = [(el,dim.group(1),dim.group(2)) for el,dim in zip(MatrixNames,Dim)]
+        MatrixNBeta = ['beta{}'.format(mat) for mat in MatrixNames]
+        #These ones have to be declared as double in C++
+        names = list(set(names).symmetric_difference(set(MatrixNBeta)))
+        Eqs = []
+        #Collect one and two loop beta functions for all the names
+        for elem in names+MatrixNBeta : 
+            Eqs.append([el for el in numpybeta if el.find(elem) != -1 ][:2])
+        #Group together the one and two loop expressions
+        OneL = '\n'.join([el[0] for el in Eqs])
+        TwoL = '\n'.join([el[1] for el in Eqs])
+        MatrixNBetaDeclare = ['double {} = 0.0;'.format(el) for el in names]
+        #Get the info about all the matrices in the file
+        #For each matrix declare it 
+        Filling = []
+        #MatrixDeclare.append("gsl_matrix * {} = gsl_matrix_alloc({},{});".format(el[0],el[1],el[2]) for el in Yuks]
+        MatrixDeclare = ["mat {}({},{},fill::zeros);".format(el[0],el[1],el[2]) for el in Yuks]
+        MatrixNBetaDeclare += ["mat beta{}({},{},fill::zeros);".format(el[0],el[1],el[2]) for el in Yuks]
+        #For each matrix create a Transpose a HC and a Conjugate copy
+        MatrixDeclarehc =["mat {0}hc({0}.t());".format(el[0]) for el in Yuks]
+        MatrixDeclareT =["mat {0}T({0}.st());".format(el[0]) for el in Yuks]
+        MatrixDeclareC =["mat {0}C(conj({0}));".format(el[0]) for el in Yuks]
+        #Do the transpose effectively
+        for elem in Init : 
+            #keep on filling it up We assume that the y[i] are real 
+            Filling.append("{}({},{}) = y[{}];".format(elem[0],elem[1],elem[2],elem[3]))
+        #Switch = "\tint two  0;\n\tif (TwoLoop){\n\t\tint two = 0;\n\t}\n\telse{\ntwo = 1;\n}\n"
+        Tocpp = reg.sub(r'y\[(.{1,2})\]\*\*(.)','pow(y[\\1],\\2)',OneL),reg.sub(r'y\[(.{1,2})\]\*\*(.)','pow(y[\\1],\\2)',TwoL)
+        #WARNING HERE ONLY REAL
+        #"Hermitian"
+        Tocpp = [reg.sub(r'np.transpose\(np.conjugate\(([^\)]*)\)\)','\\1hc',el) for el in Tocpp]
+        #Conjugate
+        Tocpp = [reg.sub(r'np.conjugate\(([^\)]*)\)','\\1C',el)for el in Tocpp]
+        #Transpose
+        Tocpp = [reg.sub(r'np.transpose\(([^\)]*)\)','\\1T',el)for el in Tocpp]
+        Tocpp = [reg.sub(r'np.trace','trace',el) for el in Tocpp]
+        Tocpp = [reg.sub(r'\*kappa\*\*(.)','*pow(kappa,\\1)',el) for el in Tocpp]
+        Tocpp = [reg.sub(r'\n',';\n',el) for el in Tocpp]
+        Tocpp = [reg.sub(r';\n;\n',';\n\n',el) for el in Tocpp]
+        #Output of the beta function has to copied into f[]
+        TocppF=sum(sum([[['beta{}[{},{}]'.format(elem[0],i,j) for i in range(int(elem[1]))]for j in range(int(elem[2]))] for elem in Yuks],[]),[])
+        TocppF += names
+        TocppF = ["f[{}] = {};".format(iel,el) for iel,el in enumerate(TocppF)]
+        #We define a template funciton 
+        template = """//This is automatically generated by pyR@TE. It is a c++ version of the calculated beta function that can be compiled into a .so Library that is then loaded via the BetaFunction class into python and solved using the regular solver of pyR@TE. See Makefile and BetaFunction class definition in RGEclass.py for more info.Using Armadillo library.\n\n\n#include<iostream>\n#define ARMA_DONT_USE_WRAPPER\n#include <armadillo>\nusing namespace std;\nusing namespace arma;\n\textern "C"{{\n\t\textern void beta_function( double t, double y[], double f[],bool TwoLoop);\n\t}}\n\n\nvoid  beta_function (double t, double y[], double f[], bool TwoLoop)\n{{\n\tdouble kappa = 1./(16*pow(3.14,2));\n\t//Matrix Declaration\n\t{}\n\t{}\n\t{}\n\t{}\n\t//beta Declaration\n\t{}\n\t{}\n\t//Beta functions one loop\n{}\n\n\t//Two loop beta functions\n\tif (TwoLoop){{\n\t{}\n}}\n\t//Copy the values in f for the return\n\t{}\n}}\nint main()\n{{\nreturn 0;\n}}""".format('\n\t'.join(MatrixDeclare),'\n\t'.join(Filling),'\n\t'.join(MatrixDeclarehc),'\n\t'.join(MatrixDeclareC),'\n\t'.join(MatrixDeclareT),'\n\t'.join(MatrixNBetaDeclare),Tocpp[0],Tocpp[1],'\n\t'.join(TocppF))
+        OutputFileName = (FileNumpyBeta.split('.py')[0]+'.cpp').split('/')[-1]
+        pdb.set_trace()
+	f = open('{}'.format(FileNumpyBeta.split('.py')[0]+'.cpp'),'w')
+        f.write(template)
+        #Now one has to write the Makefile for the corresponding files
+        templateMakefile = """libbeta_{0}.dylib: {0}.o\n\tg++ -dynamiclib -o $@ $+ -llapack -lblas\n{0}.o: {0}.cpp\n\tg++ -fPIC -c -o $@ $<\nclean :\n\trm *.o\n\trm libbeta*.dylib""".format(OutputFileName.split('.cpp')[0])
+        MakefileName = FileNumpyBeta.split('/')
+        MakefileName[-1] = "Makefile"
+        f = open('/'.join(MakefileName),'w')
+        f.write(templateMakefile)
+        f.close()
+
 
 def ToNumpy(func,xpr,Mat=False):
 	pos0 = xpr.find('{}('.format(func)) + len(func)
