@@ -278,7 +278,7 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
 	f = open('{}'.format(FileNumpyBeta.split('.py')[0]+'.cpp'),'w')
         f.write(template)
         #Now one has to write the Makefile for the corresponding files
-        templateMakefile = """libbeta_{0}.dylib: {0}.o\n\tg++ -dynamiclib -o $@ $+ -llapack -lblas\n{0}.o: {0}.cpp\n\tg++ -fPIC -c -o $@ $<\nclean :\n\trm *.o\n\trm libbeta*.dylib""".format(OutputFileName.split('.cpp')[0])
+        templateMakefile = """libbeta_{0}.dylib: {0}.o\n\tg++ -dynamiclib -o $@ $+ -llapack -lblas\n{0}.o: {0}.cpp\n\tg++ -fPIC -c -o $@ $<\nclean :\n\trm *.o\n\trm libbeta*.dylib\n\n#You might want to try with gcc instead.""".format(OutputFileName.split('.cpp')[0])
         MakefileName = FileNumpyBeta.split('/')
         MakefileName[-1] = "Makefile"
         f = open('/'.join(MakefileName),'w')
