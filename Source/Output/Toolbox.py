@@ -22,6 +22,7 @@ from latexRGEs import *
 from ToMathematica import TranslateToMathematica,ToMathematicaNotation,findclosingbracket
 from loadingEqs import Load
 from sympy import transpose
+
 ###########################################
 # LateX Output 
 ###########################################
@@ -495,6 +496,8 @@ def TranslateToNumerics(expression,ListSymbs,label,Ids,model,Mapping,Matrices=Tr
 		while 'SScalarProd(' in StrXpr:
 			StrXpr = ToNumpy('SScalarProd',StrXpr,Mat=True)
 	return StrXpr
+
+
 
 
 #########################################
