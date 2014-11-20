@@ -215,7 +215,12 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
     names = [el for el in numpybeta if el.find('return') != -1 ][0]
     names = reg.split('[, \[\]]',names)
     names = [el for el in names if reg.search(el,"['0''1''2''3''4''5''6''7''8''9']") == None and el.find('return') ==-1 and el != '\n'] 
-    names = list(set(names))
+    #we need to keep the ordering while removing multiple occurences (caused a bug in the first version)
+    duplicatenames = []
+    for el in names : 
+      if not(el in duplicatenames):
+        duplicatenames.append(el)
+    names = duplicatenames 
     #number of rges, whatch out each matrix is counted as one element
     nbrge = len(names) 
     MatrixNames = [el for el in numpybeta if el.find('np.matrix') != -1]
@@ -231,7 +236,8 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
         Yuks = [(el,dim.group(1),dim.group(2)) for el,dim in zip(MatrixNames,Dim)]
         MatrixNBeta = ['beta{}'.format(mat) for mat in MatrixNames]
         #These ones have to be declared as double in C++
-        names = list(set(names).symmetric_difference(set(MatrixNBeta)))
+        for el in MatrixNBeta:
+          names.remove(el)
         Eqs = []
         #Collect one and two loop beta functions for all the names
         for elem in names+MatrixNBeta : 
@@ -247,7 +253,7 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
         MatrixDeclare = ["mat {}({},{},fill::zeros);".format(el[0],el[1],el[2]) for el in Yuks]
         MatrixNBetaDeclare += ["mat beta{}({},{},fill::zeros);".format(el[0],el[1],el[2]) for el in Yuks]
         #For each matrix create a Transpose a HC and a Conjugate copy
-        MatrixDeclarehc =["mat {0}hc({0}.t());".format(el[0]) for el in Yuks]
+        MatrixDeclarehc =["mat {0}hc(conj({0}.t()));".format(el[0]) for el in Yuks]
         MatrixDeclareT =["mat {0}T({0}.st());".format(el[0]) for el in Yuks]
         MatrixDeclareC =["mat {0}C(conj({0}));".format(el[0]) for el in Yuks]
         #Do the transpose effectively
@@ -256,7 +262,7 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
             Filling.append("{}({},{}) = y[{}];".format(elem[0],elem[1],elem[2],elem[3]))
         #Switch = "\tint two  0;\n\tif (TwoLoop){\n\t\tint two = 0;\n\t}\n\telse{\ntwo = 1;\n}\n"
         Tocpp = reg.sub(r'y\[(.{1,2})\]\*\*(.)','pow(y[\\1],\\2)',OneL),reg.sub(r'y\[(.{1,2})\]\*\*(.)','pow(y[\\1],\\2)',TwoL)
-        #WARNING HERE ONLY REAL
+        #WARNING HERE ONLY REAL??? F. on November 20th I changed the def of hc and think it is tken into account --> check
         #"Hermitian"
         Tocpp = [reg.sub(r'np.transpose\(np.conjugate\(([^\)]*)\)\)','\\1hc',el) for el in Tocpp]
         #Conjugate
@@ -267,8 +273,11 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
         Tocpp = [reg.sub(r'\*kappa\*\*(.)','*pow(kappa,\\1)',el) for el in Tocpp]
         Tocpp = [reg.sub(r'\n',';\n',el) for el in Tocpp]
         Tocpp = [reg.sub(r';\n;\n',';\n\n',el) for el in Tocpp]
+        #Ensure the floats on fraction
+        Tocpp = [reg.sub(r'([0-9]+)\*','\\1.0*',el) for el in Tocpp]
+        Tocpp = [reg.sub(r'\/([0-9]+)','/\\1.0',el) for el in Tocpp]
         #Output of the beta function has to copied into f[]
-        TocppF=sum(sum([[['beta{}[{},{}]'.format(elem[0],i,j) for i in range(int(elem[1]))]for j in range(int(elem[2]))] for elem in Yuks],[]),[])
+        TocppF=sum(sum([[['beta{}[{},{}]'.format(elem[0],i,j) for j in range(int(elem[1]))]for i in range(int(elem[2]))] for elem in Yuks],[]),[])
         TocppF += names
         LabelRGEs = ["{}".format(el) for el in TocppF]
         TocppF = ["f[{}] = {};".format(iel,el) for iel,el in enumerate(TocppF)]
