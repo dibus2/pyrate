@@ -2,6 +2,7 @@ try :
 	import sys
 	import os
 	import pdb
+	import platform
 	cwd = os.getcwd()
 	sys.path.append('../GroupTheory')
 	from sympy import latex
