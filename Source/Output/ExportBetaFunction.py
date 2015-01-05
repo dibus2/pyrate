@@ -18,7 +18,7 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
 	date ="{}-{}-{}\t {}:{}:{}".format(date[0],date[1],date[2],date[3],date[4],date[5])
 	CodeStr = '\"\"\"\nThis Code is generated automatically by pyR@TE, {} for the model : {}\n\"\"\"\n'.format(
 			date,model._Name)
-	CodeStr += "from __future__ import division\nimport numpy as np\ndef beta_function_{}(t,y,Assumptions={{'two-loop':False,'diag': True}}):\n\t#The Assumption can be used to incorporate some switch in the calculation\n".format(model._Name)
+	CodeStr += "from __future__ import division\nimport numpy as np\ndef beta_function_{}(t,y,Assumptions={{'two-loop': False,'diag': True}}):\n\t#The Assumption can be used to incorporate some switch in the calculation\n".format(model._Name)
 	#We need an identity for each yukawa in principle because they could have different shape
 	CodeStr += "\tkappa = 1./(16*np.pi**2)\n"
 	#Simplify the keys of StrucYuk
@@ -277,7 +277,8 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
         Tocpp = [reg.sub(r'([0-9]+)\*','\\1.0*',el) for el in Tocpp]
         Tocpp = [reg.sub(r'\/([0-9]+)','/\\1.0',el) for el in Tocpp]
         #Output of the beta function has to copied into f[]
-        TocppF=sum(sum([[['beta{}[{},{}]'.format(elem[0],i,j) for j in range(int(elem[1]))]for i in range(int(elem[2]))] for elem in Yuks],[]),[])
+				#Watch out in armadillo one must use regular brackets to access matrix elements !!
+        TocppF=sum(sum([[['beta{}({},{})'.format(elem[0],i,j) for j in range(int(elem[1]))]for i in range(int(elem[2]))] for elem in Yuks],[]),[])
         TocppF += names
         LabelRGEs = ["{}".format(el) for el in TocppF]
         TocppF = ["f[{}] = {};".format(iel,el) for iel,el in enumerate(TocppF)]

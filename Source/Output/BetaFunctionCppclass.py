@@ -10,13 +10,14 @@ class BetaFunctionCpp :
 		#dim of the system
 		self.dim  = dim
 
-	def betafunction(self,t,y,Assumptions={'two-loop':False,'diag': True}) : 
+	def betafunction(self,t,y,Assumptions={'two-loop': False,'diag': True}) : 
 		T = c_double(t)
 		Y = (c_double*self.dim)()
 		F = (c_double*self.dim)()
+		TL = c_bool(Assumptions['two-loop'])
 		for i in range(self.dim):
 			Y[i] = y[i]
-	 	self.lib.beta_function(T,byref(Y),byref(F))
+	 	self.lib.beta_function(T,byref(Y),byref(F),TL)
 		return [el for el in F]
 
 
