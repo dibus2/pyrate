@@ -15,10 +15,10 @@ except :
 #
 ####
 welcomemessage = """\n\n\n\n\t\t==================================================================================\n
+<<<<<<< HEAD
 =======
-\t\t\t\tPyR@TE version X.X.X released November X, 2014\n
+\t\t\t\tPyR@TE version X.X.X released  X, 2014\n
 \t\t\tF. Lyonnet, I. Schienbein, F.Staub, A.Wingerter, arxiv 1309.7030\n
-=======
 \t\t==================================================================================\n
 """
 print(welcomemessage)
