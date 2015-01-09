@@ -1,4 +1,5 @@
 #!/usr/bin/env python 
+import pudb
 import functools,operator,copy
 import re as regular #avoid the double definition of real part of sympy 
 from RGEsDefinition import *
@@ -165,12 +166,12 @@ def CYukGaugeIIg4(powe,comb,model):
 	reskin = 0 
 	if model.kinmixing : 
 		reskin = (
-			-l13*Rational(3,2)*(2*model.Expand2(((_G,gg1),([[(_C,gg1,f1),(_Ckin,f1),(_Y,sc,f1,f2)],
+			-l131*Rational(3,2)*(2*model.Expand2(((_G,gg1),([[(_C,gg1,f1),(_Ckin,f1),(_Y,sc,f1,f2)],
 				[(_Y,sc,f1,f2),(_C,gg1,f2),(_Ckin,f2)]])),dotrace=False)#Line 13 C Ckin + Ckin C
 				+ model.Expand2((([[(_Ckin,f1),(_Ckin,f1),(_Y,sc,f1,f2)], #
 				[(_Y,sc,f1,f2),(_Ckin,f2),(_Ckin,f2)]])),dotrace=False)#Ckin Ckin
 				)
-			+ l13*6*(model.Expand2(((_G,gg1),(_Ckins,sc),([[(_C,gg1,f1),(_Y,sc,f1,f2)],[(_Y,sc,f1,f2),(_C,gg1,f2)]])),dotrace=False)#Line 13
+			+ l132*6*(model.Expand2(((_G,gg1),(_Ckins,sc),([[(_C,gg1,f1),(_Y,sc,f1,f2)],[(_Y,sc,f1,f2),(_C,gg1,f2)]])),dotrace=False)#Line 13
 					+ model.Expand2(((_G,gg1),(_Cs,gg1,sc),([[(_Ckin,f1),(_Y,sc,f1,f2)],[(_Y,sc,f1,f2),(_Ckin,f2)]])),dotrace=False)#Line 13
 				+ model.Expand2(((_Ckins,sc),([[(_Ckin,f1),(_Y,sc,f1,f2)],[(_Y,sc,f1,f2),(_Ckin,f2)]])),dotrace=False)#Ckin Ckin
 				)

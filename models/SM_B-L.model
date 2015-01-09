@@ -10,11 +10,11 @@ Groups: {'U1': U1,'U1BL': U1, 'SU2L': SU2, 'SU3c': SU3}
 ##############################
 Fermions: {
    Qbar: {Gen: 3, Qnb:{ U1: -1/6,  U1BL: -1/3, SU2L: -2, SU3c: -3}},
-   Lbar: {Gen: 3, Qnb:{ U1: 1/2,   U1BL: 1,  SU2L: -2, SU3c: 1}},
-   uR: {Gen: 3, Qnb:{   U1: 2/3,   U1BL: 1/3,  SU2L: 1,  SU3c: 3}},
+ #  Lbar: {Gen: 3, Qnb:{ U1: 1/2,   U1BL: 1,  SU2L: -2, SU3c: 1}},
+ #  uR: {Gen: 3, Qnb:{   U1: 2/3,   U1BL: 1/3,  SU2L: 1,  SU3c: 3}},
    dR: {Gen: 3, Qnb:{   U1: -1/3,  U1BL: 1/3,  SU2L: 1,  SU3c: 3}},
-   eR: {Gen: 3, Qnb:{   U1: -1,    U1BL: -1, SU2L: 1,  SU3c: 1}},
-   nuR: {Gen: 3, Qnb:{   U1: 0,    U1BL: -1, SU2L: 1,  SU3c: 1}}
+ #  eR: {Gen: 3, Qnb:{   U1: -1,    U1BL: -1, SU2L: 1,  SU3c: 1}},
+ #  nuR: {Gen: 3, Qnb:{   U1: 0,    U1BL: -1, SU2L: 1,  SU3c: 1}}
 }
 
 #############

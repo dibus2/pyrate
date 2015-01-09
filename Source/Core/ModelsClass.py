@@ -3,6 +3,7 @@ sys.path.append('./Source/GroupTheory')
 from GroupDefinitions import *
 from RGEsmathModule import *
 from Particles import *
+import pudb
 try :
 	import itertools as itr
 	from types import MethodType
@@ -2467,7 +2468,7 @@ class Model(object) :
 			#particle place holders
 			self.declareSymbol(flatten([('p{}'.format(i),'s{}'.format(i),'gg{}'.format(i)) for i in range(15)]))
 			#Yukawas,Casimir,Dynkin,Group,mf,ms,Lambda,trilinear,thethas,tAs
-			self.declareSymbol(['_Y','_Ya','_C','_Cs','_S','_Ss','_Cg','_G','_mf','_mfa','_ms','_L','_h','_Tha','_Ta','_Th','_T','_Ckin','_Ckins','_SfCkinf','_SfCkins','_SsCkinf','_SsCkins','_TkinT','_TakinT','_Tkin','_Takin','l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','l100','l101','l11','l12','l13','l14','l15','l16','l17','l140','l141','l142','l143','l150','l151','l152']) #the last symbls is for the C2(G)
+			self.declareSymbol(['_Y','_Ya','_C','_Cs','_S','_Ss','_Cg','_G','_mf','_mfa','_ms','_L','_h','_Tha','_Ta','_Th','_T','_Ckin','_Ckins','_SfCkinf','_SfCkins','_SsCkinf','_SsCkins','_TkinT','_TakinT','_Tkin','_Takin','l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','l100','l101','l11','l12','l13','l131','l132','l14','l15','l16','l17','l140','l141','l142','l143','l150','l151','l152']) #the last symbls is for the C2(G)
 			#declare all the yukawas and quartics appearing in the model file
 			if 'Yukawas' in self.Potential :
 				self.declareSymbol(self.Potential['Yukawas'].keys())
