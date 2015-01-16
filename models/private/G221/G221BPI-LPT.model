@@ -1,0 +1,56 @@
+# YAML 1.1
+---
+Author: Florian Lyonnet
+Date: 21.04.2014
+Name: G221BPILPT
+#This is the low scale model i.e. with only one scalar and we neglect all the yukawas
+Groups: {'U1': U1, 'SU21': SU2, 'SU22': SU2, 'SU3c': SU3}
+
+##############################
+#Fermions assumed weyl spinors
+##############################
+Fermions: {
+   QbarL: {Gen: 3, Qnb:{ U1: -1/6, SU21: -2, SU22: 1, SU3c: -3}},
+   LbarL: {Gen: 3, Qnb:{ U1: 1/2, SU21: -2, SU22: 1, SU3c: 1}},
+   eR: {Gen: 3, Qnb:{ U1: -1, SU21: 1, SU22: 1, SU3c: 1}},
+   QR: {Gen: 3, Qnb:{ U1: 1/6, SU21: 1, SU22: 2, SU3c: 3}},
+}
+
+#############
+#Real Scalars
+#############
+
+RealScalars: {
+  phi: {U1: 1, SU21: 1, SU22: 3, SU3c: 1},
+  phic: {U1: -1, SU21: 1, SU22: 3, SU3c: 1},
+}
+
+##########################################################################
+#Complex Scalars : have to be expressed in terms of Real Scalars see above
+##########################################################################
+
+CplxScalars: {
+  H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 0, SU21: 2, SU22: -2, SU3c: 1}},
+  H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 0, SU21: -2, SU22: 2, SU3c: 1}},
+}
+
+Potential: {
+
+#######################################
+# All particles must be defined above !
+#######################################
+QuarticTerms: {
+ '\Lambda_H1' : {Fields : [H,H,H*,H*], Norm : 1},
+ '\Lambda_H2' : {Fields : [[H*,H*,H*,H],[H,H,H,H*]], Norm : 1},
+ '\Lambda_H3' : {Fields : [[H,H,H,H],[H*,H*,H*,H*]], Norm : 1},
+ '\Lambda_H4' : {Fields : [H,H*,H,H*], Norm : 1},
+ '\Lambda_Hphi1' : {Fields : [[phic,phi,H,H],[phic,phi,H*,H*]], Norm : 1},
+ '\Lambda_Hphi2' : {Fields : [phic,phi,H,H*], Norm : 1},
+ '\Lambda_phi' : {Fields : [phic,phi,phic,phi], Norm : 1}
+ },
+ScalarMasses: {
+ '\mu_phi' : {Fields : [phic,phi], Norm : 1},
+ '\mu_H1' : {Fields : [[H,H],[H*,H*]], Norm : 1},
+ '\mu_H2' : {Fields : [H,H*], Norm : 1}
+ }
+}

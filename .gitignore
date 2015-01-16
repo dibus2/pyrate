@@ -3,7 +3,7 @@ results/
 
 #private model files not public
 #
-models/private/
+#models/private/
 
 #all .pyc
 #
