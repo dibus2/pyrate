@@ -140,7 +140,7 @@ def TranslateToMathematica(xpr,fname,tag,model):
 			if dims != [1,1] :
 				elem = model.YukToCalculate[key][0] if key in model.YukToCalculate else model.FMToCalculate[key][0]
 				fermions = [str(el.args[0])+'f' for el in elem if str(el.args[0]) in model.Fermions and model.Fermions[str(el.args[0])].Gen != 1]
-                                if fermions[0] == fermions[1] : 
+                                if len(fermions) >= 2 and fermions[0] == fermions[1] : 
                                     fermions[1] = fermions[1].split('f')[0]+'1f'
 				Return.append("{{{}[{}],{}}}".format(lltp.replace('_','').replace('\\',''),','.join(fermions),str(vall).replace('**','^').replace('_','').replace('\\','')))
 			else :

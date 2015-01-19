@@ -1,3 +1,9 @@
+January 18th:
+Bug fixed introduced in version 1.0.5 when yukawa matrices are not squared.
+
+NOvember 13th 2014:
+Bug fixed in the FermionMasses at two-loop. No impact on the physics.
+
 September 8th 2014:
 Bug introduced in pyrate-1.1.3 fixed. All the gauge groups were being added a dummy Group. Thanks to Debtosh Chowdhury for bringing this to my attention.
 
