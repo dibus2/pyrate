@@ -437,25 +437,3 @@ def TranslateToNumerics(expression,ListSymbs,label,model,Mapping,Matrices=True,i
 
 
 
-def convertsquaredtraces(expression):
-    #translate trace(....)**n to pow(trace(...),n)
-    l=0
-    while True :
-        indtrace = st.find(expression[l:],'trace')
-        if st.find(expression[l:],'trace') == -1:
-            break
-        inddbstar = st.find(expression[l:],'**')
-        parta = expression[l+indtrace-1]
-        partb = expression[l+inddbstar+2:]#
-        partc = expression[l+indtrace+6:l+inddbstar]
-        power = expression[inddbstar+2]
-        expression = parta+'pow(trace('+partc+','+power+')'
-        l=inddbstar
-        if l >= len(expression):
-            break
-    return expression
-
-
-
-
-
