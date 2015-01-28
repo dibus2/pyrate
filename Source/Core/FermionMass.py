@@ -58,22 +58,21 @@ def CYukGaugeFermionMass(powe,comb,model):
 def CYukFermionMassII(powe,comb,model):
 	"""Calculates the part that is independent of the gauge couplings in the two loop RGEs for the fermion mass terms Eq.62 8 first lines"""
 	f1,f2 = comb	
-	l1,l2,l3,l4,l5,l6,l7,l8,l9 = symbols('l1 l2 l3 l4 l5 l6 l7 l8 l9')
 	res = (
 			2*(
-				l1*model.Expand(((_Y,s1,f1,p1),(_Ya,s2,p1,p2),(_mf,p2,p3),(_Ya,s1,p3,p4),(_Y,s2,p4,f2)),dotrace=False)#Line 1
-			- l2*model.Expand(((_Y,s1,f1,p1),(_Ya,s2,p1,p2),(_mf,p2,p3),(_Ya,s2,p3,p4),(_Y,s1,p4,f2)),dotrace=False)#Line 1
+				model.Expand(((_Y,s1,f1,p1),(_Ya,s2,p1,p2),(_mf,p2,p3),(_Ya,s1,p3,p4),(_Y,s2,p4,f2)),dotrace=False)#Line 1
+			- model.Expand(((_Y,s1,f1,p1),(_Ya,s2,p1,p2),(_mf,p2,p3),(_Ya,s2,p3,p4),(_Y,s1,p4,f2)),dotrace=False)#Line 1
 			)
-		- l2*model.Expand2(((_Y,s1,f1,p1),([[('Y2F',p1,p2),(_mfa,p2,p3)],[(_mfa,p1,p2),('Y2Fa',p2,p3)]]),(_Y,s1,p3,f2)),dotrace=False)#Line 2
+		- model.Expand2(((_Y,s1,f1,p1),([[('Y2F',p1,p2),(_mfa,p2,p3)],[(_mfa,p1,p2),('Y2Fa',p2,p3)]]),(_Y,s1,p3,f2)),dotrace=False)#Line 2
 
 		- Rational(1,8)*(
-			l3*model.Expand2((([[(_Y,s1,f1,p1),('Y2F',p1,p2),(_Ya,s1,p2,p3),(_mf,p3,f2)],
+			model.Expand2((([[(_Y,s1,f1,p1),('Y2F',p1,p2),(_Ya,s1,p2,p3),(_mf,p3,f2)],
 				[(_mf,f1,p1),(_Ya,s1,p1,p2),('Y2Fa',p2,p3),(_Y,s1,p3,f2)]])),dotrace=False)#Line 3
 			)
 		- 2*kappa*(model.Expand2(((_Y,s1,f1,p1),(_Ya,s2,p1,p2),(_Y,s1,p2,f2),([[(_mfa,p3,p4),(_Y,s2,p4,p3)],
 			[(_mf,p3,p4),(_Ya,s2,p4,p3)]])))#Line 4 
 			)
-		- l5*Rational(3,2)*kappa*(model.Expand2((('Yab2S',s1,s2),([[(_Y,s1,f1,p1),(_Ya,s2,p1,p2),(_mf,p2,f2)],
+		- Rational(3,2)*kappa*(model.Expand2((('Yab2S',s1,s2),([[(_Y,s1,f1,p1),(_Ya,s2,p1,p2),(_mf,p2,f2)],
 			[(_mf,f1,p1),(_Ya,s2,p1,p2),(_Y,s1,p2,f2)]])),dotrace=False)#Line 5
 			)
 		- Rational(3,2)*kappa*(model.Expand2(((_Y,s1,f1,f2),([[('Y2F',p1,p2),(_Ya,s1,p2,p3),(_mf,p3,p1)],
