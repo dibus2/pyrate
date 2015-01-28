@@ -45,9 +45,9 @@ Potential: {
 #######################################
  
 Yukawas:{
-  'Y_{u}': {Fields: [uR,Qbar,H*], Norm: 1, latex: Y_u},
+  #'Y_{u}': {Fields: [uR,Qbar,H*], Norm: 1, latex: Y_u},
   'Y_{d}': {Fields: [dR,Qbar,H], Norm: 1, latex: Y_d},
-  'Y_{e}': {Fields: [eRbar,L,H*], Norm: 1, latex: Y_e},
+  #'Y_{e}': {Fields: [eRbar,L,H*], Norm: 1, latex: Y_e},
   'Y_{t}': {Fields: [tpR,Qbar,H*], Norm: 1, latex: Y_t}
  },
 QuarticTerms: {

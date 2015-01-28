@@ -84,7 +84,6 @@ class Model(object) :
 		#Extract the Yukawas
 		self.Classes = {}
 		if 'Yukawas' in self.Potential :
-		#TODO I am here with the list of list merging
 			self.Potential['Yukawas'],self.YukToCalculate,self.ListYukawa = self.ExtractTerm('Yukawas')
 		#extract the Quartic terms
 		if 'QuarticTerms' in self.Potential: 

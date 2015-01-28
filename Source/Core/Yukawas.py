@@ -57,7 +57,6 @@ def CYukGauge(powe,comb,model):
 ########
 def CYukII(powe,comb,model):
 	"""Calculates Eq 36 lines 1 to 6"""
-	#it is the same whethere we use the Chain3Y or not but I have not check the accuracy of the result
 	sc,f1,f2 = comb
 	res = (2*(model.Expand((('Chain3Y',s2,s1,sc,f1,p1),(_Ya,s2,p1,p2),(_Y,s1,p2,f2)),dotrace=False)
 				   - model.Expand((('Chain3Y',s2,s1,sc,f1,p1),(_Ya,s1,p1,p2),(_Y,s2,p2,f2)),dotrace=False)

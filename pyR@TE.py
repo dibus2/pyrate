@@ -60,456 +60,456 @@ FileSettings = args.__getattribute__('Settings')
 #Default Run Settings on top of the default in the command line
 #Copy the argument either from the settings File or from the command line
 if FileSettings == "" :
-	#Transform args into a dictionnary and copy it
-	RunSettings = args.__dict__
+        #Transform args into a dictionnary and copy it
+        RunSettings = args.__dict__
 else :
-	#Copy the default values
-	RunSettings = {}
-	try :
-		f = open('{}'.format(FileSettings),'r')
-		yamlRunSettings = yaml.load(f.read())
-		f.close()
-	except yaml.scanner.ScannerError as err:
-		exit("Check the YAML file {}, failed to load the settings: {}".format(FileSettings,err))
-	except yaml.parser.ParserError as err :
-		exit("Check the YAML file {}, failed to parse the settings: {}".format(FileSettings,err))
-	except IOError as (errno, errstr) : 
-		exit("Did not find the YAML file {}, specify the path if not in the current directory.\n {}".format(FileSettings,errstr))
-	try :
-		for key, value in yamlRunSettings.items():
-			RunSettings[key]= value
-	except KeyError as err:
-		exit("EROR, key {} does not exist, refer to the list of defined keys:\n\n {}".format(key,err))
-	#overwrite the settings by the commmand line
-	defaults = dict([(el,parser.get_default(el)) for el in args.__dict__.keys()])
-	for key,val in args.__dict__.items() : 
-		if key in RunSettings and val != defaults[key] : 
-			RunSettings[key] = val 
-		elif not(key in RunSettings) : 
-			RunSettings[key] = val
-		else : 
-			pass
+        #Copy the default values
+        RunSettings = {}
+        try :
+                f = open('{}'.format(FileSettings),'r')
+                yamlRunSettings = yaml.load(f.read())
+                f.close()
+        except yaml.scanner.ScannerError as err:
+                exit("Check the YAML file {}, failed to load the settings: {}".format(FileSettings,err))
+        except yaml.parser.ParserError as err :
+                exit("Check the YAML file {}, failed to parse the settings: {}".format(FileSettings,err))
+        except IOError as (errno, errstr) : 
+                exit("Did not find the YAML file {}, specify the path if not in the current directory.\n {}".format(FileSettings,errstr))
+        try :
+                for key, value in yamlRunSettings.items():
+                        RunSettings[key]= value
+        except KeyError as err:
+                exit("EROR, key {} does not exist, refer to the list of defined keys:\n\n {}".format(key,err))
+        #overwrite the settings by the commmand line
+        defaults = dict([(el,parser.get_default(el)) for el in args.__dict__.keys()])
+        for key,val in args.__dict__.items() : 
+                if key in RunSettings and val != defaults[key] : 
+                        RunSettings[key] = val 
+                elif not(key in RunSettings) : 
+                        RunSettings[key] = val
+                else : 
+                        pass
 try :
-	import copy
-	sys.path.append(wd+'/Source/Output')
+        import copy
+        sys.path.append(wd+'/Source/Output')
 except ImportError :
-	exit("Error while importing the modules")
+        exit("Error while importing the modules")
 from Logging import *
 #get current working directory
 cwd = os.getcwd()
 RunSettings['Results'] = os.path.abspath(RunSettings['Results'])
 if not(os.path.exists(RunSettings['Results'])) :
-	os.makedirs(RunSettings['Results'])
+        os.makedirs(RunSettings['Results'])
 #Get the logLevel from RunSettings
 LogLevel = {'Info':logging.INFO,'Debug':logging.DEBUG,'Critical':logging.CRITICAL}
 #create the config of the logging system
 logging.basicConfig(filename = RunSettings['LogFile'], level = LogLevel['{}'.format(RunSettings['LogLevel'])], format="%(levelname)s [%(asctime)s] [%(funcName)s] %(message)s")
 #Setting up the verbose level
 if RunSettings['verbose'] : 
-	if RunSettings['VerboseLevel'] == 'Info' :
-		RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = True,False,True
-	elif RunSettings['VerboseLevel'] == 'Debug' :
-		RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = False,True,True
-	elif RunSettings['VerboseLevel'] == 'Critical' :
-		RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = False,False,True 
-	elif RunSettings['VerboseLevel'] == '' : 
-		RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = True,False,True
-	else :
-		print("unknown VerboseLevel {}...setting it to Info".format(RunSettings['VerboseLevel']))
-		RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = True,False,False 
+        if RunSettings['VerboseLevel'] == 'Info' :
+                RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = True,False,True
+        elif RunSettings['VerboseLevel'] == 'Debug' :
+                RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = False,True,True
+        elif RunSettings['VerboseLevel'] == 'Critical' :
+                RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = False,False,True 
+        elif RunSettings['VerboseLevel'] == '' : 
+                RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = True,False,True
+        else :
+                print("unknown VerboseLevel {}...setting it to Info".format(RunSettings['VerboseLevel']))
+                RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = True,False,False 
 else : 
-	RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = False,False,True
+        RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = False,False,True
 
 #Set the skipping terms
 if 'Skip' in RunSettings :
-	if type(RunSettings['Skip']) == str :
-		RunSettings['Skip'] = RunSettings['Skip'][1:-1].split(',')
+        if type(RunSettings['Skip']) == str :
+                RunSettings['Skip'] = RunSettings['Skip'][1:-1].split(',')
 #For the loggingInfo function the RunSettings dict can be passed to print on the screen if verbose is true by default it is true in loggingInfo
 loggingInfo("Starting a new run ...",verbose=RunSettings['vInfo'])
 strRunSettings ='\n'.join(["\t\t{}: {}".format(key,val) for key,val in RunSettings.items()])
 loggingInfo("Run Settings :\n{}".format(strRunSettings),verbose=RunSettings['vInfo'])
 #Processing of the required argument
 if RunSettings['Model'] == "":
-	loggingCritical("Please, specify a .model file.",verbose = RunSettings['vCritical'])
-	exit()
+        loggingCritical("Please, specify a .model file.",verbose = RunSettings['vCritical'])
+        exit()
 else :
-	try :
-		#open the YAML file
-		f = open('{}'.format(RunSettings['Model']),'r')
+        try :
+                #open the YAML file
+                f = open('{}'.format(RunSettings['Model']),'r')
 #Open the Yaml file and load the settings
-		yamlSettings = yaml.load(f.read())
-		f.close()
-	except yaml.scanner.ScannerError as err:
-		loggingCritical("Check the YAML file {}, impossible to load the settings: {}.".format(RunSettings['Model'],err),verbose = RunSettings['vCritical'])
-		exit()
-	except yaml.parser.ParserError as err :
-		loggingCritical("Check the YAML file {}, impossible to parse the settings: {}.".format(RunSettings['Model'],err),verbose = RunSettings['vCritical'])
-		exit()
+                yamlSettings = yaml.load(f.read())
+                f.close()
+        except yaml.scanner.ScannerError as err:
+                loggingCritical("Check the YAML file {}, impossible to load the settings: {}.".format(RunSettings['Model'],err),verbose = RunSettings['vCritical'])
+                exit()
+        except yaml.parser.ParserError as err :
+                loggingCritical("Check the YAML file {}, impossible to parse the settings: {}.".format(RunSettings['Model'],err),verbose = RunSettings['vCritical'])
+                exit()
 
-	except IOError as (errno, errstr) : 
-		loggingCritical("Did not find the YAML file {}, specify the path if not in the current directory.\n {}.".format(RunSettings['Model'],errstr),verbose = RunSettings['vCritical'])
-		exit()
-	loggingInfo("Loading the YAML file: {} ... done".format(RunSettings['Model']),verbose=RunSettings['vInfo'])
-	
-	#Now we want to process the settings before creating the model class
-	#Let's first construct the dictionnaries if the input is given as a list
-	if 'Groups' in yamlSettings and yamlSettings['Groups'] != {} and type(yamlSettings['Groups']) == list :
-		tp = {}
-		cg = []
-		ListG = []
-		for x in yamlSettings['Groups']:
-			if yamlSettings['Groups'].count(x) == 1 :
-				tp.update({'{}'.format(x): x})
-				ListG.append(x)
-			else :
-				cg.append(x)
-				tp.update({'{}_{}'.format(x,cg.count(x)): x})
-				ListG.append('{}_{}'.format(x,cg.count(x)))
-		yamlSettings['Groups'] = copy.deepcopy(tp)
-	if 'Fermions' in yamlSettings  and yamlSettings['Fermions'] != {} and type(yamlSettings['Fermions'].values()[0]) == list :
-		if not(all([len(pp) == len(yamlSettings['Groups']) + 1  for pp in yamlSettings['Fermions'].values()])):
-			loggingCritical("Error, the length of the different lists of qnbs are not valid in Fermions.",verbose=RunSettings['vCritical'])
-			exit()
-		else :
-			for part,qnbs in yamlSettings['Fermions'].items():
-				tp1 = {}
-				for igg,gg in enumerate(ListG) :
-					tp1.update({gg:qnbs[igg+1]})
-				yamlSettings['Fermions'][part] = {'Gen': qnbs[0],'Qnb': tp1}
-	if 'RealScalars' in yamlSettings and yamlSettings['RealScalars'] != {} and type(yamlSettings['RealScalars'].values()[0]) == list :
-		if not(all([len(pp) == len(yamlSettings['Groups']) for pp in yamlSettings['RealScalars'].values()])):
-			loggingCritical("Error, the length of the different lists of qnbs are not valid in RealScalars.",verbose=RunSettings['vCritical'])
-			exit()
-		else :
-			for part,qnbs in yamlSettings['RealScalars'].items():
-				tp1 = {}
-				for igg,gg in enumerate(ListG) :
-					tp1.update({gg:qnbs[igg]})
-				yamlSettings['RealScalars'][part] = copy.deepcopy(tp1)
-	if 'CplxScalars' in yamlSettings and yamlSettings['CplxScalars'] != {} and type(yamlSettings['CplxScalars'].values()[0]['Qnb']) == list :
-		if not(all([len(pp['Qnb']) == len(yamlSettings['Groups']) for pp in yamlSettings['CplxScalars'].values()])):
-			loggingCritical("Error, the length of the different lists of qnbs are not valid in CplxScalars.",verbose=RunSettings['vCritical'])
-			exit()
-		else :
-			for part,qnbs in yamlSettings['CplxScalars'].items():
-				tp1 = {}
-				for igg,gg in enumerate(ListG) :
-					tp1.update({gg:qnbs['Qnb'][igg]})
-				yamlSettings['CplxScalars'][part]['Qnb'] = copy.deepcopy(tp1)
-	if 'Potential' in yamlSettings  and yamlSettings['Potential'] != {}:
-		Labels = {'QuarticTerms':4,'Yukawas':3,'TrilinearTerms':3,'ScalarMasses':2,'FermionMasses':2}
-		#There two things two do:1. deal with short hand notation 2. Deal with list of lists
-		for lab,ilab in Labels.items():
-			if lab in yamlSettings['Potential'] and yamlSettings['Potential'][lab] != {} : 
-				for ill1,ll1 in yamlSettings['Potential'][lab].items() :
-					if type(ll1) == list and type(ll1[0]) == list :
-						#it is a list of list
-						if not(all([len(subll1) == ilab or len(subll1) == ilab+1 for subll1 in ll1])):
-							loggingCritical("Error, the length of the list {} is incoherent should be {} or {} if norm is included".format(ll2,ilab,ilab+1))
-							exit()
-						else :
-							nn = []
-							templ1 = []
-							for ll2 in ll1:
-								nn.append(1) if len(ll2) ==ilab else nn.append(ll2[-1])
-								templ1.append(ll2[:ilab])
-							yamlSettings['Potential'][lab][ill1] = {'Fields': templ1, 'Norm': nn}
-					elif type(ll1) == list :
-						if not(len(ll1)==ilab or len(ll1) == ilab+1) :
-							loggingCritical("Error, the length of the list {} is incoherent should be {} or {} if norm is included".format(ll1,ilab,ilab+1))
-							exit()
-						else :
-							nn=1 if len(ll1) == ilab else ll1[-1]
-							yamlSettings['Potential'][lab][ill1] = {'Fields': ll1[:ilab],'Norm': nn}
-					else :
-						#It is a regular dictionary we have to check that the norm is understood correctly i.e.
-						# 1) Only one number and Fields is a simple list ->Ok
-						#	2) Only one number and Fields is a list of lsit -> all the same norm
-						#	3) List of numbers and Fields is a list of list -> Ok
-						if 'Norm' in ll1 : 
-							if type(ll1['Fields'][0]) == list and (type(ll1['Norm']) == str or type(ll1['Norm']) == int) : 
-								#copy it this is case 2) 
-								yamlSettings['Potential'][lab][ill1] = {'Fields' : ll1['Fields'], 'Norm': [ll1['Norm']]*len(ll1['Fields'])}
-							elif type(ll1['Fields'][0]) == list and type(ll1['Norm']) == list : 
-								pass
-							elif type(ll1['Fields'][0]) == str and (type(ll1['Norm']) == str or type(ll1['Norm']) == int):
-								pass
-							else :
-								loggingCritical("Error format for the Norm not understood. Should be either a list of same length as Fields or a single number applying to all of them: {}".format(ll1),verbose=True)
-								exit()
-						else :
-							loggingInfo("Warning no Norm specify for {}, setting it to `1`".format(ll1),verbose=RunSettings['vInfo'])
-							if type(ll1['Fields'][0]) == list : 
-								yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': [1]*len(ll1['Fields'])}
-							else :
-								yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': 1}
+        except IOError as (errno, errstr) : 
+                loggingCritical("Did not find the YAML file {}, specify the path if not in the current directory.\n {}.".format(RunSettings['Model'],errstr),verbose = RunSettings['vCritical'])
+                exit()
+        loggingInfo("Loading the YAML file: {} ... done".format(RunSettings['Model']),verbose=RunSettings['vInfo'])
+        
+        #Now we want to process the settings before creating the model class
+        #Let's first construct the dictionnaries if the input is given as a list
+        if 'Groups' in yamlSettings and yamlSettings['Groups'] != {} and type(yamlSettings['Groups']) == list :
+                tp = {}
+                cg = []
+                ListG = []
+                for x in yamlSettings['Groups']:
+                        if yamlSettings['Groups'].count(x) == 1 :
+                                tp.update({'{}'.format(x): x})
+                                ListG.append(x)
+                        else :
+                                cg.append(x)
+                                tp.update({'{}_{}'.format(x,cg.count(x)): x})
+                                ListG.append('{}_{}'.format(x,cg.count(x)))
+                yamlSettings['Groups'] = copy.deepcopy(tp)
+        if 'Fermions' in yamlSettings  and yamlSettings['Fermions'] != {} and type(yamlSettings['Fermions'].values()[0]) == list :
+                if not(all([len(pp) == len(yamlSettings['Groups']) + 1  for pp in yamlSettings['Fermions'].values()])):
+                        loggingCritical("Error, the length of the different lists of qnbs are not valid in Fermions.",verbose=RunSettings['vCritical'])
+                        exit()
+                else :
+                        for part,qnbs in yamlSettings['Fermions'].items():
+                                tp1 = {}
+                                for igg,gg in enumerate(ListG) :
+                                        tp1.update({gg:qnbs[igg+1]})
+                                yamlSettings['Fermions'][part] = {'Gen': qnbs[0],'Qnb': tp1}
+        if 'RealScalars' in yamlSettings and yamlSettings['RealScalars'] != {} and type(yamlSettings['RealScalars'].values()[0]) == list :
+                if not(all([len(pp) == len(yamlSettings['Groups']) for pp in yamlSettings['RealScalars'].values()])):
+                        loggingCritical("Error, the length of the different lists of qnbs are not valid in RealScalars.",verbose=RunSettings['vCritical'])
+                        exit()
+                else :
+                        for part,qnbs in yamlSettings['RealScalars'].items():
+                                tp1 = {}
+                                for igg,gg in enumerate(ListG) :
+                                        tp1.update({gg:qnbs[igg]})
+                                yamlSettings['RealScalars'][part] = copy.deepcopy(tp1)
+        if 'CplxScalars' in yamlSettings and yamlSettings['CplxScalars'] != {} and type(yamlSettings['CplxScalars'].values()[0]['Qnb']) == list :
+                if not(all([len(pp['Qnb']) == len(yamlSettings['Groups']) for pp in yamlSettings['CplxScalars'].values()])):
+                        loggingCritical("Error, the length of the different lists of qnbs are not valid in CplxScalars.",verbose=RunSettings['vCritical'])
+                        exit()
+                else :
+                        for part,qnbs in yamlSettings['CplxScalars'].items():
+                                tp1 = {}
+                                for igg,gg in enumerate(ListG) :
+                                        tp1.update({gg:qnbs['Qnb'][igg]})
+                                yamlSettings['CplxScalars'][part]['Qnb'] = copy.deepcopy(tp1)
+        if 'Potential' in yamlSettings  and yamlSettings['Potential'] != {}:
+                Labels = {'QuarticTerms':4,'Yukawas':3,'TrilinearTerms':3,'ScalarMasses':2,'FermionMasses':2}
+                #There two things two do:1. deal with short hand notation 2. Deal with list of lists
+                for lab,ilab in Labels.items():
+                        if lab in yamlSettings['Potential'] and yamlSettings['Potential'][lab] != {} : 
+                                for ill1,ll1 in yamlSettings['Potential'][lab].items() :
+                                        if type(ll1) == list and type(ll1[0]) == list :
+                                                #it is a list of list
+                                                if not(all([len(subll1) == ilab or len(subll1) == ilab+1 for subll1 in ll1])):
+                                                        loggingCritical("Error, the length of the list {} is incoherent should be {} or {} if norm is included".format(ll2,ilab,ilab+1))
+                                                        exit()
+                                                else :
+                                                        nn = []
+                                                        templ1 = []
+                                                        for ll2 in ll1:
+                                                                nn.append(1) if len(ll2) ==ilab else nn.append(ll2[-1])
+                                                                templ1.append(ll2[:ilab])
+                                                        yamlSettings['Potential'][lab][ill1] = {'Fields': templ1, 'Norm': nn}
+                                        elif type(ll1) == list :
+                                                if not(len(ll1)==ilab or len(ll1) == ilab+1) :
+                                                        loggingCritical("Error, the length of the list {} is incoherent should be {} or {} if norm is included".format(ll1,ilab,ilab+1))
+                                                        exit()
+                                                else :
+                                                        nn=1 if len(ll1) == ilab else ll1[-1]
+                                                        yamlSettings['Potential'][lab][ill1] = {'Fields': ll1[:ilab],'Norm': nn}
+                                        else :
+                                                #It is a regular dictionary we have to check that the norm is understood correctly i.e.
+                                                # 1) Only one number and Fields is a simple list ->Ok
+                                                #       2) Only one number and Fields is a list of lsit -> all the same norm
+                                                #       3) List of numbers and Fields is a list of list -> Ok
+                                                if 'Norm' in ll1 : 
+                                                        if type(ll1['Fields'][0]) == list and (type(ll1['Norm']) == str or type(ll1['Norm']) == int) : 
+                                                                #copy it this is case 2) 
+                                                                yamlSettings['Potential'][lab][ill1] = {'Fields' : ll1['Fields'], 'Norm': [ll1['Norm']]*len(ll1['Fields'])}
+                                                        elif type(ll1['Fields'][0]) == list and type(ll1['Norm']) == list : 
+                                                                pass
+                                                        elif type(ll1['Fields'][0]) == str and (type(ll1['Norm']) == str or type(ll1['Norm']) == int):
+                                                                pass
+                                                        else :
+                                                                loggingCritical("Error format for the Norm not understood. Should be either a list of same length as Fields or a single number applying to all of them: {}".format(ll1),verbose=True)
+                                                                exit()
+                                                else :
+                                                        loggingInfo("Warning no Norm specify for {}, setting it to `1`".format(ll1),verbose=RunSettings['vInfo'])
+                                                        if type(ll1['Fields'][0]) == list : 
+                                                                yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': [1]*len(ll1['Fields'])}
+                                                        else :
+                                                                yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': 1}
 
-	#import the module
-	loggingInfo("Importing modules ...",verbose=RunSettings['vInfo'])
-	from ModelsClass import * 
-	from RGEsModule import *
-	loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
+        #import the module
+        loggingInfo("Importing modules ...",verbose=RunSettings['vInfo'])
+        from ModelsClass import * 
+        from RGEsModule import *
+        loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
 
-	#Convert the quantum numbers into Rational of Sympy and the particles 
-	if 'Fermions' in yamlSettings:
-		for key,value in yamlSettings['Fermions'].items() :
-			try :
-				for GaugeGroup, qnb in value['Qnb'].items():
-					if type(qnb) == list:	#given in terms of the Dynkin label translate it into tuple
-						yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = tuple(qnb)
-					else :
-						yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = Rational(qnb)
-					loggingInfo("Fermion {} with Qnb {} under {}".format(key,qnb,GaugeGroup))
-			except ValueError as err : 
-				loggingCritical("Error during convertion of the quantum numbers : {} {} {}.".format(key,GaugeGroup, qnb),verbose=RunSettings['vCritical'])
-				exit()
-			except AttributeError as err :
-				loggingCritical("Error, the Qnb entry must be a dictionary",versbose=RunSettings['vCritical'])
-				exit()
-	if 'RealScalars' in yamlSettings :		
-		for key,value in yamlSettings['RealScalars'].items() :
-			try :
-				for GaugeGroup, qnb in value.items():
-					if type(qnb) == list:	#given in terms of the Dynkin label translate it into tuple
-						yamlSettings['RealScalars'][key]['Qnb'][GaugeGroup] = tuple(qnb)
-					else :
-						yamlSettings['RealScalars'][key][GaugeGroup] = Rational(qnb)
-					loggingInfo("RealScalar {} with Qnb {} under {}".format(key,qnb,GaugeGroup))
-			except ValueError as err : 
-				loggingCritical("Error during convertion of the quantum numbers : {} {} {}.".format(key,GaugeGroup, qnb),verbose=RunSettings['vCritical'])
-				exit()
-			except AttributeError as err :
-				loggingCritical("Error, the Qnb entry must be a dictionary",versbose=RunSettings['vCritical'])
-				exit()
-	if 'CplxScalars' in yamlSettings :		
-		for key,value in yamlSettings['CplxScalars'].items() :
-			try :
-				for GaugeGroup, qnb in value['Qnb'].items():
-					if type(qnb) == list:	#given in terms of the Dynkin label translate it into tuple
-						yamlSettings['CplxScalars'][key]['Qnb'][GaugeGroup] = tuple(qnb)
-					else :
-						yamlSettings['CplxScalars'][key][GaugeGroup] = Rational(qnb)
-					loggingInfo("CplxScalar {} with Qnb {} under {}".format(key,qnb,GaugeGroup))
-			except ValueError as err : 
-				loggingCritical("Error during convertion of the quantum numbers : {} {} {}.".format(key,GaugeGroup, qnb),verbose=RunSettings['vCritical'])
-				exit()
-			except AttributeError as err :
-				loggingCritical("Error, the Qnb entry must be a dictionary",versbose=RunSettings['vCritical'])
-				exit()
-		loggingInfo("Translating the quantum numbers into Rational of Sympy... done",verbose=RunSettings['vDebug'])
-	model = Model(yamlSettings)
-	#Create the instance Model
-	loggingCritical("Creating the instance of the Model: {}, {}, by {}...done".format(yamlSettings['Name'],yamlSettings['Date'],yamlSettings['Author']),verbose=RunSettings['vCritical'])
-	#add the element in ToOnly to Only
+        #Convert the quantum numbers into Rational of Sympy and the particles 
+        if 'Fermions' in yamlSettings:
+                for key,value in yamlSettings['Fermions'].items() :
+                        try :
+                                for GaugeGroup, qnb in value['Qnb'].items():
+                                        if type(qnb) == list:   #given in terms of the Dynkin label translate it into tuple
+                                                yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = tuple(qnb)
+                                        else :
+                                                yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = Rational(qnb)
+                                        loggingInfo("Fermion {} with Qnb {} under {}".format(key,qnb,GaugeGroup))
+                        except ValueError as err : 
+                                loggingCritical("Error during convertion of the quantum numbers : {} {} {}.".format(key,GaugeGroup, qnb),verbose=RunSettings['vCritical'])
+                                exit()
+                        except AttributeError as err :
+                                loggingCritical("Error, the Qnb entry must be a dictionary",versbose=RunSettings['vCritical'])
+                                exit()
+        if 'RealScalars' in yamlSettings :              
+                for key,value in yamlSettings['RealScalars'].items() :
+                        try :
+                                for GaugeGroup, qnb in value.items():
+                                        if type(qnb) == list:   #given in terms of the Dynkin label translate it into tuple
+                                                yamlSettings['RealScalars'][key]['Qnb'][GaugeGroup] = tuple(qnb)
+                                        else :
+                                                yamlSettings['RealScalars'][key][GaugeGroup] = Rational(qnb)
+                                        loggingInfo("RealScalar {} with Qnb {} under {}".format(key,qnb,GaugeGroup))
+                        except ValueError as err : 
+                                loggingCritical("Error during convertion of the quantum numbers : {} {} {}.".format(key,GaugeGroup, qnb),verbose=RunSettings['vCritical'])
+                                exit()
+                        except AttributeError as err :
+                                loggingCritical("Error, the Qnb entry must be a dictionary",versbose=RunSettings['vCritical'])
+                                exit()
+        if 'CplxScalars' in yamlSettings :              
+                for key,value in yamlSettings['CplxScalars'].items() :
+                        try :
+                                for GaugeGroup, qnb in value['Qnb'].items():
+                                        if type(qnb) == list:   #given in terms of the Dynkin label translate it into tuple
+                                                yamlSettings['CplxScalars'][key]['Qnb'][GaugeGroup] = tuple(qnb)
+                                        else :
+                                                yamlSettings['CplxScalars'][key][GaugeGroup] = Rational(qnb)
+                                        loggingInfo("CplxScalar {} with Qnb {} under {}".format(key,qnb,GaugeGroup))
+                        except ValueError as err : 
+                                loggingCritical("Error during convertion of the quantum numbers : {} {} {}.".format(key,GaugeGroup, qnb),verbose=RunSettings['vCritical'])
+                                exit()
+                        except AttributeError as err :
+                                loggingCritical("Error, the Qnb entry must be a dictionary",versbose=RunSettings['vCritical'])
+                                exit()
+                loggingInfo("Translating the quantum numbers into Rational of Sympy... done",verbose=RunSettings['vDebug'])
+        model = Model(yamlSettings)
+        #Create the instance Model
+        loggingCritical("Creating the instance of the Model: {}, {}, by {}...done".format(yamlSettings['Name'],yamlSettings['Date'],yamlSettings['Author']),verbose=RunSettings['vCritical'])
+        #add the element in ToOnly to Only
  #IF only is defined then skip the other terms
-	trans = { 'QuarticTerms': model.LbdToCalculate,
-						'ScalarsMasses': model.ScMToCalculate,
-						'FermionMasses': model.FMToCalculate,
-						'TrilinearTerms': model.TriToCalculate,
-						'Yukawas': model.YukToCalculate
-					}
-	if RunSettings['Only'] != {} :
+        trans = { 'QuarticTerms': model.LbdToCalculate,
+                                                'ScalarsMasses': model.ScMToCalculate,
+                                                'FermionMasses': model.FMToCalculate,
+                                                'TrilinearTerms': model.TriToCalculate,
+                                                'Yukawas': model.YukToCalculate
+                                        }
+        if RunSettings['Only'] != {} :
                         if type(RunSettings['Only']) == str :
                             try : 
                                 RunSettings['Only'] = eval(RunSettings['Only'])
                             except :
                                 loggingInfo('WARNING: wrong format for the `Only` switch, take care of putting the `"` correctly, ignoring it',verbose=True)
                                 RunSettings['Only'] = {}
-			for keyonly,valonly in RunSettings['Only'].items():
-				if type(valonly) != list :
-					loggingCritical("Error, wrong format type for `{}` should be a list".format(valonly),verbose=RunSettings['vCritical'])
-					exit()
-				if keyonly in trans :
-					todelete = []
-					for xelem in trans[keyonly]:
-						if not(xelem in valonly) :
-							todelete.append(xelem)
-					for xelem in todelete :
-						trans[keyonly].__delitem__(xelem)
-						loggingDebug("Removing {} from {} following `Only` settings".format(xelem,keyonly),verbose=RunSettings['vDebug'])
-				else :
-					loggingInfo("Warning wrong key value `{}` in `Only` settings. Allowed: `{}`".format(valonly,trans.keys()),verbose=True)
-	
-	#Check which terms are in the Lagrangian and if the corresponding rges have been calculated
-	Translation = {'Yukawas':'Yukawas','QuarticTerms':'Quartic-Couplings','ScalarMasses':'ScalarMass','FermionMasses':'FermionMass','TrilinearTerms':'Trilinear'}
-	ListLagrangian = model.Potential.keys()
-	StrucYuk = {}
-	if RunSettings['Export'] :
-		Check = all([True if RunSettings[Translation[el]] else False for el in ListLagrangian if model.Potential[el] != {}])
-		Check = Check and RunSettings['Gauge-Couplings']
-		if not(Check) and (not(RunSettings['All-Contributions'])) or RunSettings['Only'] != {} : 
-			loggingCritical("\n**WARNING** : options --Export cannot be carried out because all the required terms have not been set to True or Only is being used.\n Please use the --All-Contributions switch or set all the terms to True.\n",verbose=RunSettings['vCritical'])
-			Check = False
-		else :
-			Check = True
-	#check that there re no symbols in the definition of the generation
-	CheckNumerics = True
-	if 'Yukawas' in model.Potential :
-		for key,val in model.Potential['Yukawas'].items() : 
-			StrucYuk[key] = [model.Fermions[str(el.base)].Gen for el in val[0][0] if str(el.base) in model.Fermions]
-			StrucYuk[key].append([model.Scalars[str(el.base)].Gen for el in val[0][0] if str(el.base) in model.Scalars][0])
-			#Check that there's only number here 
-			CheckNumerics = CheckNumerics and all([True if type(el) != Symbol else False for el in StrucYuk[key]])
-	if 'FermionMasses' in model.Potential and CheckNumerics: 
-		for key,val in model.Potential['FermionMasses'].items() : 
-			StrucYuk[key] = [model.Fermions[str(el.base)].Gen for el in val[0][0] if str(el.base) in model.Fermions]
-			#Check that there's only number here 
-			CheckNumerics = CheckNumerics and all([True if type(el) != Symbol else False for el in StrucYuk[key]])
-	if not(CheckNumerics) and RunSettings['Export']:
-			loggingCritical("\n**WARNING** : options --Export cannot be carried out because some of the generation indices are symbols.",verbose=RunSettings['vCritical'])
-			Check = False
+                        for keyonly,valonly in RunSettings['Only'].items():
+                                if type(valonly) != list :
+                                        loggingCritical("Error, wrong format type for `{}` should be a list".format(valonly),verbose=RunSettings['vCritical'])
+                                        exit()
+                                if keyonly in trans :
+                                        todelete = []
+                                        for xelem in trans[keyonly]:
+                                                if not(xelem in valonly) :
+                                                        todelete.append(xelem)
+                                        for xelem in todelete :
+                                                trans[keyonly].__delitem__(xelem)
+                                                loggingDebug("Removing {} from {} following `Only` settings".format(xelem,keyonly),verbose=RunSettings['vDebug'])
+                                else :
+                                        loggingInfo("Warning wrong key value `{}` in `Only` settings. Allowed: `{}`".format(valonly,trans.keys()),verbose=True)
+        
+        #Check which terms are in the Lagrangian and if the corresponding rges have been calculated
+        Translation = {'Yukawas':'Yukawas','QuarticTerms':'Quartic-Couplings','ScalarMasses':'ScalarMass','FermionMasses':'FermionMass','TrilinearTerms':'Trilinear'}
+        ListLagrangian = model.Potential.keys()
+        StrucYuk = {}
+        if RunSettings['Export'] :
+                Check = all([True if RunSettings[Translation[el]] else False for el in ListLagrangian if model.Potential[el] != {}])
+                Check = Check and RunSettings['Gauge-Couplings']
+                if not(Check) and (not(RunSettings['All-Contributions'])) or RunSettings['Only'] != {} : 
+                        loggingCritical("\n**WARNING** : options --Export cannot be carried out because all the required terms have not been set to True or Only is being used.\n Please use the --All-Contributions switch or set all the terms to True.\n",verbose=RunSettings['vCritical'])
+                        Check = False
+                else :
+                        Check = True
+        #check that there re no symbols in the definition of the generation
+        CheckNumerics = True
+        if 'Yukawas' in model.Potential :
+                for key,val in model.Potential['Yukawas'].items() : 
+                        StrucYuk[key] = [model.Fermions[str(el.base)].Gen for el in val[0][0] if str(el.base) in model.Fermions]
+                        StrucYuk[key].append([model.Scalars[str(el.base)].Gen for el in val[0][0] if str(el.base) in model.Scalars][0])
+                        #Check that there's only number here 
+                        CheckNumerics = CheckNumerics and all([True if type(el) != Symbol else False for el in StrucYuk[key]])
+        if 'FermionMasses' in model.Potential and CheckNumerics: 
+                for key,val in model.Potential['FermionMasses'].items() : 
+                        StrucYuk[key] = [model.Fermions[str(el.base)].Gen for el in val[0][0] if str(el.base) in model.Fermions]
+                        #Check that there's only number here 
+                        CheckNumerics = CheckNumerics and all([True if type(el) != Symbol else False for el in StrucYuk[key]])
+        if not(CheckNumerics) and RunSettings['Export']:
+                        loggingCritical("\n**WARNING** : options --Export cannot be carried out because some of the generation indices are symbols.",verbose=RunSettings['vCritical'])
+                        Check = False
 
-	#Start the actual calculation of the RGEs
-	loggingInfo("Starting the Calculation...\n",verbose=RunSettings['vInfo'])
-	ToCalculate = []
-	#TODO Extend the list to all the contributions
-	if RunSettings['All-Contributions'] :
-		strListLagrangian = '\n\t\t\t\tGauge-Couplings'
-		for el in ListLagrangian :
-			strListLagrangian += '\n\t\t\t\t' + str(el)
-		loggingInfo("\t\t... with option --All-Contributions including{} ".format(strListLagrangian),verbose=RunSettings['vInfo'])
-		ToCalculate = ['Gauge-Couplings']+[Translation[el]for el in ListLagrangian]
-	else :
-		if RunSettings['Gauge-Couplings']:
-			ToCalculate.append('Gauge-Couplings')
-			loggingInfo("\t\t... with option --Gauge-Couplings",verbose=RunSettings['vInfo'])	
-		if RunSettings['Quartic-Couplings']:
-			ToCalculate.append('Quartic-Couplings')
-			loggingInfo("\t\t... with option --Quartic-Couplings",verbose=RunSettings['vInfo'])	
-		if RunSettings['Yukawas']:
-			ToCalculate.append('Yukawas')
-			loggingInfo("\t\t... with option --Yukawas",verbose=RunSettings['vInfo'])	
-		if RunSettings['ScalarMass']:
-			ToCalculate.append('ScalarMass')
-			loggingInfo("\t\t... with option --ScalarMass",verbose=RunSettings['vInfo'])
-		if RunSettings['FermionMass']:
-			ToCalculate.append('FermionMass')
-			loggingInfo("\t\t... with option --FermionMass",verbose=RunSettings['vInfo'])
-		if RunSettings['Trilinear']:
-			ToCalculate.append('Trilinear')
-			loggingInfo("\t\t... with option --Trilinear",verbose=RunSettings['vInfo'])
-	#To store the Final Result
-	FinalRGEdic = {}
-	FinalRGE = []
-	for rge in ToCalculate : 
-		temp = Translate(rge,model,RunSettings)
-		FinalRGEdic[rge] = temp
-		FinalRGE.append(temp)
-	FinalRGEForTranslation = copy.deepcopy(FinalRGEdic)
-	FinalRGEdic = FinalRGEdic.values()
-	loggingCritical(" \t\t...Calculation done.",verbose=RunSettings['vCritical'])	
-	#Copy the settings in model for simplicity
-	model.savesettingsforoutput.append(ToCalculate)
-	model.savesettingsforoutput.append(StrucYuk)
-	model.savesettingsforoutput.append(FinalRGEForTranslation)
-	model.savesettingsforoutput.append(RunSettings)
-	###########################################################################################################################
-	#Cleanup the RGE dictionary so that we can use the result more easily. This consists in defining a Function for each symbol
-	# in classes
-	###########################################################################################################################
-	FuncDefined = {}
-	Subs = []
-	for key,val in model.Classes.items():
-		kkey = ''.join(reg.split('{|}',str(key)))
-		kkeyf = Function(kkey,commutative=False)
-		FuncDefined[key] = kkeyf,Symbol(kkey,commutative=False)
-	#lets get the symbols to replace
-	for yuk in model.ListYukawa + model.ListFM: 
-		#Get the rge
-		rge = [el for el in FinalRGE if yuk in el]
-		if rge == [] :
-			loggingDebug("Could not simplify the expression because all the necessary rges have not been calculated",verbose=RunSettings['vDebug'])
-		else :
-			rge = rge[0]
-			#Get the external symbols
-			#two symbols
-			extsymbs = rge[yuk].replace(model.Classes[yuk](p,q),Integer(1),map=True)[-1].keys()
-			if extsymbs != [] : 
-				extsymbs = extsymbs[0]
-			else :
-				#one symbols
-				extsymbs = rge[yuk].replace(model.Classes[yuk](p),Integer(1),map=True)[-1].keys()
-				if extsymbs != [] :
-					extsymbs = extsymbs[0]
-					Subs.append((extsymbs,FuncDefined[yuk][0](*extsymbs.arg)))
-			Subs.append((Symbol(yuk,commutative=False),FuncDefined[yuk][-1]))
-	RGEs = []
-	for rge in FinalRGE:
-		tp = {}
-		for key,val in rge.items() : 
-			tp[key] = val.subs(Subs)
-		RGEs.append(copy.deepcopy(tp))
+        #Start the actual calculation of the RGEs
+        loggingInfo("Starting the Calculation...\n",verbose=RunSettings['vInfo'])
+        ToCalculate = []
+        #TODO Extend the list to all the contributions
+        if RunSettings['All-Contributions'] :
+                strListLagrangian = '\n\t\t\t\tGauge-Couplings'
+                for el in ListLagrangian :
+                        strListLagrangian += '\n\t\t\t\t' + str(el)
+                loggingInfo("\t\t... with option --All-Contributions including{} ".format(strListLagrangian),verbose=RunSettings['vInfo'])
+                ToCalculate = ['Gauge-Couplings']+[Translation[el]for el in ListLagrangian]
+        else :
+                if RunSettings['Gauge-Couplings']:
+                        ToCalculate.append('Gauge-Couplings')
+                        loggingInfo("\t\t... with option --Gauge-Couplings",verbose=RunSettings['vInfo'])       
+                if RunSettings['Quartic-Couplings']:
+                        ToCalculate.append('Quartic-Couplings')
+                        loggingInfo("\t\t... with option --Quartic-Couplings",verbose=RunSettings['vInfo'])     
+                if RunSettings['Yukawas']:
+                        ToCalculate.append('Yukawas')
+                        loggingInfo("\t\t... with option --Yukawas",verbose=RunSettings['vInfo'])       
+                if RunSettings['ScalarMass']:
+                        ToCalculate.append('ScalarMass')
+                        loggingInfo("\t\t... with option --ScalarMass",verbose=RunSettings['vInfo'])
+                if RunSettings['FermionMass']:
+                        ToCalculate.append('FermionMass')
+                        loggingInfo("\t\t... with option --FermionMass",verbose=RunSettings['vInfo'])
+                if RunSettings['Trilinear']:
+                        ToCalculate.append('Trilinear')
+                        loggingInfo("\t\t... with option --Trilinear",verbose=RunSettings['vInfo'])
+        #To store the Final Result
+        FinalRGEdic = {}
+        FinalRGE = []
+        for rge in ToCalculate : 
+                temp = Translate(rge,model,RunSettings)
+                FinalRGEdic[rge] = temp
+                FinalRGE.append(temp)
+        FinalRGEForTranslation = copy.deepcopy(FinalRGEdic)
+        FinalRGEdic = FinalRGEdic.values()
+        loggingCritical(" \t\t...Calculation done.",verbose=RunSettings['vCritical'])   
+        #Copy the settings in model for simplicity
+        model.savesettingsforoutput.append(ToCalculate)
+        model.savesettingsforoutput.append(StrucYuk)
+        model.savesettingsforoutput.append(FinalRGEForTranslation)
+        model.savesettingsforoutput.append(RunSettings)
+        ###########################################################################################################################
+        #Cleanup the RGE dictionary so that we can use the result more easily. This consists in defining a Function for each symbol
+        # in classes
+        ###########################################################################################################################
+        FuncDefined = {}
+        Subs = []
+        for key,val in model.Classes.items():
+                kkey = ''.join(reg.split('{|}',str(key)))
+                kkeyf = Function(kkey,commutative=False)
+                FuncDefined[key] = kkeyf,Symbol(kkey,commutative=False)
+        #lets get the symbols to replace
+        for yuk in model.ListYukawa + model.ListFM: 
+                #Get the rge
+                rge = [el for el in FinalRGE if yuk in el]
+                if rge == [] :
+                        loggingDebug("Could not simplify the expression because all the necessary rges have not been calculated",verbose=RunSettings['vDebug'])
+                else :
+                        rge = rge[0]
+                        #Get the external symbols
+                        #two symbols
+                        extsymbs = rge[yuk].replace(model.Classes[yuk](p,q),Integer(1),map=True)[-1].keys()
+                        if extsymbs != [] : 
+                                extsymbs = extsymbs[0]
+                        else :
+                                #one symbols
+                                extsymbs = rge[yuk].replace(model.Classes[yuk](p),Integer(1),map=True)[-1].keys()
+                                if extsymbs != [] :
+                                        extsymbs = extsymbs[0]
+                                        Subs.append((extsymbs,FuncDefined[yuk][0](*extsymbs.arg)))
+                        Subs.append((Symbol(yuk,commutative=False),FuncDefined[yuk][-1]))
+        RGEs = []
+        for rge in FinalRGE:
+                tp = {}
+                for key,val in rge.items() : 
+                        tp[key] = val.subs(Subs)
+                RGEs.append(copy.deepcopy(tp))
 
-	#Importing the requesting modules
-	from ToMathematica import TranslateToMathematica
-	from ExportBetaFunction import ExportBetaFunction,ExportBetaToCpp
-	from latexRGEs import writeLatexOutput
+        #Importing the requesting modules
+        from ToMathematica import TranslateToMathematica
+        from ExportBetaFunction import ExportBetaFunction,ExportBetaToCpp
+        from latexRGEs import writeLatexOutput
 
-	#############
-	#LateX output
-	#############
+        #############
+        #LateX output
+        #############
 
-	if RunSettings['LatexOutput'] :
-		loggingInfo("\nWriting a latex file `{}` .".format(RunSettings['Results']+'/'+ RunSettings['LatexFile']),verbose=RunSettings['vInfo'])
-		#Call the writeLateX function
-		writeLatexOutput(RunSettings,FinalRGE,model,ToCalculate)
+        if RunSettings['LatexOutput'] :
+                loggingInfo("\nWriting a latex file `{}` .".format(RunSettings['Results']+'/'+ RunSettings['LatexFile']),verbose=RunSettings['vInfo'])
+                #Call the writeLateX function
+                writeLatexOutput(RunSettings,FinalRGE,model,ToCalculate)
 
-	###################
-	#Mathematica Output
-	###################
-	if RunSettings['ToM']:
-		loggingInfo("Writing a txt to Mathematica file `{}`.".format(RunSettings['Results'] + '/' + RunSettings['ToMF']),verbose=RunSettings['vInfo'])
-		AllMathematicaRGEs = []
-		Dimension = []
-		for iel,el in enumerate(FinalRGE):
-			tp = TranslateToMathematica(el,'{}_{}'.format(RunSettings['Results']+'/'+RunSettings['ToMF'],ToCalculate[iel]),ToCalculate[iel],model)
-			AllMathematicaRGEs.append(tp[0])
-			Dimension.append(tp[1])
-		f = open(RunSettings['Results'] + '/' + RunSettings['ToMF'].split('.txt')[0] +'_numerics.m','w')
-		Dimension = 'DimensionParameter={{{}}};\n'.format(','.join(flatten(Dimension)))
-		AllMathematicaRGEs = 'AllRGEs={{{}}}'.format(','.join(flatten(AllMathematicaRGEs)))
-		f.write(Dimension)
-		f.write('\n')
-		f.write(AllMathematicaRGEs)
-		f.close()
+        ###################
+        #Mathematica Output
+        ###################
+        if RunSettings['ToM']:
+                loggingInfo("Writing a txt to Mathematica file `{}`.".format(RunSettings['Results'] + '/' + RunSettings['ToMF']),verbose=RunSettings['vInfo'])
+                AllMathematicaRGEs = []
+                Dimension = []
+                for iel,el in enumerate(FinalRGE):
+                        tp = TranslateToMathematica(el,'{}_{}'.format(RunSettings['Results']+'/'+RunSettings['ToMF'],ToCalculate[iel]),ToCalculate[iel],model)
+                        AllMathematicaRGEs.append(tp[0])
+                        Dimension.append(tp[1])
+                f = open(RunSettings['Results'] + '/' + RunSettings['ToMF'].split('.txt')[0] +'_numerics.m','w')
+                Dimension = 'DimensionParameter={{{}}};\n'.format(','.join(flatten(Dimension)))
+                AllMathematicaRGEs = 'AllRGEs={{{}}}'.format(','.join(flatten(AllMathematicaRGEs)))
+                f.write(Dimension)
+                f.write('\n')
+                f.write(AllMathematicaRGEs)
+                f.close()
 
-	##############
-	#Pickle Output
-	##############
-	if RunSettings['Pickle'] :
-		try :
-			fPickle = open('{}'.format(RunSettings['Results'] + '/' + RunSettings['PickleFile']),'w')			
-		except :
-			loggingCritical('ERROR while opening the pickle output file `{}`.'.format(fPickle),verbose=RunSettings['vCritical'])
-		try : 
-			#create a string of the result
-			strres = [str(el).replace('Dagger','adjoint') for el in RGEs]
-			strsettings = ([str(el) for el in model.ListYukawa],
-										[str(el) for el in model.ListFM],
-										[str(el) for el in model.ListTri],
-										[str(el) for el in model.ListLbd],
-										[str(el) for el in model.ListScM],
-										[str(el[-1]) for el in model.ListGroups],
-										[str(el[0]) for el in model.GaugeGroups],
-										[str(el) for el in model.Particles.keys()],
-										[str(el)+'_f' for el in model.Particles.keys()]#for the indices of the generations
-										)
-			pickle.dump([strres,strsettings,'Generated by PyR@TE for {}.'.format(model._Name)],fPickle)
-			fPickle.close()
-			loggingInfo("\nWriting a pickle output file `{}`.".format(RunSettings['PickleFile']),verbose=RunSettings['vInfo'])
-		except :
-			loggingCritical('ERROR while storing the pickle output file.',verbose=RunSettings['vCritical'])
+        ##############
+        #Pickle Output
+        ##############
+        if RunSettings['Pickle'] :
+                try :
+                        fPickle = open('{}'.format(RunSettings['Results'] + '/' + RunSettings['PickleFile']),'w')                       
+                except :
+                        loggingCritical('ERROR while opening the pickle output file `{}`.'.format(fPickle),verbose=RunSettings['vCritical'])
+                try : 
+                        #create a string of the result
+                        strres = [str(el).replace('Dagger','adjoint') for el in RGEs]
+                        strsettings = ([str(el) for el in model.ListYukawa],
+                                                                                [str(el) for el in model.ListFM],
+                                                                                [str(el) for el in model.ListTri],
+                                                                                [str(el) for el in model.ListLbd],
+                                                                                [str(el) for el in model.ListScM],
+                                                                                [str(el[-1]) for el in model.ListGroups],
+                                                                                [str(el[0]) for el in model.GaugeGroups],
+                                                                                [str(el) for el in model.Particles.keys()],
+                                                                                [str(el)+'_f' for el in model.Particles.keys()]#for the indices of the generations
+                                                                                )
+                        pickle.dump([strres,strsettings,'Generated by PyR@TE for {}.'.format(model._Name)],fPickle)
+                        fPickle.close()
+                        loggingInfo("\nWriting a pickle output file `{}`.".format(RunSettings['PickleFile']),verbose=RunSettings['vInfo'])
+                except :
+                        loggingCritical('ERROR while storing the pickle output file.',verbose=RunSettings['vCritical'])
 
-	########################
-	#Python numerical Output
-	########################
-	if RunSettings['Export'] and Check :
-		loggingInfo("Exporting the results to a python function...",verbose=RunSettings['vInfo'])
-		pythonoutput = ExportBetaFunction(model,FinalRGEForTranslation,RunSettings,StrucYuk)
-		loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
-		loggingInfo("Exporting the results to a c++ function...",verbose=RunSettings['vInfo'])
-		ExportBetaToCpp(pythonoutput,'BetaFunction{}.cpp'.format(model._Name))
-		loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
-	loggingCritical('End of the run.',verbose = RunSettings['vCritical'])
-	#mv the logging into results
-	os.system('mv {} {}'.format(RunSettings['LogFile'],RunSettings['Results']))
+        ########################
+        #Python numerical Output
+        ########################
+        if RunSettings['Export'] and Check :
+                loggingInfo("Exporting the results to a python function...",verbose=RunSettings['vInfo'])
+                pythonoutput = ExportBetaFunction(model,FinalRGEForTranslation,RunSettings,StrucYuk)
+                loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
+                loggingInfo("Exporting the results to a c++ function...",verbose=RunSettings['vInfo'])
+                ExportBetaToCpp(pythonoutput,'BetaFunction{}.cpp'.format(model._Name))
+                loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
+        loggingCritical('End of the run.',verbose = RunSettings['vCritical'])
+        #mv the logging into results
+        os.system('mv {} {}'.format(RunSettings['LogFile'],RunSettings['Results']))

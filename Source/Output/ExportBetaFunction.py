@@ -1,7 +1,6 @@
 try :
         import sys
         import os
-        import pudb
         import platform
         import string as st
         cwd = os.getcwd()
@@ -294,7 +293,6 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
         Tocpp = [reg.sub(r'np.transpose\(([^\)]*)\)','\\1T',el)for el in Tocpp]
         Tocpp = [reg.sub(r'np.trace','trace',el) for el in Tocpp]
         #Trace ^2 it does happen !
-        pudb.set_trace()
         Tocpp = [reg.sub(r'(.)\*\*\)(.*?)ecart',')\\1,)\\2ecart(wop',el[::-1])[::-1] for el in Tocpp]
         #kappa ^2
         Tocpp = [reg.sub(r'\*kappa\*\*(.)','*pow(kappa,\\1)',el) for el in Tocpp]
