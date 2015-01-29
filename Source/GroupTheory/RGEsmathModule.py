@@ -517,13 +517,13 @@ def analyseterm(term,structure,model) :
 	#if we are in trace then all the indices are summed while if we are out of trace only the exterior are not
 	#When there is a scalar product encounter it can happen that only one index is left
 	if len(structure) == 0 : #we are dealing with scalars just return the multiplication
-		if str(type(term[0])) == conjugate and str(list(term[0].atoms())[0]) in model.Classes :
+		if str(type(term[0])) == 'conjugate' and str(list(term[0].atoms())[0]) in model.Classes :
 			#term[0] = model.Classes[str(list(term[0].atoms())[0])](list(term[0].atoms())[0]).conjugate()
 			term[0] = Symbol(str(list(term[0].atoms())[0]),commutative=True)
 		else :
 			#term[0] = model.Classes[str(term[0])](term[0]) if str(term[0]) in model.Classes else term[0]
 			term[0] = Symbol(str(term[0]),commutative=True)#just to be on the safe side
-		if str(type(term[1])) == conjugate and str(list(term[1].atoms())[0]) in model.Classes :
+		if str(type(term[1])) == 'conjugate' and str(list(term[1].atoms())[0]) in model.Classes :
 			term[1] = Symbol(str(list(term[1].atoms())[0]),commutative=True).conjugate()
 			#term[1] = model.Classes[str(list(term[1].atoms())[0])](list(term[0].atoms())[0]).conjugate()
 		else :
@@ -549,9 +549,9 @@ def analyseterm(term,structure,model) :
 			return SP(term[0].transpose(),term[1]).update()#Transpose to get rid of the dagger
 		elif not(str(type(term[0])) == 'Dagger') and str(type(term[1])) == 'Dagger' : 
 			return MatM((term[0],term[1]),structure[0][0],structure[1][0]).update()
-		elif str(type(term[0])) == conjugate and str(type(term[1])) == 'transpose' : 
+		elif str(type(term[0])) == 'conjugate' and str(type(term[1])) == 'transpose' : 
 			return MatM((term[0],term[1]),structure[0][0],structure[1][0]).update()
-		elif str(type(term[0])) == 'transpose' and str(type(term[1])) == conjugate :
+		elif str(type(term[0])) == 'transpose' and str(type(term[1])) == 'conjugate' :
 			return SP(term[0].transpose(),term[1]).update()
 		elif type(term[0]) == MatM and type(term[1]) != MatM :
 			if str(type(term[1])) !='Dagger' and str(type(term[1])) != 'transpose'  : 

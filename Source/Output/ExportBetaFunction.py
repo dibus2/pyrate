@@ -280,7 +280,7 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
         Tocpp = [reg.sub(r'np.conjugate\(np.transpose\((y\[.{1,2}\])\)\)','\\1',el) for el in Tocpp]
         ################
         #"Hermitian"
-        Tocpp = [reg.sub(r'np.transpose\(np.conjugate\(([^\)]*)\)\)','conj(\\1)',el) for el in Tocpp]
+        Tocpp = [reg.sub(r'np.transpose\(np.conjugate\(([^\)]*)\)\)','\\1hc',el) for el in Tocpp]
         Tocpp = [reg.sub(r'np.conjugate\(np.transpose\(([^\)]*)\)\)','\\1hc',el) for el in Tocpp]
         #Conjugate
         #################
