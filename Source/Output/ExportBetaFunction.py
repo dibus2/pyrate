@@ -303,7 +303,7 @@ def ExportBetaToCpp(FileNumpyBeta,settings={}):
         Tocpp = [reg.sub(r'\/([0-9]+)','/\\1.0',el) for el in Tocpp]
         #Output of the beta function has to copied into f[]
         #Watch out in armadillo one must use regular brackets to access matrix elements !!
-        TocppF=sum(sum([[['beta{}({},{})'.format(elem[0],i,j) for j in range(int(elem[1]))]for i in range(int(elem[2]))] for elem in Yuks],[]),[])
+        TocppF=sum(sum([[['beta{}({},{})'.format(elem[0],j,i) for j in range(int(elem[1]))]for i in range(int(elem[2]))] for elem in Yuks],[]),[])
         TocppF += names
         LabelRGEs = ["{}".format(el) for el in TocppF]
         TocppF = ["f[{}] = {};".format(iel,el) for iel,el in enumerate(TocppF)]
