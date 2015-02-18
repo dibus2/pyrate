@@ -71,6 +71,7 @@ class Idbquerry(cmd.Cmd):
     def extractinfo(self):
         self.gaugegroupimplemented = self.db.keys()
         self.gaugegroupimplemented.remove('date')
+        self.gaugegroupimplemented = [str(el) for el in self.gaugegroupimplemented]
 
     def do_prompt(self,line):
         "change the interactive prompt"
@@ -81,14 +82,19 @@ class Idbquerry(cmd.Cmd):
         print(output)
         self.last_output = output
 
-    def do_Casimir(self,*args):
+    def do_Casimir(self,line):
+        args = line.split(' ')
         try :
-            if len(args[0]) == 2 :
-                group,irrep = args[0]
+            if len(args) == 3 and args[0] =='SU2':
+                args[1] = line[4:]
+                args.pop(-1)
+                #then most likely the user put a space in the True
+            if len(args) == 2 :
+                group,irrep = args
                 if group and irrep :
                     if group in self.db:
-                        if eval(irrep) in self.db[group]['Casimir']:
-                            print self.db[group]['Casimir'][eval(irrep)]
+                        if tuple(eval(irrep)) in self.db[group]['Casimir']:
+                            print self.db[group]['Casimir'][tuple(eval(irrep))]
                         else :
                             raise IdbquerryMissingArgument('irrep')
                     else :
@@ -98,25 +104,41 @@ class Idbquerry(cmd.Cmd):
         except IdbquerryMissingArgument:
             pass
 
-#Does not work Fix it !
-
     def complete_Casimir(self,text,line,begidx,endidx):
         #need to split it in two
-        pudb.set_trace()
-        if len(line.split(' ')) >=2 and line.split(' ')[1] in self.gaugegroupimplemented:
-            completions = [f for f in self.db[text]['DimToDynkin'].values() if f.startswith(text.split(' ')[1])]
+        ls = line.split(' ')
+        if len(ls) == 3 : 
+            if not(ls[1] in self.db):
+                completions = ls[1]+ls[2]
+            else :
+                if ls[2] == '':
+                    completions = [str(list(f)) for f in self.db[ls[1]]['Casimir'].keys()]
+                else :
+                    completions = [str(list(f)) for f in self.db[ls[1]]['Casimir'].keys() if str(list(f)).startswith(text)]
+        elif len(ls) == 2 : 
+            if ls[1] == '' :
+                completions = self.gaugegroupimplemented
+            else :
+                completions = [f for f in self.gaugegroupimplemented if f.startswith(text)]
         else :
             completions = self.gaugegroupimplemented
         return completions
-#Always returns SU
-#####
 
 
+
+        #if len(ls) >= 3 and ls[1] in self.gaugegroupimplemented:
+        #    completions = [str(f) for f in self.db[ls[1]]['Casimir'].keys() if str(f).startswith(ls[2])]
+        #elif len(ls) >=2 and ls[1] in self.gaugegroupimplemented:
+        #    completions = [str(ls[1])+' '+ str(f) for f in self.db[ls[1]]['Casimir'].keys()]
+        #else :
+        #    completions = self.gaugegroupimplemented
         
 
-    def parseline(self,line):
-        parsed = line.split(' ')
-        return parsed[0],parsed[1:],line
+#    def parseline(self,line):
+#        parsed = line.split(' ')
+#        return parsed[0],parsed[-1],line
+
+
 
 
     def do_EOF(self,line):
