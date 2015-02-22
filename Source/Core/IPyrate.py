@@ -18,7 +18,6 @@ try :
     import pickle
 except : 
     exit("Error while loading one of the modules: `cmd, os, readline, rlcompleter, pickle`")
-import pudb
 
 
 class IdbquerryMissingArgument(Warning):
@@ -71,6 +70,15 @@ class IdbquerryUnkownContraction(Warning):
 
 
 
+class IdbquerryInconsistentIrreps(Warning):
+    """
+    Wrong format of arguments
+    """
+    def __init__(self):
+        print("The irrep should all be of the same gauge group i.e. have the same size.")
+
+
+
 class Idbquerry(cmd.Cmd):
 
     prompt = 'Querry: '
@@ -102,6 +110,12 @@ class Idbquerry(cmd.Cmd):
             exit("Error while loading the database")
         return cmd.Cmd.cmdloop(self,'')
 
+    def do_exit(self,line):
+        exit("Exiting the interactive mode.")
+
+    def do_quit(self,line):
+        exit("Exiting the interactive mode.")
+
     def extractinfo(self):
         self.gaugegroupimplemented = self.db.keys()
         self.gaugegroupimplemented.remove('date')
@@ -119,7 +133,6 @@ class Idbquerry(cmd.Cmd):
     def do_Invariants(self,line):
         #returns the invariant for the given contraction and gauge group
         ls = line.split(' ')
-        pudb.set_trace()
         try :
             if len(ls) == 1 and ls[0] == '':
                 raise IdbquerryMissingArgument('gauge')
@@ -138,6 +151,10 @@ class Idbquerry(cmd.Cmd):
                     raise IdbquerryWrongFormatMultipleIrreps
                 if not(ls[0] in self.gaugegroupimplemented):
                     raise IdbquerryMissingArgument('gauge')
+                if 'SU' in ls[0] :
+                    if not(all([len(el) == int(ls[0][-1])-1 for el in ls[1]])):
+                        raise IdbquerryInconsistentIrreps()
+
                 if whichinvariant == 2 : 
                     if not(ls[1] in self.db[ls[0]]['Bilinear']) :
                         raise IdbquerryMissingArgument('irrep')
@@ -155,7 +172,7 @@ class Idbquerry(cmd.Cmd):
                         print(self.construct_contraction(self.db[ls[0]]['Quartic'][ls[1]],4))
                 else :
                     raise IdbquerryUnkownContraction()
-        except (IdbquerryMissingArgument,IdbquerryWrongFormatMultipleIrreps,IdbquerryWrongFormatNbArg,IdbquerryUnkownContraction):
+        except (IdbquerryMissingArgument,IdbquerryWrongFormatMultipleIrreps,IdbquerryWrongFormatNbArg,IdbquerryUnkownContraction,IdbquerryInconsistentIrreps):
             pass
                                    
     def construct_contraction(self,contraction,whichinvariant):
@@ -299,7 +316,6 @@ class Idbquerry(cmd.Cmd):
                 raise IdbquerryMissingArgument()
         except IdbquerryMissingArgument:
             pass
-
 
     def do_EOF(self,line):
         return True
