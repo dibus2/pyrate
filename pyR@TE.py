@@ -122,54 +122,6 @@ if 'interactivedb' in RunSettings  and RunSettings['interactivedb'] != '':
     loggingInfo("\nExiting the interactive mode.",verbose=True)
     exit()
 
-#if 'database' in RunSettings and RunSettings['database'] != '': 
-#DEPRECATED
-#    try :
-
-#        import pickle as pkl
-#    except ImportError as err: 
-#        exit("Error while loading `pickle` module.")
-#    try : 
-#        RunSettings['database'] = eval(RunSettings['database'])
-#    except :
-#        exit("WARNING, impossible to interpret the input make sure the gauge group is within quotes 'SU2'")
-#    if type(RunSettings['database'][0]) != list :
-#        RunSettings['database'] = [RunSettings['database']]
-#        #load database
-#    try :
-#        localdir = os.path.realpath(os.path.dirname(__file__))
-#        fdb = open(localdir+'/Source/GroupTheory/CGCs.pickle','r')
-#        db = pkl.load(fdb)
-#        fdb.close()
-#    except :
-#        exit("Error while loading the database from: `{}`".format(localdir+'/Source/GroupTheory/CGCs.pickle'))
-#    translatetokey = {2: 'Bilinear', 3 :'Trilinear', 4: 'Quartic'}
-#    try :
-#        print("The following CGCs are given assuming that all the fields are different. It might be that some of them vanish in the case where Fi=F_j:\n")
-#        for group,val in RunSettings['database']:
-#            if group in db :
-#                #length querry
-#                lqr = len(val)
-#                if translatetokey[lqr] in db[group] and val in db[group][translatetokey[lqr]]:
-#                    if type(db[group][translatetokey[lqr]][val][0]) == tuple :
-#                        contraction = [str(db[group][translatetokey[lqr]][val])]
-#                    else :
-#                        contraction = [str(el) for el in db[group][translatetokey[lqr]][val]]
-#                    print("{0} in {3} leads to {1} singlets :{2}\n\n.".format(val,len(contraction),'\n'.join(contraction),group))
-#                else :
-#                    exit("error contraction {} of {} is not in the database.".format(val,group))
-#            else :
-#                exit("error group {} is not in the database.".format(group))
-#        print("where the n-1 first numbers correspond to the index of the fields and the last one is the overal factor in the decomposition e.g. a[i]b[j]c[k]d[l] c_ijkl ->(i,j,k,l,c_ijkl)")
-#        exit()
-#    except ValueError : 
-#        exit("error, check the format of the querry: [Group,(F1,F2,..)] in `{}`".format(RunSettings['database']))
-            
-
-                
-
-    
-
 #Set the skipping terms
 if 'Skip' in RunSettings :
 	if type(RunSettings['Skip']) == str :

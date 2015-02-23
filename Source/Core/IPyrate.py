@@ -6,6 +6,7 @@ It allows one to check efficiently what is implemented what is not and how to sp
 """
 
 try :
+    import pudb
     import cmd
     import os
     import readline
@@ -99,7 +100,7 @@ class Idbquerry(cmd.Cmd):
             #load the database
             print("loading database of CGCs...")
             localdir = os.path.realpath(os.path.dirname(__file__))
-            fdb = open(localdir+'/../GroupTheory/CGCs.pickle','r')
+            fdb = open(localdir+'/../GroupTheory/CGCsnew.pickle','r')
             self.db = pickle.load(fdb)
             fdb.close()
             self.extractinfo()
@@ -179,15 +180,19 @@ class Idbquerry(cmd.Cmd):
         """
         contstruct a human readable output of the contraction a la susyno
         """
-        if whichinvariant == 4 :
-            contraction = sum([self.a[i]*self.b[j]*self.c[k]*self.d[l]*oo for (i,j,k,l,oo) in contraction])
-        elif whichinvariant == 3 :
-            contraction = sum([self.a[i]*self.b[j]*self.c[k]*oo for (i,j,k,oo) in contraction])
-        elif whichinvariant == 2 :
-            contraction = sum([self.a[i]*self.b[j]*oo for (i,j,oo) in contraction])
-        else :
-            raise IdbquerryUnkownContraction
-        return contraction
+        Contraction = ""
+        if type(contraction[0]) != list :
+            contraction =[contraction]
+        for ii,ell in enumerate(contraction):
+            if whichinvariant == 4 :
+                Contraction += "{} invariant:\n\t{}\n\n".format(ii+1,sum([self.a[i]*self.b[j]*self.c[k]*self.d[l]*oo for (i,j,k,l,oo) in ell]))
+            elif whichinvariant == 3 :
+                Contraction += "{} invariant:\n\t{}\n\n".format(ii+1,sum([self.a[i]*self.b[j]*self.c[k]*oo for (i,j,k,oo) in ell]))
+            elif whichinvariant == 2 :
+                Contraction += "{} invariant:\n\t{}\n\n".format(ii+1,sum([self.a[i]*self.b[j]*oo for (i,j,oo) in ell]))
+            else :
+                raise IdbquerryUnkownContraction
+        return Contraction
 
     
     def do_Dynkin(self,line):
