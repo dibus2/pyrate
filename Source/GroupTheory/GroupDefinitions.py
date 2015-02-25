@@ -23,6 +23,7 @@ class SUn(object):
 		self.Fond = db[self._absname]['Fond']
 		self.Adj = db[self._absname]['Adj']
 		self.fabc = self.GetStructureConstants()
+                #self.fabc = db[self._absname]['Struc']
 		#transformation
 		self.fabc = (tuple(flatten(self.fabc)),self.fabc.shape)
 		#Convert the  matrices into tuples that can be passed to the symbolic functions

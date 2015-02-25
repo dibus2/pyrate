@@ -116,7 +116,7 @@ else :
 	RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = False,False,True
 
 #Interrogate the database
-if 'interactivedb' in RunSettings  and RunSettings['interactivedb'] != '':
+if 'interactivedb' in RunSettings  and RunSettings['interactivedb'] :
     from IPyrate import *
     Idbquerry().cmdloop()
     loggingInfo("\nExiting the interactive mode.",verbose=True)
@@ -228,10 +228,14 @@ else :
 						# 1) Only one number and Fields is a simple list ->Ok
 						#	2) Only one number and Fields is a list of lsit -> all the same norm
 						#	3) List of numbers and Fields is a list of list -> Ok
+                                                #ONLY in this case one can pass CGCs dictionary
 						if 'Norm' in ll1 : 
 							if type(ll1['Fields'][0]) == list and (type(ll1['Norm']) == str or type(ll1['Norm']) == int) : 
 								#copy it this is case 2) 
-								yamlSettings['Potential'][lab][ill1] = {'Fields' : ll1['Fields'], 'Norm': [ll1['Norm']]*len(ll1['Fields'])}
+                                                                if 'CGCs' in ll1 :
+    								    yamlSettings['Potential'][lab][ill1] = {'Fields' : ll1['Fields'], 'Norm': [ll1['Norm']]*len(ll1['Fields']),'CGCs': ll1['CGCs']}
+                                                                else :
+    								    yamlSettings['Potential'][lab][ill1] = {'Fields' : ll1['Fields'], 'Norm': [ll1['Norm']]*len(ll1['Fields'])}
 							elif type(ll1['Fields'][0]) == list and type(ll1['Norm']) == list : 
 								pass
 							elif type(ll1['Fields'][0]) == str and (type(ll1['Norm']) == str or type(ll1['Norm']) == int):
@@ -242,8 +246,15 @@ else :
 						else :
 							loggingInfo("Warning no Norm specify for {}, setting it to `1`".format(ll1),verbose=RunSettings['vInfo'])
 							if type(ll1['Fields'][0]) == list : 
-								yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': [1]*len(ll1['Fields'])}
+                                                            if 'CGCs' in ll1 :
+                                                                yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': [1]*len(ll1['Fields']),'CGCs': ll1['CGCs']}
+                                                            else :
+                                                                yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': [1]*len(ll1['Fields'])}
+
 							else :
+                                                            if 'CGCs' in ll1:
+                                                                yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': 1, 'CGCs': ll1['CGCs']}
+                                                            else :
 								yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': 1}
 
 	#import the module

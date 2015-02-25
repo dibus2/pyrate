@@ -375,6 +375,7 @@ class Model(object) :
 				#get the quantum numbers
 				Ppi = [[self.Particles[valfields] for valfields in val['Fields']]]
 			#2. Expand the higgs into reals and update the list 
+			#TODO CONTRACTION IF HAVE TO FIND A WAY OF CREATING a NEW INSTANCE FOR EACH CONTRACTION I think here would be good
 			ExpandedTerm = self.ExpandPotential(Ppi,translation[term],[term,el])
 			FinalTerm = []
 			TempFinalTerm = {}
@@ -384,7 +385,6 @@ class Model(object) :
 				FullSinglet[ill] = False
 				for subll in ll : 
 					Factor = [] 
-					
 					for g in self.NonUGaugeGroups:
 						self.GetContractedParticles(ContractedParticles,g[0],g[1],Ppi[ill])
 						#Get the contraction factor

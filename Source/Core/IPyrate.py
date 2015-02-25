@@ -90,8 +90,7 @@ class Idbquerry(cmd.Cmd):
     last_output = ''
     a,b,c,d = map(IndexedBase,['a','b','c','d'])
 
-
-    intro = "=========================================================================================================\n\t\t Interactive PyR@TE mode to querry the database.\n\t\t The database is built on Susyno v3. February 17th.\n\t\t IMPORTANT: All the results are therefore bounded by the implicit definitions of Susyno\n\t\t to which we refer the user for further information. \n\t\t Florian Lyonnet: flyonnet@smu.edu 2015\n=========================================================================================================\n"
+    intro = "=========================================================================================================\n\t\t Interactive PyR@TE: mode to querry the database.\n\t\t The database is built on Susyno v3. February 17th.\n\t\t IMPORTANT: All the results are therefore bounded by the implicit definitions of Susyno\n\t\t to which we refer the user for further information. \n\t\t Florian Lyonnet: flyonnet@smu.edu 2015\n=========================================================================================================\n"
 
     def cmdloop(self, intro=None):
         try :
@@ -152,7 +151,7 @@ class Idbquerry(cmd.Cmd):
                     raise IdbquerryWrongFormatMultipleIrreps
                 if not(ls[0] in self.gaugegroupimplemented):
                     raise IdbquerryMissingArgument('gauge')
-                if 'SU' in ls[0] :
+                if 'SU' in ls[0] and ls[0] != 'SU2':
                     if not(all([len(el) == int(ls[0][-1])-1 for el in ls[1]])):
                         raise IdbquerryInconsistentIrreps()
 

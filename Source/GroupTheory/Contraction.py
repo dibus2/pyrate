@@ -10,6 +10,7 @@ try :
 	import copy
 	from itertools import permutations,combinations
 	import os
+        import pudb
 except ImportError :
 	loggingCritical("Error while loading modules")
 try :
@@ -47,7 +48,9 @@ fdb.close()
 
 def GetContractionFactor(dic,Group):
 		"""Seeks the contraction Factor for the contracted particles in dic under the name group.
-			Works with any number of fields, at least 2,3,4"""
+			Works with any number of fields, at least 2,3,4.
+                       F.: Modified February 22 2015 in order to deal with multiple singlets. Actually, this function
+                       is called on only one place."""
 		#Translate the Qnb into Dynkin labels if given by their dim
 		key = []
 		for part in dic[Group[0]] :
@@ -57,9 +60,7 @@ def GetContractionFactor(dic,Group):
 		if not(len(key) in Match ):
 			loggingCritical("This term is nor a Bilinear, Trilinear nor Quartic : {}\nCheck your model file some term might not be gauge invariant.".format(dic[Group[0]]),verbose=True)
 			exit()
-		##take the permutations into account
 		Factor = 0
-		#for per in perm :
 		if tuple(key) in db[Group[1]._absname][Match[len(key)]] :
 			Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
 		else : 
