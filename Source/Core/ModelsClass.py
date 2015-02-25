@@ -749,7 +749,8 @@ class Model(object) :
 			lcNorm = self.Potential[term[0]][term[1]]['Norm']
 		for idelem,elemfields in enumerate(fields):
 			Out,ToDerive,FOut = [],[],[]
-			for iff,f in enumerate(elemfields):
+                        iff = 0#F. The ordering of singlet affects the results because the indices are labelled according to its position counter which is going to be modified during exectution to skip the singlet indices
+			for f in elemfields:
 				Singlet = True if all([f.Qnb[g[0]] == g[1].Dynksinglet for g in self.NonUGaugeGroups]) else False
 				if f.Cplx and not(Singlet): 
 					Out.append([IndexedBase(f.RealPart)[['i{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[['i{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
@@ -758,6 +759,7 @@ class Model(object) :
 					#If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14
 					Out.append([IndexedBase(f.RealPart)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
 					ToDerive.append([IndexedBase(f.RealPart)[[Symbol('dumj{}{}'.format(iff+1,igg))  for igg,g in enumerate(self.NonUGaugeGroups)]],IndexedBase(f.CplxPart)[[Symbol('dumj{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+                                        iff-=1
 				elif not(f.Cplx) and not(Singlet) :
 					Out.append(IndexedBase(f._name)[['i{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]])
 					ToDerive.append([IndexedBase(f._name)[['j{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
@@ -765,6 +767,8 @@ class Model(object) :
 					#If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14
 					Out.append(IndexedBase(f._name)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]])
 					ToDerive.append([IndexedBase(f._name)[[Symbol('dumj{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+                                        iff-=1
+                                iff +=1
 			#Take the cartesian product and remove the permutations from the list
 			ToDerive = removeperms(list(itr.product(*ToDerive)))
 			##If there several singlets we are screwed so we need to declare dummy indices for them
