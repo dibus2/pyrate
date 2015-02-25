@@ -1,3 +1,7 @@
+February 25th 2015:
+Bug Fixed: the singlets position in quartic terms was still influencing the
+results ! 
+
 January 18th:
 Bug fixed introduced in version 1.0.5 when yukawa matrices are not squared.
 
