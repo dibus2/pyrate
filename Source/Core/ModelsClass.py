@@ -1,4 +1,5 @@
 import sys
+import pudb
 sys.path.append('./Source/GroupTheory')
 from GroupDefinitions import *
 from RGEsmathModule import *
@@ -427,6 +428,7 @@ class Model(object) :
                                                 if len(ExpandedTerm) == 1 or ill == 0 :
                                                     IsaValidKey = (tempkey in TempFinalTerm),0
                                                 else :
+                                                    #F.February 2015 In case where there is a sum of terms and the indices are not in 1 to 1 correspondance e.g. (1,2,3)->(2,3,4) (this happes when singlets are in. This function does not work -> Enforce the labeling from 1 to 4 ! see expandpotential function
                                                     IsaValidKey = self.isavalidpermutationkey(tempkey,TempFinalTerm,Factor)
 						if IsaValidKey[0]:
 							TempFinalTerm[IsaValidKey[1]][-1] = TempFinalTerm[IsaValidKey[1]][-1] + IsaValidKey[-1]
@@ -767,26 +769,32 @@ class Model(object) :
 			lcNorm = self.Potential[term[0]][term[1]]['Norm']
 		for idelem,elemfields in enumerate(fields):
 			Out,ToDerive,FOut = [],[],[]
-                        iff = 0#F. The ordering of singlet affects the results because the indices are labelled according to its position counter which is going to be modified during exectution to skip the singlet indices
+                        #F. February 25th There is actually a pretty big flaw here. I need different index count on group basis to skip singlets!!
+                        IndicesCounters,dummyff=[0]*len(self.NonUGaugeGroups),0
 			for f in elemfields:
 				Singlet = True if all([f.Qnb[g[0]] == g[1].Dynksinglet for g in self.NonUGaugeGroups]) else False
 				if f.Cplx and not(Singlet): 
-					Out.append([IndexedBase(f.RealPart)[['i{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[['i{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
-					ToDerive.append([IndexedBase(f.RealPart)[['j{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]],IndexedBase(f.CplxPart)[['j{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+					Out.append([IndexedBase(f.RealPart)[['i{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[['i{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
+					ToDerive.append([IndexedBase(f.RealPart)[['j{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]],IndexedBase(f.CplxPart)[['j{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+                                        #Increment the proper indices
 				elif f.Cplx and Singlet :
 					#If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14
-					Out.append([IndexedBase(f.RealPart)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
-					ToDerive.append([IndexedBase(f.RealPart)[[Symbol('dumj{}{}'.format(iff+1,igg))  for igg,g in enumerate(self.NonUGaugeGroups)]],IndexedBase(f.CplxPart)[[Symbol('dumj{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
-                                        iff-=1
+					Out.append([IndexedBase(f.RealPart)[[Symbol('dumi{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[[Symbol('dumi{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
+					ToDerive.append([IndexedBase(f.RealPart)[[Symbol('dumj{}{}'.format(dummyff+1,igg))  for igg,g in enumerate(self.NonUGaugeGroups)]],IndexedBase(f.CplxPart)[[Symbol('dumj{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+                                        dummyff+=1
 				elif not(f.Cplx) and not(Singlet) :
-					Out.append(IndexedBase(f._name)[['i{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]])
-					ToDerive.append([IndexedBase(f._name)[['j{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+					Out.append(IndexedBase(f._name)[['i{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]])
+					ToDerive.append([IndexedBase(f._name)[['j{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+                                        iff+=1
 				else :
 					#If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14
-					Out.append(IndexedBase(f._name)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]])
-					ToDerive.append([IndexedBase(f._name)[[Symbol('dumj{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
-                                        iff-=1
-                                iff +=1
+					#Out.append(IndexedBase(f._name)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]])
+					#ToDerive.append([IndexedBase(f._name)[[Symbol('dumj{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+					Out.append(IndexedBase(f._name)[[Symbol('dumi{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]])
+					ToDerive.append([IndexedBase(f._name)[[Symbol('dumj{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+                                        dummyff+=1
+                                Toinc = [True if f.Qnb[g[0]] != g[1].Dynksinglet else False for igg,g in enumerate(self.NonUGaugeGroups)]
+                                IndicesCounters = [el+1  if Toinc[iel] else el for iel,el in enumerate(IndicesCounters)]
 			#Take the cartesian product and remove the permutations from the list
 			ToDerive = removeperms(list(itr.product(*ToDerive)))
 			##If there several singlets we are screwed so we need to declare dummy indices for them
@@ -863,9 +871,10 @@ class Model(object) :
         def swapindices(self,Factor,NewInd,ix,new):
             "Swap indices ix,new in Factor"
             for idx, xx in enumerate(NewInd[ix]) :
-                Factor = Factor.subs(xx,'temp')
-                Factor = Factor.subs(NewInd[new][idx],xx)
-                Factor = Factor.subs('temp',NewInd[new][idx])
+                if NewInd[new][idx] != 0 and xx != 0 :
+                    Factor = Factor.subs(xx,'temp')
+                    Factor = Factor.subs(NewInd[new][idx],xx)
+                    Factor = Factor.subs('temp',NewInd[new][idx])
             return Factor
 
 ##				for tterm in TermIdentified : 
