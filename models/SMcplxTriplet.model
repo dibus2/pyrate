@@ -52,17 +52,17 @@ QuarticTerms: {
 # lambda_1 : {Fields : [H,H*,H,H*], Norm : 1/2},
 #This demonstrates how to specify different CGCs combinations to PyR@TE. The numbers refer to the database interactive mode. 
 #One only needs to specify the CGCs to use for the ambiguous ones.
- lambda_T : {Fields: [T,T*,T,T*], Norm: 1/2, CGCs: {'SU2': [1,2]}},
+ lambda_T : {Fields: [T,T*,T,T*], Norm: 1/2, CGCs: {'SU2L': 1}},
 # kappa_T: {Fields: [T,T*,H,H*], Norm: 1}
  },
-ScalarMasses: {
- mu_1 : {Fields : [H,H*], Norm : 1},
- mT : {Fields: [T,T*], Norm: 1/2},
- },
-TrilinearTerms: {
- fH : {Fields: [T*,H,H], Norm: 1/Sqrt(2)},
- },
-FermionMasses : {
- mD : {Fields: [PsiL,PsiRbar], Norm: 1, latex: \m_D},
- }
+#ScalarMasses: {
+# mu_1 : {Fields : [H,H*], Norm : 1},
+# mT : {Fields: [T,T*], Norm: 1/2},
+# },
+#TrilinearTerms: {
+# fH : {Fields: [T*,H,H], Norm: 1/Sqrt(2)},
+# },
+#FermionMasses : {
+# mD : {Fields: [PsiL,PsiRbar], Norm: 1, latex: \m_D},
+# }
 }

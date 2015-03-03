@@ -2,6 +2,7 @@
 """
 Defines the function needed to do the contraction of different fields"""
 from Logging import *
+import pudb
 try :
 	import pickle
 	import time
@@ -43,10 +44,11 @@ except ImportError :
 		exit()
 localdir = os.path.realpath(os.path.dirname(__file__))
 fdb = open(localdir+'/CGCs.pickle','r')
+#fdb = open(localdir+'/CGCsnew.pickle','r')
 db = pickle.load(fdb)
 fdb.close()
 
-def GetContractionFactor(dic,Group):
+def GetContractionFactor(dic,Group,CGCs=0):
 		"""Seeks the contraction Factor for the contracted particles in dic under the name group.
 			Works with any number of fields, at least 2,3,4.
                        F.: Modified February 22 2015 in order to deal with multiple singlets. Actually, this function
@@ -62,7 +64,19 @@ def GetContractionFactor(dic,Group):
 			exit()
 		Factor = 0
 		if tuple(key) in db[Group[1]._absname][Match[len(key)]] :
-			Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
+                        #F. Check wether it is a list of list
+                        if type(db[Group[1]._absname][Match[len(key)]][tuple(key)][0]) == tuple :
+                            if CGCs != 0 :
+                                loggingCritical("WARNING: `CGCs` specified for an invariant which is unique, ignored!",verbose=True)
+    		                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
+                            else :
+    		                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
+                        else :
+                            if CGCs == 0 :
+                                loggingCritical("ERROR, `CGCs` not specified for the invariant `{}` under {} which as several possible contractions to gauge singlet. Please use the interactive mode (started via the option -idb to check which CGC you want to use.".format(key,Group[1]._absname),verbose=True)
+                                exit()
+                            else :
+                                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)][CGCs-1]
 		else : 
 			loggingCritical("The contraction factor for {} {} is not in the db, calculation not implemented yet or the term is not a singlet.".format(key,Group[1]._absname),verbose=True)
 			exit()
