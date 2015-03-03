@@ -14,6 +14,7 @@ import re
 import copy
 import subprocess
 import itertools,functools
+import pudb
 # <codecell>
 
 #open the file as a string do the replacement un put it back before loading it
@@ -104,6 +105,7 @@ for key,val in db['DynkinToDim'].items():
         db[key]['DimToDynkin'][1] = tuple([0]*(int(key.split('SU')[-1])-1))
         db[key]['DynkinToDim'] = copy.deepcopy(val)
         db[key]['DynkinToDim'][tuple([0]*(int(key.split('SU')[-1])-1))] = 0
+pudb.set_trace()
 for key,val in db['Matrices'].items() :
     tp = {}
     tpA = {}
@@ -291,14 +293,16 @@ for group, val in db.items():
 				print "ERROR while determining the structure constants"
 		else :
 			pass
-for group,val in db.items():
-	if group != 'date':
-		del(db[group]['Matrices'])
-		del(db[group]['HBmat'])
-		del(db[group]['HBAmat'])
-		db[group]['Matrices'] = copy.deepcopy(NewMatrix[group])
-		db[group]['HBmat'] = copy.deepcopy(NewHBmatrix[group])
-		db[group]['HBAmat'] = copy.deepcopy(NewAHBmatrix[group])
+
+#I comment the sparse matrices for the moment thats not what is important
+#for group,val in db.items():
+#	if group != 'date':
+#		del(db[group]['Matrices'])
+#		del(db[group]['HBmat'])
+#		del(db[group]['HBAmat'])
+#		db[group]['Matrices'] = copy.deepcopy(NewMatrix[group])
+#		db[group]['HBmat'] = copy.deepcopy(NewHBmatrix[group])
+#		db[group]['HBAmat'] = copy.deepcopy(NewAHBmatrix[group])
 		db[group]['Struc'] = copy.deepcopy(structures[group])
 
 
