@@ -767,7 +767,6 @@ class Model(object) :
 				elif not(f.Cplx) and not(Singlet) :
 					Out.append(IndexedBase(f._name)[['i{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]])
 					ToDerive.append([IndexedBase(f._name)[['j{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
-                                        iff+=1
 				else :
 					#If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14
 					#Out.append(IndexedBase(f._name)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]])

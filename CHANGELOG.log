@@ -1,4 +1,10 @@
 
+Marhch 8th : 
+
+Bug fixed introduced in previous version...Thanks to M. Arshad Momen for
+pointing this out
+
+
 February 25th 2015:
 Bug Fixed: the singlets position in quartic terms was still influencing the
 results ! 
