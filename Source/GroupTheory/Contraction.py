@@ -43,8 +43,8 @@ except ImportError :
 		loggingCritical("\tError while loading sympy. Check the manual for required modules.",verbose=True)
 		exit()
 localdir = os.path.realpath(os.path.dirname(__file__))
-fdb = open(localdir+'/CGCs.pickle','r')
-#fdb = open(localdir+'/CGCsnew.pickle','r')
+#fdb = open(localdir+'/CGCs.pickle','r')
+fdb = open(localdir+'/CGCsnew.pickle','r')
 db = pickle.load(fdb)
 fdb.close()
 
