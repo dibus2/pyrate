@@ -385,9 +385,10 @@ class Model(object) :
 				ContractedParticles = {}
 				FullSinglet[ill] = False
 				for subll in ll : 
-					Factor = [] 
+					Factor = []
 					for g in self.NonUGaugeGroups:
 						self.GetContractedParticles(ContractedParticles,g[0],g[1],Ppi[ill])
+
 						#Get the contraction factor
 						if ContractedParticles[g[0]] != [] : 
                                                         #F. These are modifications for the multiple contraction case
@@ -402,6 +403,7 @@ class Model(object) :
                                                         Factor.append(GetContractionFactor(ContractedParticles,[g[0],g[1]],CGCs=tpCGCs))
 						else :
 							Factor.append((0,))#in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
+                                                #Save Factor for normalizing the CGCs
 					if not(all([cc == (0,) for cc in Factor])) :
 						#For each group plug the indices in the CGCs
 						#The fact that the indices have been generated according to the ordering of self.NonUGaugeGroups and that it s the same for the Factor we now that the indices are in the same order
@@ -620,6 +622,28 @@ class Model(object) :
 		for key2,val2 in self.Combination[term].items():
 			for iv,vv in enumerate(val2):
 				self.Combination[term][key2][iv] = vv[0],vv[1]/ReturnToCalc[key2][1]
+                #F. March 9th 2015 
+                #One has to extract the contribution comming from the CGCs such that it can be normalized to one. This is important since the normalization of the CGCs since Susyno v3 are different.
+                #This has to be done for each one of the terms
+                for ll in ListTerm:
+                    #Get the corresponding term from the potential
+                    tppotentialterm = [el[-1] for el in Return[ll] if el[0] == ReturnToCalc[ll][0]]
+                    assert len(tppotentialterm) != 0
+                    tppotentialterm = tppotentialterm[0]
+                    #split up the contributions and keep only the CGCs i.e. FF terms
+                    coefficient = np.array([functools.reduce(operator.mul,[ell for ell in el.args if type(ell) != FF],1) for el in tppotentialterm.args])
+                    coefficient = coefficient*1/coefficient[0]
+                    tppotentialterm = [functools.reduce(operator.mul,[ell for ell in el.args if type(ell) == FF],1)*norm for el,norm in zip(tppotentialterm.args,coefficient)]
+                    #Create list of substitution
+                    tosubs = tuple(flatten([tuple(zip(ff.indices,gg[1:])) for ff,gg in zip(ReturnToCalc[ll][0],ReturnToCalc[ll][-1])],1))
+                    CGCsnorm = np.array([el.subs(tosubs) for el in tppotentialterm])
+                    #At this stage all the different CGCs should return the same overal factor 
+                    checkCGCsnorm = np.all(CGCsnorm-CGCsnorm[0]==0)
+                    if not(checkCGCsnorm) :
+                        loggingCritical("Error while determining the overall normalization of the CGCs, please contact the author.",verbose=True)
+                    tpaddtoReturnToCalc = list(ReturnToCalc[ll])
+                    tpaddtoReturnToCalc.append(CGCsnorm[0])
+                    ReturnToCalc[ll] = tuple(tpaddtoReturnToCalc)
 		return Return,ReturnToCalc,ListTerm
 
 
@@ -785,7 +809,6 @@ class Model(object) :
 				elif not(f.Cplx) and not(Singlet) :
 					Out.append(IndexedBase(f._name)[['i{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]])
 					ToDerive.append([IndexedBase(f._name)[['j{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
-                                        iff+=1
 				else :
 					#If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14
 					#Out.append(IndexedBase(f._name)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]])
@@ -797,13 +820,16 @@ class Model(object) :
                                 IndicesCounters = [el+1  if Toinc[iel] else el for iel,el in enumerate(IndicesCounters)]
 			#Take the cartesian product and remove the permutations from the list
 			ToDerive = removeperms(list(itr.product(*ToDerive)))
-			##If there several singlets we are screwed so we need to declare dummy indices for them
+			##If there're several singlets we are screwed so we need to declare dummy indices for them
 			Out = (self.translatenorm(lcNorm[idelem])*functools.reduce(operator.mul,[functools.reduce(operator.mul,el,1)  if type(el) == list else el for el in Out],1)).expand()
+#                        FullNormNoCGCs = [ell.args for ell in Out.args]
+#                        FullNormNoCGCs = [functools.reduce(operator.mul,[el for el in ell if type(el) != Indexed],1) for ell in FullNormNoCGCs]
 			#Now we can sum the terms and derive them all together
 			for toderive in ToDerive : 
 				FOut.append([toderive,derivTensor(Out,toderive)])
 			##At this point we have all the derivatives for this term
 			CollectDummy = [[(el,Integer(0)) for el in elem[1].atoms() if len(str(el).split('dum')) != 1] for elem in FOut]
+#			SumFOut.append([[[tuple([xx.subs(tuple(CollectDummy[iel])) for xx in el[0]]),el[1].subs(tuple(CollectDummy[iel]))] for iel,el in enumerate(FOut)],FullNormNoCGCs])
 			SumFOut.append([[tuple([xx.subs(tuple(CollectDummy[iel])) for xx in el[0]]),el[1].subs(tuple(CollectDummy[iel]))] for iel,el in enumerate(FOut)])
 		return SumFOut
         
