@@ -28,8 +28,8 @@ RealScalars: {
 ##########################################################################
 
 CplxScalars: {
-  H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, SU2L: 2, SU3c: 3}},
-  H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: -1/2, SU2L: -2, SU3c: -3}}
+  H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, SU2L: 2, SU3c: 1}},
+  H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: -1/2, SU2L: -2, SU3c: 1}}
 }
 
 Potential: {
@@ -44,7 +44,7 @@ Yukawas:{
 #  'Y_{e}': {Fields: [Lbar,eR,H], Norm: 1}
  },
 QuarticTerms: {
- '\Lambda_1' : {Fields : [H,H*,H*,H], Norm : 1/11, CGCs: {SU2L: 1,SU3c: 1}},
+ '\Lambda_1' : {Fields : [H,H*,H*,H], Norm : 1/2, CGCs: {SU2L: 1,SU3c: 1}},
  },
 ScalarMasses: {
 # '\mu_1' : {Fields : [H*,H], Norm : 1}
