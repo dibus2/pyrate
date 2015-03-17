@@ -394,12 +394,12 @@ class Model(object) :
                                                         #F. These are modifications for the multiple contraction case
                                                         tpCGCs = 0
                                                         if ('CGCs' in val) and (g[0] in val['CGCs']) :
-                                                            #for now exclude the non int case
-                                                            if type(val['CGCs'][g[0]]) != int :
-                                                                loggingCritical("Not implemented yet: the `CGCs` option must be an int",verbose=True)
+                                                            #It can be a list or an int
+                                                            if not(type(val['CGCs'][g[0]]) == list):
+                                                                loggingCritical("Error the `CGCs` option must be an int or a list",verbose=True)
                                                                 exit()
                                                             else :
-                                                                tpCGCs = val['CGCs'][g[0]]
+                                                                tpCGCs = val['CGCs'][g[0]][ill]
                                                         Factor.append(GetContractionFactor(ContractedParticles,[g[0],g[1]],CGCs=tpCGCs))
 						else :
 							Factor.append((0,))#in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
@@ -744,15 +744,15 @@ class Model(object) :
 							loggingCritical("Error, the FermionMasses {} does not contain two fermions : {}".format(ff,subxpr),verbose=True)
 							exit()
 
-		for key,term in Settings['Potential'].items() :
-                    for kkey,tterm in term.items():
-                        if 'CGCs' in tterm : 
-                            if not(all([el in Settings['Groups'].keys() for el in tterm['CGCs']])):
-                                loggingCritical("Error, `CGCs` keys must be know gauge group: {}".format(tterm['CGCs']),verbose=True)
-                                exit()
-                            if any([type(valgr) != int  for kgroup,valgr in tterm['CGCs'].items()]):
-                                loggingCritical("Error, `CGCs` entries must be int: {}".format(tterm['CGCs']),verbose=True)
-                                exit()
+		#for key,term in Settings['Potential'].items() :
+                #    for kkey,tterm in term.items():
+                #        if 'CGCs' in tterm : 
+                #            if not(all([el in Settings['Groups'].keys() for el in tterm['CGCs']])):
+                #                loggingCritical("Error, `CGCs` keys must be known gauge group: {}".format(tterm['CGCs']),verbose=True)
+                #                exit()
+                #            if any([type(valgr) != int  for kgroup,valgr in tterm['CGCs'].items()]):
+                #                loggingCritical("Error, `CGCs` entries must be int: {}".format(tterm['CGCs']),verbose=True)
+                #                exit()
 
 
 	def AreThereMixingTerms(self,term):
