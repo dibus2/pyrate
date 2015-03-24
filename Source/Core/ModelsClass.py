@@ -394,7 +394,8 @@ class Model(object) :
                                                         #F. These are modifications for the multiple contraction case
                                                         tpCGCs = 0
                                                         if ('CGCs' in val) and (g[0] in val['CGCs']) :
-                                                            #It can be a list or an int
+                                                            if type(val['CGCs'][g[0]]) == int :
+                                                                val['CGCs'][g[0]] = [val['CGCs'][g[0]]]
                                                             if not(type(val['CGCs'][g[0]]) == list):
                                                                 loggingCritical("Error the `CGCs` option must be an int or a list",verbose=True)
                                                                 exit()

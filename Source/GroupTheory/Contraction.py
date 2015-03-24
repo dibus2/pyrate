@@ -74,8 +74,8 @@ def GetContractionFactor(dic,Group,CGCs=0):
     		                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
                         else :
                             if CGCs == 0 :
-                                loggingCritical("ERROR, `CGCs` not specified for the invariant `{}` under {} which as several possible contractions to gauge singlet. Please use the interactive mode (started via the option -idb to check which CGC you want to use.".format(key,Group[1]._absname),verbose=True)
-                                exit()
+                                loggingCritical("WARNING, `CGCs` not specified for the invariant `{}` under {} which has several possible contractions to gauge singlet, using the first one! Please use the interactive mode (started via the option -idb to make sure it is the CGC you want to use.".format(key,Group[1]._absname),verbose=True)
+                                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)][0]
                             else :
                                 Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)][CGCs-1]
 		else : 

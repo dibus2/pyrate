@@ -1,4 +1,4 @@
-#!/usr/bin/env python 
+#1!/usr/bin/env python 
 try :
     import pudb
     import yaml
@@ -207,7 +207,7 @@ else :
 					if type(ll1) == list and type(ll1[0]) == list :
 						#it is a list of list
 						if not(all([len(subll1) == ilab or len(subll1) == ilab+1 for subll1 in ll1])):
-							loggingCritical("Error, the length of the list {} is incoherent should be {} or {} if norm is included".format(ll2,ilab,ilab+1))
+							loggingCritical("Error, the length of the list {} is incoherent should be {} or {} if norm is included".format(ll2,ilab,ilab+1),verbose=RunSettings['vCritical'])
 							exit()
 						else :
 							nn = []
@@ -218,7 +218,7 @@ else :
 							yamlSettings['Potential'][lab][ill1] = {'Fields': templ1, 'Norm': nn}
 					elif type(ll1) == list :
 						if not(len(ll1)==ilab or len(ll1) == ilab+1) :
-							loggingCritical("Error, the length of the list {} is incoherent should be {} or {} if norm is included".format(ll1,ilab,ilab+1))
+							loggingCritical("Error, the length of the list {} is incoherent should be {} or {} if norm is included".format(ll1,ilab,ilab+1),verbose=RunSettings['vCritical'])
 							exit()
 						else :
 							nn=1 if len(ll1) == ilab else ll1[-1]

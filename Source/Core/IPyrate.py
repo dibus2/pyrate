@@ -9,6 +9,7 @@ try :
     import pudb
     import cmd
     import os
+    from sys import exit
     import readline
     import rlcompleter
     from sympy import symbols,Symbol,Rational,sqrt,IndexedBase
@@ -114,7 +115,7 @@ class Idbquerry(cmd.Cmd):
         exit("Exiting the interactive mode.")
 
     def do_quit(self,line):
-        exit("Exiting the interactive mode.")
+        sys.exit("Exiting the interactive mode.")
 
     def extractinfo(self):
         self.gaugegroupimplemented = self.db.keys()
@@ -134,46 +135,50 @@ class Idbquerry(cmd.Cmd):
         #returns the invariant for the given contraction and gauge group
         ls = line.split(' ')
         try :
-            if len(ls) == 1 and ls[0] == '':
-                raise IdbquerryMissingArgument('gauge')
-            elif len(ls) == 1 :
-                if ls[1] in self.gaugegroupimplemented :
-                    raise IdbquerryMissingArgument('irrep')
-                else :
-                    raise IdbquerryWrongFormatMultipleIrreps()
-            elif len(ls)>3 :
-                raise IdbquerryWrongFormatNbArg(2)
-            else :
-                #We have the proper number of arguments
-                ls = (ls[0],tuple([tuple(el) for el in eval(ls[1])]))
-                whichinvariant = len(ls[1])
-                if type(ls[1][0]) != tuple :
-                    raise IdbquerryWrongFormatMultipleIrreps
-                if not(ls[0] in self.gaugegroupimplemented):
+            try :
+                if len(ls) == 1 and ls[0] == '':
                     raise IdbquerryMissingArgument('gauge')
-                if 'SU' in ls[0] and ls[0] != 'SU2':
-                    if not(all([len(el) == int(ls[0][-1])-1 for el in ls[1]])):
-                        raise IdbquerryInconsistentIrreps()
-
-                if whichinvariant == 2 : 
-                    if not(ls[1] in self.db[ls[0]]['Bilinear']) :
+                elif len(ls) == 1 :
+                    if ls[1] in self.gaugegroupimplemented :
                         raise IdbquerryMissingArgument('irrep')
                     else :
-                        print(self.construct_contraction(self.db[ls[0]]['Bilinear'][ls[1]],2))
-                elif whichinvariant == 3:
-                    if not(ls[1] in self.db[ls[0]]['Trilinear']):
-                        raise IdbquerryMissingArgument('irrep')
-                    else :
-                        print(self.construct_contraction(self.db[ls[0]]['Trilinear'][ls[1]],3))
-                elif whichinvariant == 4 :
-                    if not(ls[1] in self.db[ls[0]]['Quartic']):
-                        raise IdbquerryMissingArgument('irrep')
-                    else :
-                        print(self.construct_contraction(self.db[ls[0]]['Quartic'][ls[1]],4))
+                        raise IdbquerryWrongFormatMultipleIrreps()
+                elif len(ls)>3 :
+                    raise IdbquerryWrongFormatNbArg(2)
                 else :
-                    raise IdbquerryUnkownContraction()
-        except (IdbquerryMissingArgument,IdbquerryWrongFormatMultipleIrreps,IdbquerryWrongFormatNbArg,IdbquerryUnkownContraction,IdbquerryInconsistentIrreps):
-            pass
+                    #We have the proper number of arguments
+                    ls = (ls[0],tuple([tuple(el) for el in eval(ls[1])]))
+                    whichinvariant = len(ls[1])
+                    if type(ls[1][0]) != tuple :
+                        raise IdbquerryWrongFormatMultipleIrreps
+                    if not(ls[0] in self.gaugegroupimplemented):
+                        raise IdbquerryMissingArgument('gauge')
+                    if 'SU' in ls[0] and ls[0] != 'SU2':
+                        if not(all([len(el) == int(ls[0][-1])-1 for el in ls[1]])):
+                            raise IdbquerryInconsistentIrreps()
+
+                    if whichinvariant == 2 : 
+                        if not(ls[1] in self.db[ls[0]]['Bilinear']) :
+                            raise IdbquerryMissingArgument('irrep')
+                        else :
+                            print(self.construct_contraction(self.db[ls[0]]['Bilinear'][ls[1]],2))
+                    elif whichinvariant == 3:
+                        if not(ls[1] in self.db[ls[0]]['Trilinear']):
+                            raise IdbquerryMissingArgument('irrep')
+                        else :
+                            print(self.construct_contraction(self.db[ls[0]]['Trilinear'][ls[1]],3))
+                    elif whichinvariant == 4 :
+                        if not(ls[1] in self.db[ls[0]]['Quartic']):
+                            raise IdbquerryMissingArgument('irrep')
+                        else :
+                            print(self.construct_contraction(self.db[ls[0]]['Quartic'][ls[1]],4))
+                    else :
+                        raise IdbquerryUnkownContraction()
+            except (IdbquerryMissingArgument,IdbquerryWrongFormatMultipleIrreps,IdbquerryWrongFormatNbArg,IdbquerryUnkownContraction,IdbquerryInconsistentIrreps):
+                pass
+        except SyntaxError :
+            print("Could not interpret your querry, try again.")
+            pass 
                                    
     def construct_contraction(self,contraction,whichinvariant):
         """
