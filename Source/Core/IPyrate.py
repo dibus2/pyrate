@@ -12,7 +12,7 @@ try :
     from sys import exit
     import readline
     import rlcompleter
-    from sympy import symbols,Symbol,Rational,sqrt,IndexedBase
+    from sympy import symbols,Symbol,Rational,sqrt,IndexedBase,Matrix
     if 'libedit' in readline.__doc__:
         readline.parse_and_bind("bind ^I rl_complete")
     else :
@@ -62,14 +62,12 @@ class IdbquerryWrongFormatNbArg(Warning):
     def __init__(self,nbarg):
         print("This function requires {} arguments".format(nbarg))
 
-
 class IdbquerryUnkownContraction(Warning):
     """
     Wrong format of arguments
     """
     def __init__(self):
         print("This contraction is not in the databased.")
-
 
 
 class IdbquerryInconsistentIrreps(Warning):
@@ -134,6 +132,8 @@ class Idbquerry(cmd.Cmd):
     def do_Invariants(self,line):
         #returns the invariant for the given contraction and gauge group
         ls = line.split(' ')
+        if len(ls) > 2 : 
+            ls = [ls[0], ''.join(ls[1:])]
         try :
             try :
                 if len(ls) == 1 and ls[0] == '':
@@ -180,6 +180,9 @@ class Idbquerry(cmd.Cmd):
             print("Could not interpret your querry, try again.")
             pass 
                                    
+    
+
+
     def construct_contraction(self,contraction,whichinvariant):
         """
         contstruct a human readable output of the contraction a la susyno
@@ -262,6 +265,12 @@ class Idbquerry(cmd.Cmd):
             completions = self.gaugegroupimplemented
         return completions
 
+    def do_Matrices(self, line):
+        mats = self.do_generic(line,'Matrices',toreturn=True)
+        print("{}".format("\n\n".join([str(Matrix(el)) for el in mats['mat']])))
+
+    def complete_Matrices(self,text,line,begidx,endidx):
+        return self.complete_generic(text,line,begidx,endidx,'Matrices')
 
     def do_generic_onearg(self,line,function):
         args = line.split(' ')
@@ -289,8 +298,15 @@ class Idbquerry(cmd.Cmd):
             completions = self.gaugegroupimplemented
         return completions
 
-    def do_generic(self,line,function,istuple=True):
+    def do_generic(self,line,function,istuple=True,toreturn=False):
         args = line.split(' ')
+        if len(args) > 2 : 
+            toremove = [(el+args[iel+1],el,args[iel+1],iel) for iel,el in enumerate(args) if el[-1] ==',']
+            for ll in toremove : 
+                args.insert(ll[-1],ll[0])
+                args.remove(ll[1])
+                args.remove(ll[2])
+            line = ' '.join(args)
         if istuple :
             tocheck = list
         else :
@@ -311,12 +327,20 @@ class Idbquerry(cmd.Cmd):
                     if group in self.db:
                         if istuple:
                             if tuple(eval(irrep)) in self.db[group][function]:
-                                print self.db[group][function][tuple(eval(irrep))]
+                                temp = self.db[group][function][tuple(eval(irrep))]
+                                if not(toreturn):
+                                    print(temp)
+                                else :
+                                    return temp
                             else :
                                 raise IdbquerryMissingArgument('irrep')
                         else :
                             if eval(irrep) in self.db[group][function]:
-                                print list(self.db[group][function][eval(irrep)])
+                                temp = list(self.db[group][function][eval(irrep)])
+                                if not(toreturn):
+                                    print(temp)
+                                else :
+                                    return temp
                             else :
                                 raise IdbquerryMissingArgument('irrep')
                     else :
