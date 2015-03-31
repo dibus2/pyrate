@@ -18,7 +18,7 @@ import pudb
 # <codecell>
 
 #open the file as a string do the replacement un put it back before loading it
-f = open('CGCsnew.m','r')
+f = open('CGCsnewsu4.m','r')
 dic = f.readlines()
 f.close()
 
@@ -85,14 +85,15 @@ tp = {}
 #			db[group]['Quartic'][kk] = Quarticelem[ikk] 
 tp = {}
 tpbar = {}
-for key,val in db['DynkinToDim']['SU2'].items():
-    tp[(key,)] = val
-    tp[(key,True)] = val
-    tpbar[val],tpbar[-val] = (key,),(key,True)
-db['SU2']['DimToDynkin'] = copy.deepcopy(tpbar)
-db['SU2']['DimToDynkin'][1] = (0,)#singlet
-db['SU2']['DynkinToDim'] = copy.deepcopy(tp)
-db['SU2']['DynkinToDim'][(0,)] = 0
+if 'SU2' in db['DynkinToDim']:
+    for key,val in db['DynkinToDim']['SU2'].items():
+        tp[(key,)] = val
+        tp[(key,True)] = val
+        tpbar[val],tpbar[-val] = (key,),(key,True)
+    db['SU2']['DimToDynkin'] = copy.deepcopy(tpbar)
+    db['SU2']['DimToDynkin'][1] = (0,)#singlet
+    db['SU2']['DynkinToDim'] = copy.deepcopy(tp)
+    db['SU2']['DynkinToDim'][(0,)] = 0
 #All other groups: We just need to construct the DimToDynkin dict
 for key,val in db['DynkinToDim'].items():
     tp = {}
@@ -312,13 +313,13 @@ subprocess.call(["rm","CGCsnew.py"])
 
  #<codecell>
 
-f = open('CGCsnew.pickle','w')
+f = open('CGCsnewsu4.pickle','w')
 pickle.dump(db,f)
 f.close()
 
 # <codecell>
 
-g = open('CGCsnew.pickle','r')
+g = open('CGCsnewsu4.pickle','r')
 data = pickle.load(g)
 g.close()
 
