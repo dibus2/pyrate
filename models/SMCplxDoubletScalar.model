@@ -49,7 +49,7 @@ Yukawas:{
 QuarticTerms: {
  '\lambda_1' : {Fields : [H,H*,H,H*], Norm : 1/2},
  '\lambda_D' : {Fields: [D,D*,D,D*], Norm : 1/2},
- '\kappa_D ' : {Fields: [D,D*,H,H*], Norm : 1/2},
+ '\kappa_D' : {Fields: [D,D*,H,H*], Norm : 1/2},
  '\Pkappa_D' : {Fields: [D,H*,H,D*], Norm : 1/2}
  },
 ScalarMasses: {

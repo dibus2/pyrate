@@ -43,26 +43,24 @@ Potential: {
 #######################################
 ##############
 #The doublet vector like and the yukawa corresponding to the triplet are not included yet 
-#Yukawas:{
-#  'Y_{u}': {Fields: [H*,Qbar,uR], Norm: 1},
-#  'f_{L}': {Fields: [T,L,L], Norm: 1/Sqrt(2)},
-#  'f_\psi': {Fields: [T, PsiL,PsiL], Norm: 1/Sqrt(2)}
-# },
-QuarticTerms: {
-# lambda_1 : {Fields : [H,H*,H,H*], Norm : 1/2},
-#This demonstrates how to specify different CGCs combinations to PyR@TE. The numbers refer to the database interactive mode. 
-#One only needs to specify the CGCs to use for the ambiguous ones.
- lambda_T : {Fields: [T,T*,T,T*], Norm: 1/2, CGCs: {'SU2L': 1}},
-# kappa_T: {Fields: [T,T*,H,H*], Norm: 1}
+Yukawas:{
+  'Y_{u}': {Fields: [H*,Qbar,uR], Norm: 1},
+  'f_{L}': {Fields: [T,L,L], Norm: 3**(1/4)/2},
+  'f_\psi': {Fields: [T, PsiL,PsiL], Norm: 3**(1/4)/2}
  },
-#ScalarMasses: {
-# mu_1 : {Fields : [H,H*], Norm : 1},
-# mT : {Fields: [T,T*], Norm: 1/2},
-# },
-#TrilinearTerms: {
-# fH : {Fields: [T*,H,H], Norm: 1/Sqrt(2)},
-# },
-#FermionMasses : {
-# mD : {Fields: [PsiL,PsiRbar], Norm: 1, latex: \m_D},
-# }
+QuarticTerms: {
+ lambda_1 : {Fields : [H,H*,H,H*], Norm : 1/2, CGCs: {'SU2L': 1}},
+ lambda_T : {Fields: [T,T*,T,T*], Norm: 1/2, CGCs: {'SU2L': 1}},
+ kappa_T: {Fields: [T,T*,H,H*], Norm: 1, CGCs: {'SU2L': 1}}
+ },
+ScalarMasses: {
+ mu_1 : {Fields : [H,H*], Norm : 1},
+ mT : {Fields: [T,T*], Norm: 1/2},
+ },
+TrilinearTerms: {
+ fH : {Fields: [T*,H,H], Norm: 1/Sqrt(2)},
+ },
+FermionMasses : {
+ mD : {Fields: [PsiL,PsiRbar], Norm: 1, latex: \m_D},
+ }
 }

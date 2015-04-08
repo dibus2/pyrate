@@ -45,13 +45,13 @@ Potential: {
  },
 
 QuarticTerms: {
- '\lambda_1' : {Fields : [H,H*,H,H*], Norm: 1/2},
- '\lambda_s' : {Fields : [si,si,si,si], Norm: 1/2},
- '\kappa_s' : {Fields : [H,H*,si,si], Norm: 1/2}
+ '\lambda_1': {Fields : [H,H*,H,H*], Norm: 1/2},
+ '\lambda_s': {Fields : [si,si,si,si], Norm: 1/2},
+ '\kappa_s': {Fields : [H,H*,si,si], Norm: 1/2}
  },
 
 ScalarMasses: {
- '\mu_{1}' : {Fields: [H,H*], Norm: 1},
- '\mu_{s}' : {Fields: [si,si], Norm: 1/2}
+ '\mu_{1}': {Fields: [H,H*], Norm: 1},
+ '\mu_{s}': {Fields: [si,si], Norm: 1/2}
  }
 }

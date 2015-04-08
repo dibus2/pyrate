@@ -114,10 +114,19 @@ def loadmodel(name):
 	Replace = []
 	for ill,ll in enumerate(strsettings) : 
 		#simplify the symbol to get rid of the LateX structure
-		lln1 = [(iel,''.join(reg.split('{(.*)}',el))) for iel,el in enumerate(ll) if len(reg.split('{(.*)}',el)) == 3 ]
-		lln2 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) == 3 ]
-		lln3 = [(iel,el) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) != 3 and len(reg.split('{(.*)}',el)) != 3  ]
-		lln = lln1 + lln2 + lln3
+		#lln1 = [(iel,''.join(reg.split('{(.*)}',el))) for iel,el in enumerate(ll) if len(reg.split('{(.*)}',el)) == 3 ]
+		lln1 = [(iel,''.join(reg.split('{(.*)}',el))) for iel,el in enumerate(ll)]
+                lln1 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate([elem[1] for elem in lln1])]
+                #if lln1 != [] :
+		#    lln2 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate([elem[1] for elem in lln1]) if len(reg.split('\\\(.*)',el)) == 3 ]
+                #    #erase the first step
+                #    if lln2 != [] :
+                #        lln1 = []
+                #else :
+		#    lln2 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) == 3 ]
+		#lln3 = [(iel,el) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) != 3 and len(reg.split('{(.*)}',el)) != 3  ]
+		#lln = lln1 + lln2 + lln3
+                lln = lln1
 		Replace.append([(ll[iel],el) for iel,el in lln])
 		#Declare all the symbols
 		ll = ll + [el[1] for el in lln]

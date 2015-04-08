@@ -10,9 +10,9 @@ Groups: {'U1': U1, 'SU2L': SU2, 'SU3c': SU3}
 ##############################
 
 Fermions: {
-   uR: {Gen: ng, Qnb:{ U1: 2/3, SU2L: 1, SU3c: 3}},
-   uRbar: {Gen: ng, Qnb:{ U1: -2/3, SU2L: 1, SU3c: -3}},
-   Q: {Gen: ng, Qnb:{ U1: 1/6, SU2L: 2, SU3c: 3}}
+   uR: {Gen: 3, Qnb:{ U1: 2/3, SU2L: 1, SU3c: 3}},
+   uRbar: {Gen: 3, Qnb:{ U1: -2/3, SU2L: 1, SU3c: -3}},
+   Q: {Gen: 3, Qnb:{ U1: 1/6, SU2L: 2, SU3c: 3}}
 }
 #############
 #Real Scalars

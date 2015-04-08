@@ -9,3 +9,18 @@ models/private/
 #all .pyc
 #
 *.pyc
+
+*.m
+BuildupDatebase*
+*.nb
+
+Source/GroupTheory/CGCsnewsu2.pickle
+Source/GroupTheory/CGCsnewsu3.pickle
+Source/GroupTheory/CGCsnewsu4.pickle
+Source/GroupTheory/change_matrices.py
+Source/GroupTheory/combine-database.py
+Source/GroupTheory/contraction-15-15-15-s.py
+Source/GroupTheory/update-database.py
+Source/GroupTheory/.ipynb_checkpoints/
+*.DS_Store
+*.swp

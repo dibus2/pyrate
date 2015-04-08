@@ -4,6 +4,7 @@ sys.path.append('./Source/GroupTheory')
 from GroupDefinitions import *
 from RGEsmathModule import *
 from Particles import *
+import re
 try :
 	import itertools as itr
 	from types import MethodType
@@ -225,8 +226,12 @@ class Model(object) :
 			return normdic
 		else :
 			normdic = normdic.replace('Sqrt','sqrt').replace('i','I')
-			if 'I' in normdic or 'sqrt' in normdic :
+                        if ('I' in normdic or 'sqrt' in normdic) and not('**' in normdic):
 				return eval(normdic)
+                        elif '**' in normdic and '/' in normdic :
+                            src = re.search('([0-9]{1,2})/([0-9])',normdic)
+                            normdic = eval(normdic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2))))
+                            return normdic
 			else :
 				try :
 					return Rational(normdic)
@@ -388,7 +393,6 @@ class Model(object) :
 					Factor = []
 					for g in self.NonUGaugeGroups:
 						self.GetContractedParticles(ContractedParticles,g[0],g[1],Ppi[ill])
-
 						#Get the contraction factor
 						if ContractedParticles[g[0]] != [] : 
                                                         #F. These are modifications for the multiple contraction case
@@ -464,7 +468,7 @@ class Model(object) :
 			#One thing that is still do be done at this step is to find a Combination of indices such that the coeff is non zero
 			if not(SKIP):
 				if Factor != [] and not(FullSinglet):
-					counter = 4 
+					counter = 0 
 					STOP = False
 					while not(STOP) :
 						#For each contraction we generate an iterator for the possible contraction
