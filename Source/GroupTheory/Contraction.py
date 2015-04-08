@@ -44,9 +44,11 @@ except ImportError :
 		exit()
 localdir = os.path.realpath(os.path.dirname(__file__))
 #fdb = open(localdir+'/CGCs.pickle','r')
+loggingInfo('Loading the database...',verbose=True)
 fdb = open(localdir+'/CGCs-1.2.0.pickle','r')
 db = pickle.load(fdb)
 fdb.close()
+loggingInfo('\t\t...done',verbose=True)
 
 def GetContractionFactor(dic,Group,CGCs=0):
 		"""Seeks the contraction Factor for the contracted particles in dic under the name group.

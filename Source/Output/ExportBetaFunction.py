@@ -23,7 +23,7 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
 	maps = {}
 	Ids = {}
 	for ikk,(key,val) in enumerate(StrucYuk.items()) :
-		maps[key] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}',key))))
+		maps[key] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',key))))
 		Ids[maps[key]] = "Id{}".format(ikk)
 		if max(val) != 1 :
 			CodeStr += "\tId{} = np.eye({})\n".format(ikk,max(val))
@@ -35,7 +35,8 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
 	ListSymbs = [el[1].g for el in model.GaugeGroups] + model.ListLbd + model.ListScM + model.ListTri
 	for iel,el in enumerate(ListSymbs) :
 		if len(reg.split('{(.*)}',str(el))) == 3 or len(reg.split('\\\(.*)',str(el))) == 3 :
-			ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
+			#ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
+			ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',str(el)))))
 			maps[el] = ListSymbs[iel]	
 		else :
 			maps[el] = el
@@ -290,7 +291,9 @@ def TranslateToNumerics(expression,ListSymbs,label,Ids,model,Mapping,Matrices=Tr
 	if Matrices :#result in matrix form
 		#Remove all the indices
 		for el in model.ListYukawa :
-			el =''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',el))))
+			#el =''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',el))))
+                        #F. changed to comply with the new detex functions
+			el =''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',el))))
 			StrXpr = RemoveIndices(StrXpr,el,Yuk=True)
 		StrXpr = RemoveIndices(StrXpr,'MatMul',Yuk=False)
 		while 'matMul(' in StrXpr :

@@ -1,7 +1,7 @@
 # YAML 1.1
 ---
-Author: Juan Carlos Vasquez
-Date: 27.01.2015
+Author: Florian Lyonnet 
+Date: 04.15.2015
 Name: TypeIIandaxion
 Groups: {'U1': U1, 'SU2L': SU2, 'SU3c': SU3}
 

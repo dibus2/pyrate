@@ -281,7 +281,7 @@ class Idbquerry(cmd.Cmd):
                 raise IdbquerryWrongFormat(onlygauge=True)
             else :
                 if args[0] in self.db:
-                    print(self.db[args[0]][function])
+                    print(list(self.db[args[0]][function]))
                 else :
                     raise IdbquerryMissingArgument('gauge')
         except (IdbquerryWrongFormat,IdbquerryMissingArgument):

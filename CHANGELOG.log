@@ -1,3 +1,11 @@
+April 15 th:
+
+Version 1.2.0_beta finalized: 
+	* New key word CGCs allowing to deal with multiple gauge singlets for a
+	given term
+	* Please read NewsInPyR@TE-1.2.0.html before using
+
+
 Marhch 8th : 
 
 Bug fixed introduced in previous version...Thanks to M. Arshad Momen for
