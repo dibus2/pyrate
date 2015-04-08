@@ -44,9 +44,7 @@ except ImportError :
 		exit()
 localdir = os.path.realpath(os.path.dirname(__file__))
 #fdb = open(localdir+'/CGCs.pickle','r')
-#fdb = open(localdir+'/CGCstestnorm.pickle','r')
-#fdb = open(localdir+'/CGCsnew.pickle','r')
-fdb = open(localdir+'/CGCslast.pickle','r')
+fdb = open(localdir+'/CGCs-1.2.0.pickle','r')
 db = pickle.load(fdb)
 fdb.close()
 
