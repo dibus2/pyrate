@@ -45,6 +45,7 @@ div #notebook { /* centre the content */
 div.input_area {
   border-radius: 0px;
   border: 1px solid #373b41;
+	background-color: #1d1f21;
 }
 
 div.output_area pre {font-weight: normal; color: #c5c8c6;}

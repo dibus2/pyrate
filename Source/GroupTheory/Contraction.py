@@ -45,7 +45,8 @@ except ImportError :
 localdir = os.path.realpath(os.path.dirname(__file__))
 #fdb = open(localdir+'/CGCs.pickle','r')
 loggingInfo('Loading the database...',verbose=True)
-fdb = open(localdir+'/CGCs-1.2.0.pickle','r')
+#fdb = open(localdir+'/CGCs-1.2.0.pickle','r')
+fdb = open(localdir+'/CGCs-1.2.0-sparse.pickle','r')
 db = pickle.load(fdb)
 fdb.close()
 loggingInfo('\t\t...done',verbose=True)
@@ -143,14 +144,21 @@ class Ts(Function):
 	is_commutative = True
 
 	@classmethod
-	def eval(cls,A,mats,f1,f2):
-		if type(A) != Symbol and type(f1) != Symbol and type(f2) != Symbol :
-			#reconstruct the matrix 
-			mat = mats[0][A]
-			dim = mats[-1]
-			mat = np.array(mat).reshape(dim)
-			return mat[f1-1,f2-1]
-
+#	def eval(cls,A,mats,f1,f2):
+#		if type(A) != Symbol and type(f1) != Symbol and type(f2) != Symbol :
+#			#reconstruct the matrix 
+#			mat = mats[0][A]
+#			dim = mats[-1]
+#			mat = np.array(mat).reshape(dim)
+#			return mat[f1-1,f2-1]
+        def eval(cls,A,mats,f1,f2):
+                if type(A) != Symbol and type(f1) != Symbol and type(f2) != Symbol :
+                        #reconstruct the matrix
+                        for el in mats[A] :
+                            if el != ():
+                                if (f1-1,f2-1)== el[0:2]:
+                                    return el[-1]
+                        return 0
 
 ################
 #Factor Function

@@ -22,8 +22,8 @@ class SUn(object):
 		self.HBMat = db[self._absname]['HBmat']
 		self.Fond = db[self._absname]['Fond']
 		self.Adj = db[self._absname]['Adj']
-		self.fabc = self.GetStructureConstants()
-                #self.fabc = db[self._absname]['Struc']
+		#self.fabc = self.GetStructureConstants()
+                self.fabc = db[self._absname]['Struc']
 		#transformation
 		self.fabc = (tuple(flatten(self.fabc)),self.fabc.shape)
 		#Convert the  matrices into tuples that can be passed to the symbolic functions
@@ -40,12 +40,12 @@ class SUn(object):
 		if not(HB) :
 			assert ferm1 == ferm2
 			mat = self.Matrices[ferm1]
-			mat = (mat['mat'],mat['shape'])
+#F.sparse			mat = (mat['mat'],mat['shape'])
 		else  :
 			assert ferm1[1] == ferm2[1] #i.e. same representation
 			#read the sequence i.e. PiPi PiSig SigPi 
 			mat = self.HBMat[ferm1[1]][(ferm1[0],ferm2[0])]
-			mat = (mat['mat'],mat['shape'])
+#F.sparse			mat = (mat['mat'],mat['shape'])
 		return mat
 
 	def OuterMatrixProduct(self,M1,M2):
