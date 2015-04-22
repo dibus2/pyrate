@@ -1688,7 +1688,7 @@ div#notebook {
 <hr>
 <h1 id="pyr-te-v1-2-0">PyR@TE v1.2.0</h1>
 <h2 id="release-notes">Release Notes</h2>
-<p>This document aims at describing the new features of PyR@TEv1.2.0 In particular it explains the new capabilities regarding its ability to handle terms that can lead to <strong>several gauge singlets</strong>. The first section is dedicated to the presentation of the issue, the second deals with the changes brought to PyR@TE in order to deal with such cases and finally, the last section shows how this applies to a concrete example namely the effective potential of the TypeII Seesaw model.</p>
+<p>This document aims at describing the new features of PyR@TEv1.2.0 In particular it explains the new capabilities regarding its ability to handle terms that can lead to <strong>several gauge singlets</strong>. In addition, we have made public the implementation of sparse matrices. This boosts up the calculation of RGEs. The first section is dedicated to the presentation of the issue, the second deals with the changes brought to PyR@TE in order to deal with such cases and finally, the last section shows how this applies to a concrete example namely the effective potential of the TypeII Seesaw model.</p>
 <h3 id="1-multiple-gauge-singlets">1. Multiple Gauge Singlets</h3>
 <p>The different terms entering a given Lagrangin, $\mathcal{L}$ in PyR@TE are given by a python <em>dictionary</em> under the following form</p>
 <blockquote>
@@ -1817,21 +1817,21 @@ In&nbsp;[2]:
 loading database of CGCs...
 db version: August 22 2013
 done!
-Querry: Casimir SU2 [2]
+Query: Casimir SU2 [2]
 2
-Querry: AdjR SU4
+Query: AdjR SU4
 [1, 0, 1]
-Querry: Dynkin SU3 [1,0]
+Query: Dynkin SU3 [1,0]
 1/2
-Querry: FondR SU5
+Query: FondR SU5
 [1, 0, 0, 0]
-Querry: GetDynk SU2 [2,True]
+Query: GetDynk SU2 [2,True]
 The second argument must be an integer representing the dimension of the irrep
-Querry: GetDynk SU2 2
+Query: GetDynk SU2 2
 [1]
-Querry: DimR SU3 [1,0]
+Query: DimR SU3 [1,0]
 3
-Querry: exit
+Query: exit
 
 </pre>
 </div>
@@ -1926,7 +1926,7 @@ In&nbsp;[3]:
 loading database of CGCs...
 db version: August 22 2013
 done!
-Querry: Matrices SU2 [2]
+Query: Matrices SU2 [2]
 [        0, sqrt(2)/2,         0]
 [sqrt(2)/2,         0, sqrt(2)/2]
 [        0, sqrt(2)/2,         0]
@@ -1938,7 +1938,7 @@ Querry: Matrices SU2 [2]
 [1, 0,  0]
 [0, 0,  0]
 [0, 0, -1]
-Querry: exit
+Query: exit
 
 </pre>
 </div>
@@ -2136,7 +2136,7 @@ In&nbsp;[51]:
 loading database of CGCs...
 db version: August 22 2013
 done!
-Querry: Invariants SU2 [[1,True],[1],[1,True],[1]]
+Query: Invariants SU2 [[1,True],[1],[1,True],[1]]
 1 invariant:
 	a[1]*b[1]*c[1]*d[1] + a[1]*b[1]*c[2]*d[2] + a[2]*b[2]*c[1]*d[1] + a[2]*b[2]*c[2]*d[2]
 
@@ -2144,7 +2144,7 @@ Querry: Invariants SU2 [[1,True],[1],[1,True],[1]]
 	sqrt(3)*a[1]*b[1]*c[1]*d[1]/3 - sqrt(3)*a[1]*b[1]*c[2]*d[2]/3 + 2*sqrt(3)*a[1]*b[2]*c[2]*d[1]/3 + 2*sqrt(3)*a[2]*b[1]*c[1]*d[2]/3 - sqrt(3)*a[2]*b[2]*c[1]*d[1]/3 + sqrt(3)*a[2]*b[2]*c[2]*d[2]/3
 
 
-Querry: exit
+Query: exit
 
 </pre>
 </div>
@@ -2225,7 +2225,7 @@ In&nbsp;[63]:
 loading database of CGCs...
 db version: August 22 2013
 done!
-Querry: Invariants SU2 [[2,True],[2],[2,True],[2]]
+Query: Invariants SU2 [[2,True],[2],[2,True],[2]]
 1 invariant:
 	a[1]*b[1]*c[1]*d[1] + a[1]*b[1]*c[2]*d[2] + a[1]*b[1]*c[3]*d[3] + a[2]*b[2]*c[1]*d[1] + a[2]*b[2]*c[2]*d[2] + a[2]*b[2]*c[3]*d[3] + a[3]*b[3]*c[1]*d[1] + a[3]*b[3]*c[2]*d[2] + a[3]*b[3]*c[3]*d[3]
 
@@ -2236,7 +2236,7 @@ Querry: Invariants SU2 [[2,True],[2],[2,True],[2]]
 	sqrt(5)*a[1]*b[1]*c[1]*d[1]/10 - sqrt(5)*a[1]*b[1]*c[2]*d[2]/5 + sqrt(5)*a[1]*b[1]*c[3]*d[3]/10 + 3*sqrt(5)*a[1]*b[2]*c[2]*d[1]/10 - 3*sqrt(5)*a[1]*b[2]*c[3]*d[2]/10 + 3*sqrt(5)*a[1]*b[3]*c[3]*d[1]/5 + 3*sqrt(5)*a[2]*b[1]*c[1]*d[2]/10 - 3*sqrt(5)*a[2]*b[1]*c[2]*d[3]/10 - sqrt(5)*a[2]*b[2]*c[1]*d[1]/5 + 2*sqrt(5)*a[2]*b[2]*c[2]*d[2]/5 - sqrt(5)*a[2]*b[2]*c[3]*d[3]/5 - 3*sqrt(5)*a[2]*b[3]*c[2]*d[1]/10 + 3*sqrt(5)*a[2]*b[3]*c[3]*d[2]/10 + 3*sqrt(5)*a[3]*b[1]*c[1]*d[3]/5 - 3*sqrt(5)*a[3]*b[2]*c[1]*d[2]/10 + 3*sqrt(5)*a[3]*b[2]*c[2]*d[3]/10 + sqrt(5)*a[3]*b[3]*c[1]*d[1]/10 - sqrt(5)*a[3]*b[3]*c[2]*d[2]/5 + sqrt(5)*a[3]*b[3]*c[3]*d[3]/10
 
 
-Querry: exit
+Query: exit
 
 </pre>
 </div>
@@ -2543,7 +2543,7 @@ In&nbsp;[174]:
 loading database of CGCs...
 db version: August 22 2013
 done!
-Querry: Invariants SU2 [[1,True],[2],[2,True],[1]]
+Query: Invariants SU2 [[1,True],[2],[2,True],[1]]
 1 invariant:
 	2*sqrt(3)*a[1]*b[1]*c[1]*d[1]/3 + sqrt(6)*a[1]*b[1]*c[2]*d[2]/3 + sqrt(3)*a[1]*b[2]*c[2]*d[1]/3 + sqrt(6)*a[1]*b[2]*c[3]*d[2]/3 + sqrt(6)*a[2]*b[2]*c[1]*d[1]/3 + sqrt(3)*a[2]*b[2]*c[2]*d[2]/3 + sqrt(6)*a[2]*b[3]*c[2]*d[1]/3 + 2*sqrt(3)*a[2]*b[3]*c[3]*d[2]/3
 
@@ -2551,7 +2551,7 @@ Querry: Invariants SU2 [[1,True],[2],[2,True],[1]]
 	sqrt(6)*a[1]*b[1]*c[1]*d[1]/6 - sqrt(3)*a[1]*b[1]*c[2]*d[2]/3 + sqrt(6)*a[1]*b[2]*c[2]*d[1]/3 - sqrt(3)*a[1]*b[2]*c[3]*d[2]/3 + sqrt(6)*a[1]*b[3]*c[3]*d[1]/2 + sqrt(6)*a[2]*b[1]*c[1]*d[2]/2 - sqrt(3)*a[2]*b[2]*c[1]*d[1]/3 + sqrt(6)*a[2]*b[2]*c[2]*d[2]/3 - sqrt(3)*a[2]*b[3]*c[2]*d[1]/3 + sqrt(6)*a[2]*b[3]*c[3]*d[2]/6
 
 
-Querry: exit
+Query: exit
 
 </pre>
 </div>

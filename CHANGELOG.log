@@ -4,7 +4,7 @@ Version 1.2.0_beta finalized:
 	* New key word CGCs allowing to deal with multiple gauge singlets for a
 	given term
 	* Please read NewsInPyR@TE-1.2.0.html before using
-
+	* Add the non public implementation of the sparse matrices
 
 Marhch 8th : 
 
