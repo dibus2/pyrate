@@ -749,9 +749,14 @@ class Model(object) :
 							loggingCritical("Error, the FermionMasses {} does not contain two fermions : {}".format(ff,subxpr),verbose=True)
 							exit()
 
-		#for key,term in Settings['Potential'].items() :
-                #    for kkey,tterm in term.items():
-                #        if 'CGCs' in tterm : 
+		for key,term in Settings['Potential'].items() :
+                    for kkey,tterm in term.items():
+                        if 'CGCs' in tterm : 
+                            if type(term[kkey]['Fields'][0]) == list : 
+                                if not(all([type(valel) == list for keyel,valel in tterm['CGCs'].items()])) or not(all([len(valel)==len(term[kkey]['Fields']) for keyel,valel in tterm['CGCs'].items()])):
+                                    loggingCritical("Error, `CGCs` keys must be a dictionary of list of the same size as the `Field` key.",verbose=True)
+                                    exit()
+
                 #            if not(all([el in Settings['Groups'].keys() for el in tterm['CGCs']])):
                 #                loggingCritical("Error, `CGCs` keys must be known gauge group: {}".format(tterm['CGCs']),verbose=True)
                 #                exit()
