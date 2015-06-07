@@ -540,7 +540,7 @@ class Model(object) :
 												break
 										lcparts = [str(elem.args[0]) for elem in Return[el][counter][0]]
 										#######
-										#F. Bug fix on June 5th: the permutation does not work with multiple group for the scalars
+										#F. Bug fix on June 5th 2014: the permutation does not work with multiple group for the scalars
 										# Put back zeros for fields not charged under the various gauge groups
 										#######
 										#Get the structure of the indices 
@@ -550,6 +550,8 @@ class Model(object) :
 										NewInd = [list(elem) for elem in tempF[0]]
 										#substitute the j values by the integers
 										newind = []
+                                                                                #F. I believe that the list of zeros i.e. non of the particles are charged under a given gauge group are useless and I therefore remove them now (June 6th 2015)
+                                                                                Structureindices = [elstruc for elstruc in Structureindices if not(all([elemstruc ==0 for elemstruc in elstruc]))]
 										for ielem,elem in enumerate(Structureindices):
 											tempnewind = []
 											ill = 0
