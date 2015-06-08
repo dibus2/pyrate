@@ -1,5 +1,4 @@
 import sys
-import pudb
 sys.path.append('./Source/GroupTheory')
 from GroupDefinitions import *
 from RGEsmathModule import *
@@ -390,7 +389,7 @@ class Model(object) :
 				ContractedParticles = {}
 				FullSinglet[ill] = False
 				for subll in ll : 
-					Factor = []
+					Factor = [] 
 					for g in self.NonUGaugeGroups:
 						self.GetContractedParticles(ContractedParticles,g[0],g[1],Ppi[ill])
 						#Get the contraction factor
