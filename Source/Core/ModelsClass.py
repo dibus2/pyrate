@@ -224,7 +224,7 @@ class Model(object) :
 			return normdic
 		else :
 			normdic = normdic.replace('Sqrt','sqrt').replace('i','I')
-			if 'I' in normdic or 'sqrt' in normdic :
+                        if ('I' in normdic or 'sqrt' in normdic) and not('**' in normdic):
 				return eval(normdic)
                         elif '**' in normdic and '/' in normdic :
                             src = re.search('([0-9]{1,2})/([0-9])',normdic)
