@@ -1,5 +1,9 @@
 
-Marhch 8th : 
+June 5th: 
+
+Bug  introduced in version 1.1.1 fixed: with models where there is a singlet contracted with other fields. I introduced a fix for the permutations of indices but missed out one case which was never encountered in the demo model files. In case it was encoutered the program would crash. Therefore, no wrong results coudl have been produced.
+
+March 8th : 
 
 Bug fixed introduced in previous version...Thanks to M. Arshad Momen for
 pointing this out
