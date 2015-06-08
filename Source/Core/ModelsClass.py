@@ -536,6 +536,8 @@ class Model(object) :
 										NewInd = [list(elem) for elem in tempF[0]]
 										#substitute the j values by the integers
 										newind = []
+                                                                                #F. I believe that the list of zeros i.e. non of the particles are charged under a given gauge group are useless and I therefore remove them now (June 6th 2015)
+                                                                                Structureindices = [elstruc for elstruc in Structureindices if not(all([elemstruc ==0 for elemstruc in elstruc]))]
 										for ielem,elem in enumerate(Structureindices):
 											tempnewind = []
 											ill = 0
