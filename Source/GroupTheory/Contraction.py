@@ -2,7 +2,6 @@
 """
 Defines the function needed to do the contraction of different fields"""
 from Logging import *
-import pudb
 try :
 	import pickle
 	import time

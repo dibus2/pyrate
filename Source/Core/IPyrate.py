@@ -6,7 +6,6 @@ It allows one to check efficiently what is implemented what is not and how to sp
 """
 
 try :
-    import pudb
     import cmd
     import os
     from sys import exit
