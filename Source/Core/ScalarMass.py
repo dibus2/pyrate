@@ -31,6 +31,8 @@ def Cmeflabef(powe,comb,model):
 	"""Calculates the first term of Eq (86)"""
 	sc1,sc2 = comb
 	res = model.Expand(((_ms,s1,s2),(_L,sc1,sc2,s1,s2)))
+        if res != 0 : 
+            res = res.doit()
 	powe[0] = powe[0].subs(meflabef,res)
 	return powe[0]
 
