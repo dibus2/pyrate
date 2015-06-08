@@ -1,3 +1,7 @@
+June 5th: 
+
+Bug introduced in version 1.1.1 fixed: with models where there is a singlet contracted with other fields. I introduced a fix for the permutations of indices but missed out one case which was never encountered in the demo model files. In case it was encoutered the program would crash. Therefore, no wrong results coudl have been produced.
+
 April 15 th:
 
 Version 1.2.0_beta finalized: 
@@ -5,10 +9,6 @@ Version 1.2.0_beta finalized:
 	given term
 	* Please read NewsInPyR@TE-1.2.0.html before using
 	* Add the non public implementation of the sparse matrices
-
-June 5th: 
-
-Bug  introduced in version 1.1.1 fixed: with models where there is a singlet contracted with other fields. I introduced a fix for the permutations of indices but missed out one case which was never encountered in the demo model files. In case it was encoutered the program would crash. Therefore, no wrong results coudl have been produced.
 
 March 8th : 
 
