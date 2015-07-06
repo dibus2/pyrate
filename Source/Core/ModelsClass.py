@@ -118,7 +118,9 @@ class Model(object) :
 		###Extract the Fermion mass terms
 		if 'FermionMasses' in self.Potential : 
 			self.Potential['FermionMasses'],self.FMToCalculate,self.ListFM = self.ExtractTerm('FermionMasses')
-			self.FermionAnomalousToCalculate = copy.deepcopy(self.FMToCalculate)
+                        for fmkey,fmval in self.FMToCalculate.items():
+                                self.FermionAnomalousToCalculate['gamma_{{{}{}}}'.format(fmval[-1][0][0],fmval[-1][1][0])] = fmval
+			#self.FermionAnomalousToCalculate = copy.deepcopy(self.FMToCalculate)
 		if 'TrilinearTerms' in self.Potential : 
 			self.Potential['TrilinearTerms'],self.TriToCalculate,self.ListTri = self.ExtractTerm('TrilinearTerms')
 		#Check that there is no symbols that look like M or tM or atM or MatM because it interfers with the output
