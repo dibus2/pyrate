@@ -11,7 +11,7 @@ except :
     exit("Error while importing one of the modules `sys,os,argparse,yaml`")
 
 welcomemessage = """\n\n\n\n\t\t==================================================================================\n
-\t\t\t\tPyR@TE version 1.1.5  released  ???\n
+\t\t\t\tPyR@TE version x.x.x  released  ???\n
 \t\t\tF. Lyonnet, I. Schienbein, F.Staub, A.Wingerter, arxiv 1309.7030
 \t\t==================================================================================\n
 """
