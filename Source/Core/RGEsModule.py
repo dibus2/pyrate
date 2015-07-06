@@ -11,6 +11,7 @@ from FermionMass import *
 from Trilinear import *
 from ScalarAnomalous import *
 from FermionAnomalous import *
+import pudb
 
 def Translate(RGE, model, RunSettings):
 	"""Do the translation for a given RGE in a general g group into a product of semi simple groups."""
@@ -63,7 +64,7 @@ def Translate(RGE, model, RunSettings):
 					Translated[x[0]][ipow][0] = Y4F(powe,model,x)
 					loggingInfo('\t\t\t Calculating the Y4(F) term...done',verbose=RunSettings['vInfo'])
 					Translated[x[0]][ipow][0] = Translated[x[0]][ipow][0].doit()
-			Translated[x[0]] = CompileGaugeCouplings(model,Translated,x[0],RunSettings['Weyl'],RunSettings['SetGutNorm'])
+			Translated[x[0]] = CompileGaugeCouplings(model,Translated,x[0],RunSettings['Weyl'])
 			#Kinetic mixing terms
 		if model.kinmixing :
 			loggingInfo('\t\tGauge-Couplings calculation of the abelian sector {} ...'.format(' ,'.join([el[0] for el in model.UGaugeGroups])),verbose=RunSettings['vInfo'])
@@ -82,7 +83,7 @@ def Translate(RGE, model, RunSettings):
 				if powe[1] == 5 :
 					Translated['abelian'][ipow][0] = abeliansector2loop(model)
 					loggingInfo('\t\t\t Abelian sector 2-Loop...done',verbose=RunSettings['vInfo']) 
-			Translated['abelian'] = CompileGaugeCouplings(model,Translated,'abelian',RunSettings['Weyl'],RunSettings['SetGutNorm'])
+			Translated['abelian'] = CompileGaugeCouplings(model,Translated,'abelian',RunSettings['Weyl'])
 		loggingInfo("\t\t...Gauge-Couplings calculation done.",verbose=RunSettings['vInfo'])
 	elif RGE == 'Quartic-Couplings' :
 		set_globalsLbd(model)
@@ -295,6 +296,7 @@ def Translate(RGE, model, RunSettings):
 		if model.FermionAnomalousToCalculate == {} :
 			loggingCritical("WARNING, no fermion anomalous dimension to calculate",verbose=RunSettings['vCritical'])
 		else :
+                        pudb.set_trace()
 			for sc,valsc in model.FermionAnomalousToCalculate.items():
 				loggingInfo('\t\tFermion anomalous dimension calculation, for combination {}...\n'.format(sc),verbose=RunSettings['vInfo'])
 				Translated[sc] = LocalRGE.expand()
@@ -303,8 +305,8 @@ def Translate(RGE, model, RunSettings):
 				#elimination of the component that are equals to zero 
 				Translated[sc] = [[elt,ilt] for ilt,elt in enumerate(Translated[sc]) if elt != 0]
 				##############################################################
-				#comb = model.FermionAnomalousToCalculate[sc][-1] 
-				comb = [[Symbol('Qbar'),1,1],[Symbol('Qbar'),2,2]]
+				comb = model.FermionAnomalousToCalculate[sc][-1] 
+				#comb = [[Symbol('Qbar'),1,1],[Symbol('Qbar'),1,1]]
 				##############################################################
 				for ipow,powe in enumerate(Translated[sc]):
 								for elemineq in ListEquations['FermionAnomalous'][powe[1]]['one-loop']:

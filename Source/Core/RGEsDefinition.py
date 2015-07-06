@@ -109,12 +109,7 @@ ListEquations['ScalarAnomalous'] ={ 0 : {'one-loop': ['CY2ab'],
 																					'two-loop': ['CScalarAnoII','CC2SC2S']}
 																		}
 ListEquations['FermionAnomalous'] ={ 0 : {'one-loop': ['CFermionAnoI'],
-																					'two-loop': ['CFermionAnoII']},
-																		2 : {'one-loop': ['CFermionAnoIg2'],
-																					'two-loop': ['CFermionAnoIIg2']},
-																		4 : {'one-loop': [],
-																					'two-loop': ['CFermionAnoIIg4']}
-																		}																	
+'two-loop': ['CFermionAnoII']},	2 : {'one-loop': ['CFermionAnoIg2'],'two-loop': ['CFermionAnoIIg2']},4 : {'one-loop': [],'two-loop': ['CFermionAnoIIg4']}																		}																	
 #################
 #RGEs Definitions
 #################
@@ -277,7 +272,7 @@ RGEsDefinitions['FermionAnomalous'] ={
 		'I':
 		1/(4*pi)**2*(
 			FermionAnoI+
-		g**2*FermionAnoIg2)
+		g**2*xi*FermionAnoIg2)
 		,
 		'II':
 		1/(4*pi)**4*(

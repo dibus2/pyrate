@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from Contraction import *
+import pudb
 try :
 	import yaml
 	import sys
@@ -25,7 +26,7 @@ def writeLatexOutput(RunSettings,FinalRGE,model,ToCalculate):
 			Potential +='\n'.join(['{}: {}'.format(k,v) for k,v in val.items()])
 		ModelStr += Potential
 		LatexText = r"""
-		\documentclass[12pt,letter,fleqn]{article}
+		\documentclass[12pt,fleqn]{article}
 		\pagestyle{empty}
 		\usepackage[latin1]{inputenc}
 		\usepackage[dvips,landscape,top=1cm,nohead,nofoot]{geometry}
@@ -380,10 +381,43 @@ def writeScalarAnomalous(LatexText,FinalRGE,model,RunSettings,counter):
 
 def writeFermionAnomalous(LatexText,FinalRGE,model,RunSettings,counter):
 	"""writes the Fermion anomalous dimension to the tex string"""
-	#NOT IMPLEMENTED yet
 	LatexText += '\n\section{Fermion Anomalous dimension}'
-	LatexText += r"""
-		NOT IMPLEMENTED YET"""
+        LatexText += r"""
+        \begin{align*}
+            \frac{d\gamma_{ff^\prime}}{dt} = \left.\beta_{\gamma_{ff^\prime}}\right|_I + \left.\beta_{\gamma_{ff^\prime}}\right|_{II}\\
+        \end{align*}
+        """
+        index = counter
+	for y in model.FermionAnomalousToCalculate.keys() : 
+		Eq = FinalRGE[index][y]
+		#Reconstruct the external indices
+		Indices = ['i{}'.format(ii) for ii in range(2)]
+		#Get the 1Loop result
+		ExprI = (((Eq*(4*pi)**2).subs(Symbol('kappa'),Rational(1,2))).expand()).subs(1/pi,0)
+		#Get the 2Loop result
+		ExprII = (((Eq*(4*pi)**4).subs(Symbol('kappa'),Rational(1,2))).expand()).subs(pi,0)
+		#Replace the name of the particles with the new indices for readability
+		Fermions = [el.args[0] for el in model.FermionAnomalousToCalculate[y][0] if str(el.args[0]) in model.Fermions]
+		if len(Fermions) == 2 and Fermions[0] == Fermions[1] :
+			ExprI = ExprI.subs(str(Fermions[0])+'_f',Indices[0])
+			ExprI = ExprI.subs(str(Fermions[0])+'1_f',Indices[1])
+			ExprI = ExprI.subs(str(Fermions[0]),Indices[0])
+			ExprII = ExprII.subs(str(Fermions[0])+'_f',Indices[0])
+			ExprII = ExprII.subs(str(Fermions[0])+'1_f',Indices[1])
+			ExprII = ExprII.subs(str(Fermions[0]),Indices[0])
+		else :
+			for ipp,pp in enumerate(Fermions):
+				ExprI = ExprI.subs(str(pp)+'_f',Indices[ipp])
+				ExprI = ExprI.subs(str(pp),Indices[ipp])
+				ExprII = ExprII.subs(str(pp)+'_f',Indices[ipp])
+				ExprII = ExprII.subs(str(pp),Indices[ipp])
+		#Split the Equations
+		ExprI = SplitEq(ExprI)
+		ExprII = SplitEq(ExprII)
+		LatexText = WriteEqs(LatexText,ExprI,ExprII,y,RunSettings)
+		LatexText = Polishing(LatexText,model)
+	else :
+		pass
 	return LatexText
 
 def WriteEqs(LatexText,ExprI,ExprII,label,RunSettings,combinations=[],ScalarAnomalous=False) : 

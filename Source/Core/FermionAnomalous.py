@@ -38,12 +38,20 @@ def CFermionAnoIg2(powe,comb,model):
 	"""Calculates Eq 28"""
 	assert powe[1] == 2
 	f1,f2 = comb
-	conserv = functools.reduce(operator.mul,[KroneckerDelta(a,b) for a,b in zip(f1,f2)])
+	conserv = [KroneckerDelta(a,b) for a,b in zip(f1,f2)]
+	if type(conserv[0]) == KroneckerDelta  :
+			conserv[0] = 0 if conserv[0].args[0] != conserv[0].args[1] else 1
+	conserv = functools.reduce(operator.mul,conserv)
 	if conserv != 0 :
 		res = model.Expand(((_G,gg1),(_C,gg1,f1)))*conserv
 	else :
 		res = 0
 	powe[0] = powe[0].subs(FermionAnoIg2,res)
 	return powe[0]
+
+
+
+
+
 
 

@@ -46,8 +46,8 @@ parser.add_argument('--Export','-e',dest = 'Export', action= 'store_true', defau
 parser.add_argument('--Export-file','-ef',dest = 'ExportFile', action= 'store', default = 'BetaFunction.py', help = 'Set the name of the output python file')
 parser.add_argument('--Only','-onl',dest = 'Only', action ='store', default = {}, help='Set a dictionary of terms you want to calculate: "QuarticTerms,Yukawas,TrilearTerms,FermionMasses,ScalarMasses". E.g. "{\'QuarticTerms\': [\'\lambda_1\',\'\lambda_2\']}". Note that if passed in the command line the whole argument must be a string')
 parser.add_argument('--Skip','-sk',dest = 'Skip', action= 'store', default = '', help = 'Set the different terms to neglect in the calculation. E.g. ["CAabcd","CL2abcd"]. The list of terms that can be neglected are listed in Source/Core/RGEsDefinition.py' )
-parser.add_argument('--ScalarAnomalous','-sca',dest = 'ScalarAnomalous', action ='store_true', default = False, help='set the calculation of scalar anomalous dimensions to True')
-parser.add_argument('--FermionAnomalous','-fera',dest = 'FermionAnomalous', action ='store_true', default = False, help='set the calculation of fermion anomalous dimensions to True')
+parser.add_argument('--ScalarAnomalous','-sa',dest = 'ScalarAnomalous', action ='store_true', default = False, help='set the calculation of scalar anomalous dimensions to True')
+parser.add_argument('--FermionAnomalous','-fa',dest = 'FermionAnomalous', action ='store_true', default = False, help='set the calculation of fermion anomalous dimensions to True')
 parser.add_argument('--SetGutNorm','-gutn',dest='SetGutNorm',action='store_true', default=False, help='set the normalization to gut normalization in case there is a U(1) gauge group, it normalizes g1 -> sqrt(3/5)*g\'')
 
 #Collect the arguments
@@ -407,9 +407,6 @@ else :
 		if RunSettings['FermionAnomalous']:
 			if model.FermionAnomalousToCalculate == {} :
 				loggingCritical("\t\t**WARNING**, No Fermion Anomalous dimension found to calculate. Each anomalous is associated to a fermion mass term, make sure that the corresponding fermion mass terms are defined in the potential.", verbose=True)
-				#TODO REMOVE 
-				ToCalculate.append('FermionAnomalous')
-				model.FermionAnomalousToCalculate ={'test':[]}
 			else :
 				ToCalculate.append('FermionAnomalous')
 				loggingInfo("\t\t... with option --FermionAno",verbose=RunSettings['vInfo'])
