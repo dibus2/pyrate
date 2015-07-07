@@ -8,6 +8,5 @@ models/private/
 *.pyc
 #logfiles
 logFile*.log
-
 Source/GroupTheory/CGCs-new*
 Source/GroupTheory/CGCsnew*
