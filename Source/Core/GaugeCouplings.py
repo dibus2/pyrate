@@ -19,7 +19,6 @@ def CompileGaugeCouplings(model,Translated,x,Weyl):
 	FinalBeta = DeterminOrdering(model,FinalBeta)
 	return FinalBeta
 
-
 def set_globals(model):
 	"""coppy the globals from RGEsModule into the local gloabls()"""
 	for key,val in model.glob.items():

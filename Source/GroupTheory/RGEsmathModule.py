@@ -1,6 +1,7 @@
 #!/usr/bin/env python 
 """We define mathematical functions and tools used for the different calculations."""
 from GroupDefinitions import *
+import pudb
 def Epsilon(lis):
 	"""wrapper for the Eijk function of sympy in order to have it work with a list of arg of arbitrary length"""
 	#contruct the string of indices
@@ -327,6 +328,7 @@ def DeterminOrdering(model,Final):
 def determinordering(model,Final):
 	"""Determin the ordering of the Structure"""
 	OrderedTerm  = []	
+        pudb.set_trace()
 	for term in Final :
 		args = term.args	
 		Out,In,Factor = [],[],[]

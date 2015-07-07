@@ -277,8 +277,8 @@ RGEsDefinitions['FermionAnomalous'] ={
 		'II':
 		1/(4*pi)**4*(
 			FermionAnoII 
-			+ FermionAnoIIg2
-			+ FermionAnoIIg4
+			+ g**2*FermionAnoIIg2
+			+ g**4*FermionAnoIIg4
 		)
 		,
 		'Ref': 'Eq 	22,23 of 0211440v3'

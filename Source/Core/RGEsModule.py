@@ -305,8 +305,8 @@ def Translate(RGE, model, RunSettings):
 				#elimination of the component that are equals to zero 
 				Translated[sc] = [[elt,ilt] for ilt,elt in enumerate(Translated[sc]) if elt != 0]
 				##############################################################
-				comb = model.FermionAnomalousToCalculate[sc][-1] 
-				#comb = [[Symbol('Qbar'),1,1],[Symbol('Qbar'),1,1]]
+				#comb = model.FermionAnomalousToCalculate[sc][-1] 
+				comb = [[Symbol('Qbar'),1,1],[Symbol('Qbar'),1,1]]
 				##############################################################
 				for ipow,powe in enumerate(Translated[sc]):
 								for elemineq in ListEquations['FermionAnomalous'][powe[1]]['one-loop']:
