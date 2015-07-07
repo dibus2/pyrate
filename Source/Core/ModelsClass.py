@@ -2069,7 +2069,7 @@ class Model(object) :
 		key = tuple(['Y2F']+parts+flatten(indices))
 		if key in self.InvariantResults:
 			res = self.InvariantResults[key]
-			loggingDebug("reading Y2F",verbose=self.applyExtraConstrains2)
+			loggingDebug("reading Y2F")
 		else :
 			f1,f2 = self.getparts(parts,indices)
 			if not(adj):

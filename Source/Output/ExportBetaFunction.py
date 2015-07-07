@@ -24,10 +24,10 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
         CodeStr += "\tkappa = 1./(16*np.pi**2)\n"
         #Simplify the keys of StrucYuk
         maps = {}
-				Ids = {}
+        Ids = {}
         for ikk,(key,val) in enumerate(StrucYuk.items()) :
                 maps[key] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}',key))))
-								Ids[maps[key]] = "Id{}".format(ikk)
+                Ids[maps[key]] = "Id{}".format(ikk)
                 if max(val) != 1 :
                         CodeStr += "\tId{} = np.eye({})\n".format(ikk,max(val))
                 else :
@@ -38,7 +38,7 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
         ListSymbs = [el[1].g for el in model.GaugeGroups] + model.ListLbd + model.ListScM + model.ListTri
         for iel,el in enumerate(ListSymbs) :
                 if len(reg.split('{(.*)}',str(el))) == 3 or len(reg.split('\\\(.*)',str(el))) == 3 :
-												#F: merging, online version:ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',str(el)))))
+                    #F: merging, online version:ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',str(el)))))
                         ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
                         maps[el] = ListSymbs[iel]       
                 else :
@@ -110,13 +110,13 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
                                                         maps[label],TranslateToNumerics((kappa*expr).expand().subs(1/pi**2,0),ListSymbs,maps[label],Ids,model,Mapping,isScalar=True))
                                         #Get the 2loop contribution
                                         temp2L += '\t\tb{0} = b{0} + ({1})*kappa**2\n'.format(
-                                                        maps[label],TranslateToNumerics((kappa**2*expr).expand().subs(pi,0),ListSymbs,maps[label],model,Ids,Mapping,isScalar=True))
+                                                        maps[label],TranslateToNumerics((kappa**2*expr).expand().subs(pi,0),ListSymbs,maps[label],Ids,model,Mapping,isScalar=True))
                                 else :
                                         temp1L += '\tbeta{} = ({})*kappa\n'.format(
-                                                        maps[label],TranslateToNumerics((kappa*expr).expand().subs(1/pi**2,0),ListSymbs,maps[label],model,Ids,Mapping,isScalar=False))
+                                                        maps[label],TranslateToNumerics((kappa*expr).expand().subs(1/pi**2,0),ListSymbs,maps[label],Ids,model,Mapping,isScalar=False))
                                         #Get the 2loop contribution
                                         temp2L += '\t\tbeta{0} = beta{0} + ({1})*kappa**2\n'.format(
-                                                        maps[label],TranslateToNumerics((kappa**2*expr).expand().subs(pi,0),ListSymbs,maps[label],model,Ids,Mapping,isScalar=False))
+                                                        maps[label],TranslateToNumerics((kappa**2*expr).expand().subs(pi,0),ListSymbs,maps[label],Ids,model,Mapping,isScalar=False))
         #We regroup all the 1 loop and 2 loop contributions to avoid multiple if statements
         CodeStr += temp1L
         CodeStr += "\tif Assumptions['two-loop']:\n{}".format(temp2L)

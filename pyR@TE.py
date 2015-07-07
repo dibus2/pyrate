@@ -523,5 +523,5 @@ else :
                 loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
         loggingCritical('End of the run.',verbose = RunSettings['vCritical'])
         #mv the logging into results
-        os.system('mv {} {}'.format(RunSettings['LogFile'],RunSettings['Results']))
+        #os.system('mv {} {}'.format(RunSettings['LogFile'],RunSettings['Results']))
 
