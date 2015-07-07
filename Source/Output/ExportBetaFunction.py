@@ -24,8 +24,10 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
         CodeStr += "\tkappa = 1./(16*np.pi**2)\n"
         #Simplify the keys of StrucYuk
         maps = {}
+				Ids = {}
         for ikk,(key,val) in enumerate(StrucYuk.items()) :
                 maps[key] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}',key))))
+								Ids[maps[key]] = "Id{}".format(ikk)
                 if max(val) != 1 :
                         CodeStr += "\tId{} = np.eye({})\n".format(ikk,max(val))
                 else :
@@ -36,6 +38,7 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
         ListSymbs = [el[1].g for el in model.GaugeGroups] + model.ListLbd + model.ListScM + model.ListTri
         for iel,el in enumerate(ListSymbs) :
                 if len(reg.split('{(.*)}',str(el))) == 3 or len(reg.split('\\\(.*)',str(el))) == 3 :
+												#F: merging, online version:ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',str(el)))))
                         ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
                         maps[el] = ListSymbs[iel]       
                 else :
@@ -104,16 +107,16 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
                                 #Get the 1loop contribution
                                 if ii != 'Yukawas' and ii != 'FermionMass' : 
                                         temp1L += '\tb{} = ({})*kappa\n'.format(
-                                                        maps[label],TranslateToNumerics((kappa*expr).expand().subs(1/pi**2,0),ListSymbs,maps[label],model,Mapping,isScalar=True))
+                                                        maps[label],TranslateToNumerics((kappa*expr).expand().subs(1/pi**2,0),ListSymbs,maps[label],Ids,model,Mapping,isScalar=True))
                                         #Get the 2loop contribution
                                         temp2L += '\t\tb{0} = b{0} + ({1})*kappa**2\n'.format(
-                                                        maps[label],TranslateToNumerics((kappa**2*expr).expand().subs(pi,0),ListSymbs,maps[label],model,Mapping,isScalar=True))
+                                                        maps[label],TranslateToNumerics((kappa**2*expr).expand().subs(pi,0),ListSymbs,maps[label],model,Ids,Mapping,isScalar=True))
                                 else :
                                         temp1L += '\tbeta{} = ({})*kappa\n'.format(
-                                                        maps[label],TranslateToNumerics((kappa*expr).expand().subs(1/pi**2,0),ListSymbs,maps[label],model,Mapping,isScalar=False))
+                                                        maps[label],TranslateToNumerics((kappa*expr).expand().subs(1/pi**2,0),ListSymbs,maps[label],model,Ids,Mapping,isScalar=False))
                                         #Get the 2loop contribution
                                         temp2L += '\t\tbeta{0} = beta{0} + ({1})*kappa**2\n'.format(
-                                                        maps[label],TranslateToNumerics((kappa**2*expr).expand().subs(pi,0),ListSymbs,maps[label],model,Mapping,isScalar=False))
+                                                        maps[label],TranslateToNumerics((kappa**2*expr).expand().subs(pi,0),ListSymbs,maps[label],model,Ids,Mapping,isScalar=False))
         #We regroup all the 1 loop and 2 loop contributions to avoid multiple if statements
         CodeStr += temp1L
         CodeStr += "\tif Assumptions['two-loop']:\n{}".format(temp2L)
@@ -405,37 +408,35 @@ def RemoveIndices(xpr,el,Yuk=True):
         return xpr
 
 
-def TranslateToNumerics(expression,ListSymbs,label,model,Mapping,Matrices=True,isScalar=False) : 
-        """Implements all the modification to the expression to be evaluated numerically and return a string"""
-        #Use the ToMathematicaNotation to clean up the result a bit
-        StrXpr = ToMathematicaNotation(expression,model,FlagSquare=False)#to avoid the '('->'['
-        if not(isScalar) :
-                StrXpr = StrXpr.replace('trace','ttrace').replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','SScalarProd')
-        else :
-                StrXpr = StrXpr.replace('trace','ttrace').replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','SScalarProd')
-        while 'ttrace(' in StrXpr       :
-                StrXpr = ToNumpy('ttrace',StrXpr)
-        while 'Adj(' in StrXpr :
-                StrXpr = TAdj(StrXpr)
-        #Gauge-Couplings,Quartic,Trilinear,scalar masses
-        for el in ListSymbs : 
-                StrXpr = StrXpr.replace(str(el),'y[{}]'.format(Mapping[el]))
-        #Now let's deal with the Yukawas and the indices 
-        if Matrices :#result in matrix form
-                #Remove all the indices
-                for el in model.ListYukawa :
-                        el =''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',el))))
-                        StrXpr = RemoveIndices(StrXpr,el,Yuk=True)
-                StrXpr = RemoveIndices(StrXpr,'MatMul',Yuk=False)
-                while 'matMul(' in StrXpr :
-                        StrXpr = ToNumpy('matMul',StrXpr,Mat=True)#The Mat is used to remove the tag of the function like ScalarProd -> ''
-                while 'SScalarProd(' in StrXpr:
-                        StrXpr = ToNumpy('SScalarProd',StrXpr,Mat=True)
-        return StrXpr
+#def TranslateToNumerics(expression,ListSymbs,label,model,Mapping,Matrices=True,isScalar=False) : 
+#        """Implements all the modification to the expression to be evaluated numerically and return a string"""
+#        #Use the ToMathematicaNotation to clean up the result a bit
+#        StrXpr = ToMathematicaNotation(expression,model,FlagSquare=False)#to avoid the '('->'['
+#        if not(isScalar) :
+#                StrXpr = StrXpr.replace('trace','ttrace').replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','SScalarProd')
+#        else :
+#                StrXpr = StrXpr.replace('trace','ttrace').replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','SScalarProd')
+#        while 'ttrace(' in StrXpr       :
+#                StrXpr = ToNumpy('ttrace',StrXpr)
+#        while 'Adj(' in StrXpr :
+#                StrXpr = TAdj(StrXpr)
+#        #Gauge-Couplings,Quartic,Trilinear,scalar masses
+#        for el in ListSymbs : 
+#                StrXpr = StrXpr.replace(str(el),'y[{}]'.format(Mapping[el]))
+#        #Now let's deal with the Yukawas and the indices 
+#        if Matrices :#result in matrix form
+#                #Remove all the indices
+#                for el in model.ListYukawa :
+#                        el =''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',el))))
+#                        StrXpr = RemoveIndices(StrXpr,el,Yuk=True)
+#                StrXpr = RemoveIndices(StrXpr,'MatMul',Yuk=False)
+#                while 'matMul(' in StrXpr :
+#                        StrXpr = ToNumpy('matMul',StrXpr,Mat=True)#The Mat is used to remove the tag of the function like ScalarProd -> ''
+#                while 'SScalarProd(' in StrXpr:
+#                        StrXpr = ToNumpy('SScalarProd',StrXpr,Mat=True)
+#        return StrXpr
 
 
-<<<<<<< HEAD
-=======
 def TranslateToNumerics(expression,ListSymbs,label,Ids,model,Mapping,Matrices=True,isScalar=False) : 
 	"""Implements all the modification to the expression to be evaluated numerically and return a string"""
 	#Use the ToMathematicaNotation to clean up the result a bit
@@ -466,5 +467,4 @@ def TranslateToNumerics(expression,ListSymbs,label,Ids,model,Mapping,Matrices=Tr
 		while 'SScalarProd(' in StrXpr:
 			StrXpr = ToNumpy('SScalarProd',StrXpr,Mat=True)
 	return StrXpr
->>>>>>> online
 
