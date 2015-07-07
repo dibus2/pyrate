@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from Contraction import *
-import pudb
 try :
 	import yaml
 	import sys
@@ -143,53 +142,6 @@ def writeGaugeCouplings(LatexText,FinalRGE,model,RunSettings):
 					\end{align*}"""
 		inonu += 1 if t else 0
 	return LatexText
-
-#def writeGaugeCouplings(LatexText,FinalRGE,model,RunSettings):
-#	"""writes the GaugeCouplings equation to the latexTexte string"""
-#	LatexText += '\n\section{Gauge Couplings}'
-#	LatexText += r"""
-#		\begin{align*}
-#			\frac{dg}{dt} = \left.\beta_g\right|_I + \left.\beta_g\right|_{II}\
-#		\end{align*}"""
-#	for name,g,t in model.GaugeGroups:
-#		#The Yuk are at two loop but prop to g^3 therefore it ends up in the ExprI contribution -> translate it
-# 		ExprI = (FinalRGE[0][name]*(4*pi)**2).expand().subs(1/pi,0)
-#		#get the dict containing the expression to write on each line
-#		LtxExprI = SplitEq(ExprI.subs(Symbol('kappa'),Rational(1,2)).expand())
-#		if RunSettings['Two-Loop'] : 
-# 			ExprII = (FinalRGE[0][name]*(4*pi)**4).expand().subs(pi**2,0)
-#			LtxExprII = SplitEq(ExprII.subs(Symbol('kappa'),Rational(1,2)).expand(),200)
-#			LatexText += r"""
-#					\subsection{{Evolution of ${0}$}}
-#					\begin{{align*}}
-#						\left.(4\pi)^2\beta_{{{0}}}\right|_{{I}} = """.format(latex(g.g))
-#			for line,eq in LtxExprI.items():
-#				eq = latex(eq)
-#				Sign = '+' if eq[0] != '-' else ''
-#				LatexText +=r"""
-#					&{}{}\\""".format(Sign,eq)
-#			LatexText +=r"""
-#						\left.(4\pi)^4\beta_{{{0}}}\right|_{{II}} = """.format(latex(g.g))
-#			for line,eq in LtxExprII.items():
-#				eq = latex(eq)
-#				Sign = '+' if eq[0] != '-' else ''
-#				LatexText +=r"""
-#				&{}{}\\""".format(Sign,eq)
-#			LatexText +=r"""
-#					\end{align*}"""
-#		else :
-#			LatexText += r"""
-#					\subsection{{Evolution of ${0}$}}
-#					\begin{{align*}}
-#						\left.(4\pi)^2\beta_{{{0}}}\right|_{{I}} = """.format(latex(g.g))
-#			for line,eq in LtxExprI.items():
-#				eq = latex(eq)
-#				Sign = '+' if eq[0] != '-' else ''
-#				LatexText +=r"""
-#					&{}{}\\""".format(Sign,eq)
-#			LatexText +=r"""
-#					\end{align*}"""
-#	return LatexText
 
 def writeQuarticCouplings(LatexText,FinalRGE,model,RunSettings,counter):
 	"""writes the Quartic Couplings to the tex string"""

@@ -59,8 +59,8 @@ def CFermionAnoII(powe,comb,model):
     """Calculates Eq. 29 line 1"""
     assert powe[1] == 0
     f1,f2 = comb
-    res = (-Rational(1,8)*model.Expand2(((_Y,s1,f1,p1),(_Ya,s2,p1,p2),(_Y,s2,p2,p3),(_Ya,s1,p3,f2)))
-            -kappa*Rational(3,2)*model.Expand2(((_Y,s1,f1,p1),(_Ya,s2,p1,f2),('Yab2S',s1,s2)))
+    res = (-Rational(1,8)*model.Expand2(((_Y,s1,f1,p1),(_Ya,s2,p1,p2),(_Y,s2,p2,p3),(_Ya,s1,p3,f2)),dotrace=False)
+            -kappa*Rational(3,2)*model.Expand2(((_Y,s1,f1,p1),(_Ya,s2,p1,f2),('Yab2S',s1,s2)),dotrace=False)
             )
     if res != 0 : 
         res = res.doit()

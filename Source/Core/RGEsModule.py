@@ -11,7 +11,6 @@ from FermionMass import *
 from Trilinear import *
 from ScalarAnomalous import *
 from FermionAnomalous import *
-import pudb
 
 def Translate(RGE, model, RunSettings):
 	"""Do the translation for a given RGE in a general g group into a product of semi simple groups."""
@@ -296,7 +295,6 @@ def Translate(RGE, model, RunSettings):
 		if model.FermionAnomalousToCalculate == {} :
 			loggingCritical("WARNING, no fermion anomalous dimension to calculate",verbose=RunSettings['vCritical'])
 		else :
-                        pudb.set_trace()
 			for sc,valsc in model.FermionAnomalousToCalculate.items():
 				loggingInfo('\t\tFermion anomalous dimension calculation, for combination {}...\n'.format(sc),verbose=RunSettings['vInfo'])
 				Translated[sc] = LocalRGE.expand()
@@ -305,8 +303,8 @@ def Translate(RGE, model, RunSettings):
 				#elimination of the component that are equals to zero 
 				Translated[sc] = [[elt,ilt] for ilt,elt in enumerate(Translated[sc]) if elt != 0]
 				##############################################################
-				#comb = model.FermionAnomalousToCalculate[sc][-1] 
-				comb = [[Symbol('Qbar'),1,1],[Symbol('Qbar'),1,1]]
+				comb = model.FermionAnomalousToCalculate[sc][-1] 
+				#comb = [[Symbol('Qbar'),1,1],[Symbol('Q'),1,1]]
 				##############################################################
 				for ipow,powe in enumerate(Translated[sc]):
 								for elemineq in ListEquations['FermionAnomalous'][powe[1]]['one-loop']:

@@ -4,7 +4,6 @@ from ModelsClass import	Model,loggingInfo,loggingDebug,loggingCritical
 from RGEsmathModule import DynkinIndex,DynkinCasimir,multiplicity,SimplifyTraces,DeterminOrdering,Tr
 
 
-
 ###########################
 #Scalar Anomalous dimension
 ###########################
@@ -56,9 +55,6 @@ def CScalarAnoI(powe,comb,model):
 # Two-loop contributions
 ########################
 
-
-
-
 def CL2ab(powe,comb,model):
 	"""Calculates the term L2ab Eq 24"""
 	assert powe[1] ==0
@@ -92,9 +88,9 @@ def CY2Fab(powe,comb,model):
 	"""Calculates the term CY2Fab Eq 27"""
 	assert powe[1] ==2
 	sc1,sc2 = comb
-	res = Rational(1,2)*(model.Expand2(((_G,gg1),(_C,gg1,p1),[[(_Y,sc1,p1,p2),(_Ya,sc2,p3,p1)],[(_Y,sc2,p1,p2),(_Ya,sc1,p2,p1)]])) 
+	res = Rational(1,2)*(model.Expand2(((_G,gg1),(_C,gg1,p1),[[(_Y,sc1,p1,p2),(_Ya,sc2,p2,p1)],[(_Y,sc2,p1,p2),(_Ya,sc1,p2,p1)]])) 
 			)
-	powe[0] = powe[0].subs(Hbar2ab,res)
+	powe[0] = powe[0].subs(Y2Fab,res)
 	return powe[0]
 
 def CC2SC2S(powe,comb,model):
@@ -103,9 +99,9 @@ def CC2SC2S(powe,comb,model):
 	sc1,sc2 = comb
 	conserv = functools.reduce(operator.mul,[KroneckerDelta(a,b) for a,b in zip(sc1,sc2)])
 	if conserv != 0:
-		res = model.Expand(((_G,gg1),(_G,gg2),(_Cs,gg1,sc1),(_Cs,gg2,sc2)))
+		res = model.Expand(((_G,gg1),(_G,gg2),(_Cs,gg1,sc1),(_Cs,gg2,sc1)))
 	else : 
-		res = 0
+            res = 0
 	powe[0] = powe[0].subs(C2SC2S,res)
 	return powe[0]
 
@@ -117,8 +113,8 @@ def CScalarAnoII(powe,comb,model):
 	conserv = functools.reduce(operator.mul,[KroneckerDelta(a,b) for a,b in zip(sc1,sc2)])
 	if conserv != 0 : 
 		res = ((Rational(35,3)-2*xi-Rational(1,4)*xi**2)*model.Expand(((_G,gg1),(_G,gg1),(_Cs,gg1,sc1),(_Cg,gg1)))
-			-Rational(10,3)*kappa*model.Expand(((_G,gg1),(_G,gg1),(_S,gg1)))
-			-Rational(11,12)*model.Expand(((_G,gg1),(_G,gg1),(_Ss,gg1)))
+			-Rational(10,3)*kappa*model.Expand(((_G,gg1),(_G,gg1),(_Cs,gg1,sc1),(_S,gg1)))
+			-Rational(11,12)*model.Expand(((_G,gg1),(_G,gg1),(_Cs,gg1,sc1),(_Ss,gg1)))
 			)
 	else :
 		res = 0
