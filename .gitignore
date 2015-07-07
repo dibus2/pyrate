@@ -8,3 +8,4 @@ models/private/
 *.pyc
 #logfiles
 logFile*.log
+Source/GroupeTheory/CGCs-new*
