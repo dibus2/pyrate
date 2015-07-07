@@ -9,6 +9,7 @@ try :
 except ImportError :
         exit('error while loading modules in latexRGEs.py')
 from Contraction import *
+import pudb
 from ToMathematica import ToMathematicaNotation,findclosingbracket
 
 def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
@@ -26,7 +27,7 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
         maps = {}
         Ids = {}
         for ikk,(key,val) in enumerate(StrucYuk.items()) :
-                maps[key] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}',key))))
+                maps[key] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',key))))
                 Ids[maps[key]] = "Id{}".format(ikk)
                 if max(val) != 1 :
                         CodeStr += "\tId{} = np.eye({})\n".format(ikk,max(val))
@@ -38,8 +39,9 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
         ListSymbs = [el[1].g for el in model.GaugeGroups] + model.ListLbd + model.ListScM + model.ListTri
         for iel,el in enumerate(ListSymbs) :
                 if len(reg.split('{(.*)}',str(el))) == 3 or len(reg.split('\\\(.*)',str(el))) == 3 :
-                    #F: merging, online version:ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',str(el)))))
-                        ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
+                    #F: merging, online version:
+                        ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',str(el)))))
+                        #ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
                         maps[el] = ListSymbs[iel]       
                 else :
                         maps[el] = el
@@ -406,35 +408,6 @@ def RemoveIndices(xpr,el,Yuk=True):
                         xpr = ''.join(lstring)
                         xpr = xpr.replace('MatMul','matMul',1)
         return xpr
-
-
-#def TranslateToNumerics(expression,ListSymbs,label,model,Mapping,Matrices=True,isScalar=False) : 
-#        """Implements all the modification to the expression to be evaluated numerically and return a string"""
-#        #Use the ToMathematicaNotation to clean up the result a bit
-#        StrXpr = ToMathematicaNotation(expression,model,FlagSquare=False)#to avoid the '('->'['
-#        if not(isScalar) :
-#                StrXpr = StrXpr.replace('trace','ttrace').replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','SScalarProd')
-#        else :
-#                StrXpr = StrXpr.replace('trace','ttrace').replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','SScalarProd')
-#        while 'ttrace(' in StrXpr       :
-#                StrXpr = ToNumpy('ttrace',StrXpr)
-#        while 'Adj(' in StrXpr :
-#                StrXpr = TAdj(StrXpr)
-#        #Gauge-Couplings,Quartic,Trilinear,scalar masses
-#        for el in ListSymbs : 
-#                StrXpr = StrXpr.replace(str(el),'y[{}]'.format(Mapping[el]))
-#        #Now let's deal with the Yukawas and the indices 
-#        if Matrices :#result in matrix form
-#                #Remove all the indices
-#                for el in model.ListYukawa :
-#                        el =''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',el))))
-#                        StrXpr = RemoveIndices(StrXpr,el,Yuk=True)
-#                StrXpr = RemoveIndices(StrXpr,'MatMul',Yuk=False)
-#                while 'matMul(' in StrXpr :
-#                        StrXpr = ToNumpy('matMul',StrXpr,Mat=True)#The Mat is used to remove the tag of the function like ScalarProd -> ''
-#                while 'SScalarProd(' in StrXpr:
-#                        StrXpr = ToNumpy('SScalarProd',StrXpr,Mat=True)
-#        return StrXpr
 
 
 def TranslateToNumerics(expression,ListSymbs,label,Ids,model,Mapping,Matrices=True,isScalar=False) : 
