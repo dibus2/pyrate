@@ -43,16 +43,12 @@ class SUn(object):
 		if not(HB) :
 			assert ferm1 == ferm2
 			mat = self.Matrices[ferm1]
-			#for sparse matrices
-			#mat = (mat['mat'],mat['shape'])
-			#mat = mat['mat']
+#F.sparse	        mat = (mat['mat'],mat['shape'])
 		else  :
 			assert ferm1[1] == ferm2[1] #i.e. same representation
 			#read the sequence i.e. PiPi PiSig SigPi 
 			mat = self.HBMat[ferm1[1]][(ferm1[0],ferm2[0])]
-			#for sparse matrices
-			#mat = (mat['mat'],mat['shape'])
-			#mat = mat['mat']
+#F.sparse		mat = (mat['mat'],mat['shape'])
 		return mat
 
 	def OuterMatrixProduct(self,M1,M2):

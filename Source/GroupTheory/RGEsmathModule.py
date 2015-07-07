@@ -439,7 +439,7 @@ def determinordering(model,Final):
 									Term = Symbol(str(Term[0]),commutative=True)
 								elif Indices != [] :
 									if len(Indices) == 1 and skip != [] and type(skip[0]) == MatM:
-										if Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
+										if len(Indices[-1]) >= 2 and Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
 											Indices[-1] = Indices[-1][0],Symbol(str(Indices[-1][1]).split('_')[0]+'1_f')
 										Term = model.Classes[str(Term[0])](*Indices[-1]).transpose()
 									else :

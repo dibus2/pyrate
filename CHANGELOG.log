@@ -1,3 +1,28 @@
+June 5th: 
+
+Bug introduced in version 1.1.1 fixed: with models where there is a singlet contracted with other fields. I introduced a fix for the permutations of indices but missed out one case which was never encountered in the demo model files. In case it was encoutered the program would crash. Therefore, no wrong results coudl have been produced.
+
+April 15 th:
+
+Version 1.2.0_beta finalized: 
+	* New key word CGCs allowing to deal with multiple gauge singlets for a
+	given term
+	* Please read NewsInPyR@TE-1.2.0.html before using
+	* Add the non public implementation of the sparse matrices
+
+March 8th : 
+
+Bug fixed introduced in previous version...Thanks to M. Arshad Momen for
+pointing this out
+
+
+February 25th 2015:
+Bug Fixed: the singlets position in quartic terms was still influencing the
+results ! 
+
+January 18th 2015:
+Bug fixed introduced in version 1.0.5 when yukawa matrices are not squared.
+
 NOvember 13th 2014:
 Bug fixed in the FermionMasses at two-loop. No impact on the physics.
 

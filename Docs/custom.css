@@ -1,0 +1,175 @@
+/*
+
+    Name:       Base16 Tomorrow Dark
+    Author:     Chris Kempson (http://chriskempson.com)
+
+    CodeMirror template adapted for IPython Notebook by Nikhil Sonnad (https://github.com/nsonnad/base16-ipython-notebook)
+    CodeMirror template by Jan T. Sott (https://github.com/idleberg/base16-chrome-devtools)
+    Original Base16 color scheme by Chris Kempson (https://github.com/chriskempson/base16)
+
+*/
+
+/* Uncomment to use a custom font
+div#notebook, div.CodeMirror, div.output_area pre, div.output_wrapper, div.prompt {
+  font-family: 'Custom Font Name', monospace !important;
+}
+*/
+
+/* GLOBALS */
+body {background-color: #1d1f21;}
+a {color: #81a2be;}
+
+/* INTRO PAGE */
+.toolbar_info, .list_container {color: #e0e0e0;}
+
+/* NOTEBOOK */
+
+/* comment out this line to bring the toolbar back */
+div#maintoolbar, div#header {display: none !important;}
+
+div#notebook {border-top: none;}
+
+div.input_prompt {color: #a3685a;}
+div.output_prompt {color: #b294bb;}
+
+div.cell { /* set cell width to about 80 chars */
+    width: 1000px;
+}
+
+div #notebook { /* centre the content */
+    width: 1200px;
+    margin: auto;
+    padding-left: 1em;
+}
+
+div.input_area {
+  border-radius: 0px;
+  border: 1px solid #373b41;
+	background-color: #1d1f21;
+}
+
+div.output_area pre {font-weight: normal; color: #c5c8c6;}
+div.output_subarea {font-weight: normal; color: #c5c8c6;}
+
+.rendered_html table, .rendered_html th, .rendered_html tr, .rendered_html td {
+  border: 1px  #c5c8c6 solid;
+  color: #c5c8c6;
+}
+div.output_html { font-family: sans-serif; }
+table.dataframe tr {border: 1px #c5c8c6;}
+
+div.cell.selected {border-radius: 10px;}
+div.cell.edit_mode {border-radius: 10px; border: thick solid #b294bb;}
+div.text_cell_render, div.output_html {color: #c5c8c6;}
+
+/*Linking cell and result nice when you have only few cells in middle of a big text*/
+div.cell.code_cell {
+    background-color: rgba(171,165,131,0.3); 
+    border-radius: 10px; /* rounded borders */
+    padding: 1em;
+    margin-top: 1em;
+}
+div.text_cell_render{
+    font-family: 'Arvo' sans-serif;
+    line-height: 130%;
+    font-size: 115%;
+    width:700px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+/* Formatting for header cells */
+.text_cell_render h1 {
+    font-family: 'Philosopher', sans-serif;
+    font-weight: 400;
+    font-size: 64pt;
+    line-height: 100%;
+    color: rgb(12,85,97);
+    margin-bottom: 0.1em;
+    margin-top: 0.1em;
+    display: block;
+}
+
+.text_cell_render h2 {
+    font-family: 'Philosopher', serif;
+    font-weight: 700;
+    font-size: 24pt;
+    line-height: 100%;
+    color: rgb(171,165,131);
+    margin-bottom: 0.1em;
+    margin-top: 0.1em;
+    display: block;
+}   
+
+.text_cell_render h3 {
+    font-family: 'Philosopher', serif;
+    margin-top:12px;
+    margin-bottom: 3px;
+    font-style: italic;
+    color: rgb(95,92,72);
+}
+
+.text_cell_render h4 {
+    font-family: 'Philosopher', serif;
+}
+
+.text_cell_render h5 {
+    font-family: 'Alegreya Sans', sans-serif;
+    font-weight: 300;
+    font-size: 16pt;
+    color: grey;
+    font-style: italic;
+    margin-bottom: .1em;
+    margin-top: 0.1em;
+    display: block;
+}
+
+
+.text_cell_render h6 {
+    font-family: 'PT Mono', sans-serif;
+    font-weight: 300;
+    font-size: 10pt;
+    color: grey;
+    margin-bottom: 1px;
+    margin-top: 1px;
+}
+
+
+
+
+span.ansiblack {color: #282a2e;}
+span.ansiblue {color: #8abeb7;}
+span.ansigray {color: #b4b7b4;}
+span.ansigreen {color: #b5bd68;}
+span.ansipurple {color: #b294bb;}
+span.ansired {color: #cc6666;}
+span.ansiyellow {color: #f0c674;}
+
+div.output_stderr {background-color: #cc6666;}
+div.output_stderr pre {color: #e0e0e0;}
+
+.cm-s-ipython.CodeMirror {background: #1d1f21; color: #e0e0e0;}
+.cm-s-ipython div.CodeMirror-selected {background: #282a2e !important;}
+.cm-s-ipython .CodeMirror-gutters {background: #1d1f21; border-right: 0px;}
+.cm-s-ipython .CodeMirror-linenumber {color: #969896;}
+.cm-s-ipython .CodeMirror-cursor {border-left: 1px solid #b4b7b4 !important;}
+
+.cm-s-ipython span.cm-comment {color: #a3685a;}
+.cm-s-ipython span.cm-atom {color: #b294bb;}
+.cm-s-ipython span.cm-number {color: #b294bb;}
+
+.cm-s-ipython span.cm-property, .cm-s-ipython span.cm-attribute {color: #b5bd68;}
+.cm-s-ipython span.cm-keyword {color: #cc6666;}
+.cm-s-ipython span.cm-string {color: #f0c674;}
+.cm-s-ipython span.cm-operator {color: #a3685a;}
+.cm-s-ipython span.cm-builtin {color: #b294bb;}
+
+.cm-s-ipython span.cm-variable {color: #b5bd68;}
+.cm-s-ipython span.cm-variable-2 {color: #81a2be;}
+.cm-s-ipython span.cm-def {color: #de935f;}
+.cm-s-ipython span.cm-error {background: #cc6666; color: #b4b7b4;}
+.cm-s-ipython span.cm-bracket {color: #c5c8c6;}
+.cm-s-ipython span.cm-tag {color: #cc6666;}
+.cm-s-ipython span.cm-link {color: #b294bb;}
+
+.cm-s-ipython .CodeMirror-matchingbracket { text-decoration: underline; color: #e0e0e0 !important;}

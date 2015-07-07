@@ -115,10 +115,19 @@ def loadmodel(name):
 	Replace = []
 	for ill,ll in enumerate(strsettings) : 
 		#simplify the symbol to get rid of the LateX structure
-		lln1 = [(iel,''.join(reg.split('{(.*)}',el))) for iel,el in enumerate(ll) if len(reg.split('{(.*)}',el)) == 3 ]
-		lln2 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) == 3 ]
-		lln3 = [(iel,el) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) != 3 and len(reg.split('{(.*)}',el)) != 3  ]
-		lln = lln1 + lln2 + lln3
+		#lln1 = [(iel,''.join(reg.split('{(.*)}',el))) for iel,el in enumerate(ll) if len(reg.split('{(.*)}',el)) == 3 ]
+		lln1 = [(iel,''.join(reg.split('{(.*)}',el))) for iel,el in enumerate(ll)]
+                lln1 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate([elem[1] for elem in lln1])]
+                #if lln1 != [] :
+		#    lln2 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate([elem[1] for elem in lln1]) if len(reg.split('\\\(.*)',el)) == 3 ]
+                #    #erase the first step
+                #    if lln2 != [] :
+                #        lln1 = []
+                #else :
+		#    lln2 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) == 3 ]
+		#lln3 = [(iel,el) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) != 3 and len(reg.split('{(.*)}',el)) != 3  ]
+		#lln = lln1 + lln2 + lln3
+                lln = lln1
 		Replace.append([(ll[iel],el) for iel,el in lln])
 		#Declare all the symbols
 		ll = ll + [el[1] for el in lln]
@@ -224,7 +233,7 @@ def ExportBetaFunction(name,model):
 	maps = {}
 	Ids = {}
 	for ikk,(key,val) in enumerate(cpStrucYuk.items()) :
-		maps[key] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}',key))))
+		maps[key] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',key))))
 		Ids[maps[key]] = "Id{}".format(ikk)
 		if max(val) != 1 :
 			CodeStr += "\tId{} = np.eye({})\n".format(ikk,max(val))
@@ -236,7 +245,7 @@ def ExportBetaFunction(name,model):
 	ListSymbs = [el[1].g for el in model.GaugeGroups] + model.ListLbd + model.ListScM + model.ListTri
 	for iel,el in enumerate(ListSymbs) :
 		if len(reg.split('{(.*)}',str(el))) == 3 or len(reg.split('\\\(.*)',str(el))) == 3 :
-			ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
+			ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',str(el)))))
 			maps[el] = ListSymbs[iel]	
 		else :
 			maps[el] = el
@@ -488,7 +497,7 @@ def TranslateToNumerics(expression,ListSymbs,label,Ids,model,Mapping,Matrices=Tr
 	if Matrices :#result in matrix form
 		#Remove all the indices
 		for el in model.ListYukawa :
-			el =''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',el))))
+			el =''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',el))))
 			StrXpr = RemoveIndices(StrXpr,el,Yuk=True)
 		StrXpr = RemoveIndices(StrXpr,'MatMul',Yuk=False)
 		while 'matMul(' in StrXpr :

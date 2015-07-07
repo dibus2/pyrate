@@ -74,7 +74,7 @@ def Translate(RGE, model, RunSettings):
 				#elimination of the component that are equals to zero 
 				Translated[lbd] = [[elt,ilt] for ilt,elt in enumerate(Translated[lbd]) if elt != 0]
 				######################################
-				comb = listlbd[-1]#select the particles
+				comb = listlbd[2]#select the particles
 				######################################
 				for ipow,powe in enumerate(Translated[lbd]):
                                     for elemineq in ListEquations['Quartic-Couplings'][powe[1]]['one-loop']:
@@ -106,7 +106,7 @@ def Translate(RGE, model, RunSettings):
 				#elimination of the component that are equals to zero 
 				Translated[y] = [[elt,ilt] for ilt,elt in enumerate(Translated[y]) if elt != 0]
 				#####################################################################
-				comb = model.YukToCalculate[y][-1]
+				comb = model.YukToCalculate[y][2]
 				sc = [(iel,el) for iel,el in enumerate(comb) if str(el[0]) in model.Scalars]
 				assert len(sc) == 1
 				comb = [el for iel,el in enumerate(comb) if iel != sc[0][0]]
@@ -138,7 +138,7 @@ def Translate(RGE, model, RunSettings):
 			for mqt,listmab in model.ScMToCalculate.items() :
 				#########################################
 				#Only one term needed to calculate the evolution lets take the first one The others could be used for implementing some checks
-				comb = model.ScMToCalculate[mqt][-1]
+				comb = model.ScMToCalculate[mqt][2]
 				#########################################	
 				loggingInfo('\t\tScalar mass calculation, for parameter {}...\n'.format(mqt),verbose=RunSettings['vInfo'])
 				Translated[mqt] = LocalRGE.expand()
@@ -177,7 +177,7 @@ def Translate(RGE, model, RunSettings):
 				Translated[mf] = [[elt,ilt] for ilt,elt in enumerate(Translated[mf]) if elt != 0]
 				###############################################################################
 				#FOR EACH y i.e. yukawa we have to identify a couple scalar,f1,f2 that gives the yukawa
-				comb = model.FMToCalculate[mf][-1]
+				comb = model.FMToCalculate[mf][2]
 				###############################################################################
 				for ipow,powe in enumerate(Translated[mf]):
                                     for elemineq in ListEquations['FermionMasses'][powe[1]]['one-loop']:
@@ -211,7 +211,7 @@ def Translate(RGE, model, RunSettings):
 				Translated[hf] = [[elt,ilt] for ilt,elt in enumerate(Translated[hf]) if elt != 0]
 				#we need only one term to calculate the evolution of each hefg term let's take the first one in the list
 				##############################################################
-				comb = model.TriToCalculate[hf][-1]  # Choice only one calculated
+				comb = model.TriToCalculate[hf][2]  # Choice only one calculated
 				##############################################################
 				for ipow,powe in enumerate(Translated[hf]):
                                     for elemineq in ListEquations['Trilinear'][powe[1]]['one-loop']:

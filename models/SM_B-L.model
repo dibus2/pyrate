@@ -49,7 +49,7 @@ Yukawas:{
   'Y_{H}': {Fields: [nuR,nuR,S*], Norm: 1}
  },
 QuarticTerms: {
- '\lambda_1' : {Fields : [H,H*,H,H*], Norm : 1},
+ '\lambda_1' : {Fields : [H,H*,H,H*], Norm : 1, 'CGCs': {'SU2L': [1]}},
  '\lambda_3' : {Fields : [H,H*,S,S*], Norm : 1},
  '\lambda_2' : {Fields : [S,S*,S,S*], Norm : 1}
  },

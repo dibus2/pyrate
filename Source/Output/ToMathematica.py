@@ -91,6 +91,10 @@ def ToMathematicaNotation(vall,model,FlagSquare = True):
 				vall = roundToSquareForFunction('trace',vall)
 			while 'transpose(' in vall : 
 				vall = roundToSquareForFunction('transpose',vall)
+                        while 'sqrt(' in vall:
+                                vall = roundToSquareForFunction('sqrt',vall)
+                        while 'Sqrt(' in vall:
+                                vall = roundToSquareForFunction('Sqrt',vall)
 		while 'MatM[(' in vall :
 			vall = extractTuple('MatM',vall)
 		for yuksymb in model.ListYukawa :
@@ -103,12 +107,12 @@ def ToMathematicaNotation(vall,model,FlagSquare = True):
 		#Simplify the Symbols to get rid of the LateX structure
 		symbs = model.ListYukawa + model.ListFM + model.ListLbd + model.ListScM + model.ListTri
 		ll = []
-#		pdb.set_trace()
 		for el in symbs :
 			if len(reg.split('{(.*)}',el)) == 3 or len(reg.split('\\\(.*)',el)) == 3 :
 				ll.append(''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',el)))))
 			else :
 				ll.append(el)
+                ll = [el.replace('_','').replace('\\','').replace('\\\\','').replace(' ','') for el in ll]
 		Replace = [(el,ll[iel]) for iel,el in enumerate(symbs)]
 		for rep in Replace : 
 			vall = vall.replace(*rep)
@@ -124,10 +128,14 @@ def TranslateToMathematica(xpr,fname,tag,model):
 		if len(reg.split('{(.*)}',str(ll))) == 3 or len(reg.split('\\\(.*)',str(ll))) == 3 :
 			lltp = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(ll))).replace('_','')))
 			ll = lltp.lower()
+                        ll= ll[0].upper()+ll[1:]
 		else :
 			ll = str(ll)
+                        #notsure what this is doing...
 			lltp = ll
-		Final.append([ll + '=',str(vall).replace('**','^').replace('_','')])
+                        ll = ll[0].upper()+ll[1:]
+                ll = ll.replace('_','').replace('\\','').replace('\\\\','').replace(' ','')
+		Final.append([ll + '=',str(vall).replace('**','^').replace('_','').replace('sqrt','Sqrt')])
 		if ll in model.GetGroupFromName :
 			Return.append("{{{},{}}}".format(str(model.GetGroupFromName[ll].g).replace('_','').replace('\\','').replace('**','^'),str(vall).replace('**','^').replace('_','')))
 			Dimension.append("{{{},{{}}}}".format(str(model.GetGroupFromName[ll].g).replace('_','').replace('\\','').replace('**','^')))

@@ -1,5 +1,6 @@
-#!/usr/bin/env python 
+#1!/usr/bin/env python 
 try :
+    import pudb
     import yaml
     import sys
     import argparse
@@ -15,7 +16,6 @@ except :
 #
 ####
 welcomemessage = """\n\n\n\n\t\t==================================================================================\n
-<<<<<<< HEAD
 =======
 \t\t\t\tPyR@TE version X.X.X released  X, 2014\n
 \t\t\tF. Lyonnet, I. Schienbein, F.Staub, A.Wingerter, arxiv 1309.7030\n
@@ -52,7 +52,8 @@ parser.add_argument('--Export','-e',dest = 'Export', action= 'store_true', defau
 parser.add_argument('--Export-file','-ef',dest = 'ExportFile', action= 'store', default = 'BetaFunction.py', help = 'Set the name of the output python file')
 parser.add_argument('--Only','-onl',dest = 'Only', action ='store', default = {}, help='Set a dictionary of terms you want to calculate: "QuarticTerms,Yukawas,TrilearTerms,FermionMasses,ScalarMasses". E.g. "{\'QuarticTerms\': [\'\lambda_1\',\'\lambda_2\']}". Note that if passed in the command line the whole argument must be a string')
 parser.add_argument('--Skip','-sk',dest = 'Skip', action= 'store', default = '', help = 'Set the different terms to neglect in the calculation. E.g. ["CAabcd","CL2abcd"]. The list of terms that can be neglected are listed in Source/Core/RGEsDefinition.py' )
-
+#parser.add_argument('--database','-db',dest='database',action='store', default='', help='Interrogate the Clebsh-Gordan Coefficient database. It returns the list of invariants. E.g. --databas ["SU2",((1,),(1,True))]')
+parser.add_argument('--interactive-db','-idb',dest='interactivedb',action='store_true',default=False,help='Starts the interactive database mode. Allows one to check what are the CGCs implemented for a given contraction and more (Casimir, Dynkin,...)')
 
 #Collect the arguments
 args = parser.parse_args()
@@ -103,7 +104,7 @@ if not(os.path.exists(RunSettings['Results'])) :
 #Get the logLevel from RunSettings
 LogLevel = {'Info':logging.INFO,'Debug':logging.DEBUG,'Critical':logging.CRITICAL}
 #create the config of the logging system
-logging.basicConfig(filename = RunSettings['LogFile'], level = LogLevel['{}'.format(RunSettings['LogLevel'])], format="%(levelname)s [%(asctime)s] [%(funcName)s] %(message)s")
+logging.basicConfig(filename = RunSettings['Results'] + '/' + RunSettings['LogFile'], level = LogLevel['{}'.format(RunSettings['LogLevel'])], format="%(levelname)s [%(asctime)s] [%(funcName)s] %(message)s")
 #Setting up the verbose level
 if RunSettings['verbose'] : 
         if RunSettings['VerboseLevel'] == 'Info' :
@@ -119,6 +120,13 @@ if RunSettings['verbose'] :
                 RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = True,False,False 
 else : 
         RunSettings['vInfo'],RunSettings['vDebug'],RunSettings['vCritical'] = False,False,True
+
+#Interrogate the database
+if 'interactivedb' in RunSettings  and RunSettings['interactivedb'] :
+    from IPyrate import *
+    Idbquerry().cmdloop()
+    loggingInfo("\nExiting the interactive mode.",verbose=True)
+    exit()
 
 #Set the skipping terms
 if 'Skip' in RunSettings :
@@ -243,7 +251,6 @@ else :
                                                                 yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': [1]*len(ll1['Fields'])}
                                                         else :
                                                                 yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': 1}
-
         #import the module
         loggingInfo("Importing modules ...",verbose=RunSettings['vInfo'])
         from ModelsClass import * 
@@ -473,32 +480,36 @@ else :
                 f.write(AllMathematicaRGEs)
                 f.close()
 
-        ##############
-        #Pickle Output
-        ##############
-        if RunSettings['Pickle'] :
-                try :
-                        fPickle = open('{}'.format(RunSettings['Results'] + '/' + RunSettings['PickleFile']),'w')                       
-                except :
-                        loggingCritical('ERROR while opening the pickle output file `{}`.'.format(fPickle),verbose=RunSettings['vCritical'])
-                try : 
-                        #create a string of the result
-                        strres = [str(el).replace('Dagger','adjoint') for el in RGEs]
-                        strsettings = ([str(el) for el in model.ListYukawa],
-                                                                                [str(el) for el in model.ListFM],
-                                                                                [str(el) for el in model.ListTri],
-                                                                                [str(el) for el in model.ListLbd],
-                                                                                [str(el) for el in model.ListScM],
-                                                                                [str(el[-1]) for el in model.ListGroups],
-                                                                                [str(el[0]) for el in model.GaugeGroups],
-                                                                                [str(el) for el in model.Particles.keys()],
-                                                                                [str(el)+'_f' for el in model.Particles.keys()]#for the indices of the generations
-                                                                                )
-                        pickle.dump([strres,strsettings,'Generated by PyR@TE for {}.'.format(model._Name)],fPickle)
-                        fPickle.close()
-                        loggingInfo("\nWriting a pickle output file `{}`.".format(RunSettings['PickleFile']),verbose=RunSettings['vInfo'])
-                except :
-                        loggingCritical('ERROR while storing the pickle output file.',verbose=RunSettings['vCritical'])
+	##############
+	#Pickle Output
+	##############
+	if RunSettings['Pickle'] :
+		try :
+			fPickle = open('{}'.format(RunSettings['Results'] + '/' + RunSettings['PickleFile']),'w')			
+		except :
+			loggingCritical('ERROR while opening the pickle output file `{}`.'.format(fPickle),verbose=RunSettings['vCritical'])
+		try : 
+			#create a string of the result
+			strres = [str(el).replace('Dagger','adjoint') for el in RGEs]
+			strsettings = ([str(el) for el in model.ListYukawa],
+										[str(el) for el in model.ListFM],
+										[str(el) for el in model.ListTri],
+										[str(el) for el in model.ListLbd],
+										[str(el) for el in model.ListScM],
+										[str(el[-1]) for el in model.ListGroups],
+										[str(el[0]) for el in model.GaugeGroups],
+										[str(el) for el in model.Particles.keys()],
+										[str(el)+'_f' for el in model.Particles.keys()],
+                                                                                [str(el)+'1_f' for el in model.Particles.keys()]#for the indices of the generations
+										)
+                        #Fix for the Sudummy gauge group 
+                        if 'SUndum' in strsettings[-4] : 
+                            strsettings[-5].append('g_SUndum')
+			pickle.dump([strres,strsettings,'Generated by PyR@TE for {}.'.format(model._Name)],fPickle)
+			fPickle.close()
+			loggingInfo("\nWriting a pickle output file `{}`.".format(RunSettings['PickleFile']),verbose=RunSettings['vInfo'])
+		except :
+			loggingCritical('ERROR while storing the pickle output file.',verbose=RunSettings['vCritical'])
 
         ########################
         #Python numerical Output
@@ -513,3 +524,4 @@ else :
         loggingCritical('End of the run.',verbose = RunSettings['vCritical'])
         #mv the logging into results
         os.system('mv {} {}'.format(RunSettings['LogFile'],RunSettings['Results']))
+

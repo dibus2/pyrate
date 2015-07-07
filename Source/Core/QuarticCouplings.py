@@ -17,6 +17,7 @@ def set_globalsLbd(model):
 		globals()[key] = val 
 
 def CompileQuartic(Translated,lbd,comb,model,Weyl):
+	#LH = model.LbdToCalculate[lbd][1]/model.LbdToCalculate[lbd][-1]
 	LH = model.LbdToCalculate[lbd][1]
 	FinalBeta = (sum([el[0] for el in Translated[lbd]]).doit()/LH).expand()
 	if Weyl : 

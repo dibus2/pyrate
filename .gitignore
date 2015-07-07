@@ -3,8 +3,26 @@ results/
 
 #private model files not public
 #
-#models/private/
+
+models/private/
 
 #all .pyc
 #
 *.pyc
+<<<<<<< HEAD
+=======
+
+*.m
+*.nb
+
+Source/GroupTheory/CGCsnewsu2.pickle
+Source/GroupTheory/CGCsnewsu3.pickle
+Source/GroupTheory/CGCsnewsu4.pickle
+Source/GroupTheory/CGCsnewsu5.pickle
+Source/GroupTheory/CGCsoldextractedsu6.pickle
+Source/GroupTheory/change_matrices.py
+Source/GroupTheory/contraction-15-15-15-s.py
+Source/GroupTheory/update-database.py
+Source/GroupTheory/.ipynb_checkpoints/
+*.DS_Store
+*.swp

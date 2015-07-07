@@ -3,6 +3,7 @@ sys.path.append('./Source/GroupTheory')
 from GroupDefinitions import *
 from RGEsmathModule import *
 from Particles import *
+import re
 try :
 	import itertools as itr
 	from types import MethodType
@@ -223,8 +224,12 @@ class Model(object) :
 			return normdic
 		else :
 			normdic = normdic.replace('Sqrt','sqrt').replace('i','I')
-			if 'I' in normdic or 'sqrt' in normdic :
+                        if ('I' in normdic or 'sqrt' in normdic) and not('**' in normdic):
 				return eval(normdic)
+                        elif '**' in normdic and '/' in normdic :
+                            src = re.search('([0-9]{1,2})/([0-9])',normdic)
+                            normdic = eval(normdic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2))))
+                            return normdic
 			else :
 				try :
 					return Rational(normdic)
@@ -374,6 +379,7 @@ class Model(object) :
 				#get the quantum numbers
 				Ppi = [[self.Particles[valfields] for valfields in val['Fields']]]
 			#2. Expand the higgs into reals and update the list 
+			#TODO CONTRACTION IF HAVE TO FIND A WAY OF CREATING a NEW INSTANCE FOR EACH CONTRACTION I think here would be good
 			ExpandedTerm = self.ExpandPotential(Ppi,translation[term],[term,el])
 			FinalTerm = []
 			TempFinalTerm = {}
@@ -383,14 +389,24 @@ class Model(object) :
 				FullSinglet[ill] = False
 				for subll in ll : 
 					Factor = [] 
-					
 					for g in self.NonUGaugeGroups:
 						self.GetContractedParticles(ContractedParticles,g[0],g[1],Ppi[ill])
 						#Get the contraction factor
 						if ContractedParticles[g[0]] != [] : 
-							Factor.append(GetContractionFactor(ContractedParticles,[g[0],g[1]]))
+                                                        #F. These are modifications for the multiple contraction case
+                                                        tpCGCs = 0
+                                                        if ('CGCs' in val) and (g[0] in val['CGCs']) :
+                                                            if type(val['CGCs'][g[0]]) == int :
+                                                                val['CGCs'][g[0]] = [val['CGCs'][g[0]]]
+                                                            if not(type(val['CGCs'][g[0]]) == list):
+                                                                loggingCritical("Error the `CGCs` option must be an int or a list",verbose=True)
+                                                                exit()
+                                                            else :
+                                                                tpCGCs = val['CGCs'][g[0]][ill]
+                                                        Factor.append(GetContractionFactor(ContractedParticles,[g[0],g[1]],CGCs=tpCGCs))
 						else :
 							Factor.append((0,))#in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
+                                                #Save Factor for normalizing the CGCs
 					if not(all([cc == (0,) for cc in Factor])) :
 						#For each group plug the indices in the CGCs
 						#The fact that the indices have been generated according to the ordering of self.NonUGaugeGroups and that it s the same for the Factor we now that the indices are in the same order
@@ -417,6 +433,7 @@ class Model(object) :
                                                 if len(ExpandedTerm) == 1 or ill == 0 :
                                                     IsaValidKey = (tempkey in TempFinalTerm),0
                                                 else :
+                                                    #F.February 2015 In case where there is a sum of terms and the indices are not in 1 to 1 correspondance e.g. (1,2,3)->(2,3,4) (this happes when singlets are in. This function does not work -> Enforce the labeling from 1 to 4 ! see expandpotential function
                                                     IsaValidKey = self.isavalidpermutationkey(tempkey,TempFinalTerm,Factor)
 						if IsaValidKey[0]:
 							TempFinalTerm[IsaValidKey[1]][-1] = TempFinalTerm[IsaValidKey[1]][-1] + IsaValidKey[-1]
@@ -521,7 +538,7 @@ class Model(object) :
 												break
 										lcparts = [str(elem.args[0]) for elem in Return[el][counter][0]]
 										#######
-										#F. Bug fix on June 5th: the permutation does not work with multiple group for the scalars
+										#F. Bug fix on June 5th 2014: the permutation does not work with multiple group for the scalars
 										# Put back zeros for fields not charged under the various gauge groups
 										#######
 										#Get the structure of the indices 
@@ -531,6 +548,8 @@ class Model(object) :
 										NewInd = [list(elem) for elem in tempF[0]]
 										#substitute the j values by the integers
 										newind = []
+                                                                                #F. I believe that the list of zeros i.e. non of the particles are charged under a given gauge group are useless and I therefore remove them now (June 6th 2015)
+                                                                                Structureindices = [elstruc for elstruc in Structureindices if not(all([elemstruc ==0 for elemstruc in elstruc]))]
 										for ielem,elem in enumerate(Structureindices):
 											tempnewind = []
 											ill = 0
@@ -608,6 +627,33 @@ class Model(object) :
 		for key2,val2 in self.Combination[term].items():
 			for iv,vv in enumerate(val2):
 				self.Combination[term][key2][iv] = vv[0],vv[1]/ReturnToCalc[key2][1]
+		#F. March 9th 2015 
+		#One has to extract the contribution comming from the CGCs such that it can be normalized to one. This is important since the normalization of the CGCs since Susyno v3 are different.
+		#This has to be done for each one of the terms
+		#for ll in ListTerm:
+		#		#Get the corresponding term from the potential
+		#		tppotentialterm = [el[-1] for iel,el in enumerate(Return[ll]) if el[0] == ReturnToCalc[ll][0]]
+		#		assert len(tppotentialterm) == 1
+		#		tppotentialterm = tppotentialterm[0]
+		#		#split up the contributions and keep only the CGCs i.e. FF terms
+		#		coefficient = np.array([functools.reduce(operator.mul,[ell for ell in el.args if type(ell) != FF],1) for el in tppotentialterm.args])
+		#		coefficient = coefficient*1/coefficient[0]
+		#		tppotentialterm = [functools.reduce(operator.mul,[ell for ell in el.args if type(ell) == FF],1)*norm for el,norm in zip(tppotentialterm.args,coefficient)]
+		#		#Create list of substitution
+		#		tosubs = tuple(flatten([tuple(zip(ff.indices,gg[1:])) for ff,gg in zip(ReturnToCalc[ll][0],ReturnToCalc[ll][-1])],1))
+		#		CGCsnorm = np.array([el.subs(tosubs) for el in tppotentialterm])
+		#		#At this stage all the different CGCs should return the same overal factor 
+		#		checkCGCsnorm = np.all(abs(CGCsnorm)-abs(CGCsnorm[0])==0)
+		#		#TODO The pb is how do we know which overall factor to use ? Plus or minus sign? I think the one of the selected combination
+		#		if not(checkCGCsnorm) :
+		#				loggingCritical("Error while determining the overall normalization of the CGCs, please contact the author.",verbose=True)
+		#		tpaddtoReturnToCalc = list(ReturnToCalc[ll])
+		#		tpaddtoReturnToCalc.append(CGCsnorm[0])
+		#		print(CGCsnorm,tpaddtoReturnToCalc)
+		#		tpaddtoReturnToCalc[1] = tpaddtoReturnToCalc[1]/abs(CGCsnorm[0])
+		#		ReturnToCalc[ll] = tuple(tpaddtoReturnToCalc)
+		#		for iel,el in enumerate(Return[ll]):
+		#				Return[ll][iel] = [el[0],el[1],el[2]*1/abs(CGCsnorm[0])]
 		return Return,ReturnToCalc,ListTerm
 
 
@@ -702,7 +748,21 @@ class Model(object) :
 						if not(Tags):
 							loggingCritical("Error, the FermionMasses {} does not contain two fermions : {}".format(ff,subxpr),verbose=True)
 							exit()
-			
+
+		for key,term in Settings['Potential'].items() :
+                    for kkey,tterm in term.items():
+                        if 'CGCs' in tterm : 
+                            if type(term[kkey]['Fields'][0]) == list : 
+                                if not(all([type(valel) == list for keyel,valel in tterm['CGCs'].items()])) or not(all([len(valel)==len(term[kkey]['Fields']) for keyel,valel in tterm['CGCs'].items()])):
+                                    loggingCritical("Error, `CGCs` keys must be a dictionary of list of the same size as the `Field` key.",verbose=True)
+                                    exit()
+
+                #            if not(all([el in Settings['Groups'].keys() for el in tterm['CGCs']])):
+                #                loggingCritical("Error, `CGCs` keys must be known gauge group: {}".format(tterm['CGCs']),verbose=True)
+                #                exit()
+                #            if any([type(valgr) != int  for kgroup,valgr in tterm['CGCs'].items()]):
+                #                loggingCritical("Error, `CGCs` entries must be int: {}".format(tterm['CGCs']),verbose=True)
+                #                exit()
 
 
 	def AreThereMixingTerms(self,term):
@@ -748,31 +808,43 @@ class Model(object) :
 			lcNorm = self.Potential[term[0]][term[1]]['Norm']
 		for idelem,elemfields in enumerate(fields):
 			Out,ToDerive,FOut = [],[],[]
-			for iff,f in enumerate(elemfields):
+                        #F. February 25th There is actually a pretty big flaw here. I need different index count on group basis to skip singlets!!
+                        IndicesCounters,dummyff=[0]*len(self.NonUGaugeGroups),0
+			for f in elemfields:
 				Singlet = True if all([f.Qnb[g[0]] == g[1].Dynksinglet for g in self.NonUGaugeGroups]) else False
 				if f.Cplx and not(Singlet): 
-					Out.append([IndexedBase(f.RealPart)[['i{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[['i{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
-					ToDerive.append([IndexedBase(f.RealPart)[['j{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]],IndexedBase(f.CplxPart)[['j{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+					Out.append([IndexedBase(f.RealPart)[['i{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[['i{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
+					ToDerive.append([IndexedBase(f.RealPart)[['j{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]],IndexedBase(f.CplxPart)[['j{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+                                        #Increment the proper indices
 				elif f.Cplx and Singlet :
 					#If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14
-					Out.append([IndexedBase(f.RealPart)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
-					ToDerive.append([IndexedBase(f.RealPart)[[Symbol('dumj{}{}'.format(iff+1,igg))  for igg,g in enumerate(self.NonUGaugeGroups)]],IndexedBase(f.CplxPart)[[Symbol('dumj{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+					Out.append([IndexedBase(f.RealPart)[[Symbol('dumi{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]] + f.Coeff*IndexedBase(f.CplxPart)[[Symbol('dumi{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]],f.norm])
+					ToDerive.append([IndexedBase(f.RealPart)[[Symbol('dumj{}{}'.format(dummyff+1,igg))  for igg,g in enumerate(self.NonUGaugeGroups)]],IndexedBase(f.CplxPart)[[Symbol('dumj{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+                                        dummyff+=1
 				elif not(f.Cplx) and not(Singlet) :
-					Out.append(IndexedBase(f._name)[['i{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]])
-					ToDerive.append([IndexedBase(f._name)[['j{}{}'.format(iff+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+					Out.append(IndexedBase(f._name)[['i{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]])
+					ToDerive.append([IndexedBase(f._name)[['j{}{}'.format(IndicesCounters[igg]+1,igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0) for igg,g in enumerate(self.NonUGaugeGroups)]]])
 				else :
 					#If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14
-					Out.append(IndexedBase(f._name)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]])
-					ToDerive.append([IndexedBase(f._name)[[Symbol('dumj{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+					#Out.append(IndexedBase(f._name)[[Symbol('dumi{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]])
+					#ToDerive.append([IndexedBase(f._name)[[Symbol('dumj{}{}'.format(iff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+					Out.append(IndexedBase(f._name)[[Symbol('dumi{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]])
+					ToDerive.append([IndexedBase(f._name)[[Symbol('dumj{}{}'.format(dummyff+1,igg)) for igg,g in enumerate(self.NonUGaugeGroups)]]])
+                                        dummyff+=1
+                                Toinc = [True if f.Qnb[g[0]] != g[1].Dynksinglet else False for igg,g in enumerate(self.NonUGaugeGroups)]
+                                IndicesCounters = [el+1  if Toinc[iel] else el for iel,el in enumerate(IndicesCounters)]
 			#Take the cartesian product and remove the permutations from the list
 			ToDerive = removeperms(list(itr.product(*ToDerive)))
-			##If there several singlets we are screwed so we need to declare dummy indices for them
+			##If there're several singlets we are screwed so we need to declare dummy indices for them
 			Out = (self.translatenorm(lcNorm[idelem])*functools.reduce(operator.mul,[functools.reduce(operator.mul,el,1)  if type(el) == list else el for el in Out],1)).expand()
+#                        FullNormNoCGCs = [ell.args for ell in Out.args]
+#                        FullNormNoCGCs = [functools.reduce(operator.mul,[el for el in ell if type(el) != Indexed],1) for ell in FullNormNoCGCs]
 			#Now we can sum the terms and derive them all together
 			for toderive in ToDerive : 
 				FOut.append([toderive,derivTensor(Out,toderive)])
 			##At this point we have all the derivatives for this term
 			CollectDummy = [[(el,Integer(0)) for el in elem[1].atoms() if len(str(el).split('dum')) != 1] for elem in FOut]
+#			SumFOut.append([[[tuple([xx.subs(tuple(CollectDummy[iel])) for xx in el[0]]),el[1].subs(tuple(CollectDummy[iel]))] for iel,el in enumerate(FOut)],FullNormNoCGCs])
 			SumFOut.append([[tuple([xx.subs(tuple(CollectDummy[iel])) for xx in el[0]]),el[1].subs(tuple(CollectDummy[iel]))] for iel,el in enumerate(FOut)])
 		return SumFOut
         
@@ -840,9 +912,10 @@ class Model(object) :
         def swapindices(self,Factor,NewInd,ix,new):
             "Swap indices ix,new in Factor"
             for idx, xx in enumerate(NewInd[ix]) :
-                Factor = Factor.subs(xx,'temp')
-                Factor = Factor.subs(NewInd[new][idx],xx)
-                Factor = Factor.subs('temp',NewInd[new][idx])
+                if NewInd[new][idx] != 0 and xx != 0 :
+                    Factor = Factor.subs(xx,'temp')
+                    Factor = Factor.subs(NewInd[new][idx],xx)
+                    Factor = Factor.subs('temp',NewInd[new][idx])
             return Factor
 
 ##				for tterm in TermIdentified : 
@@ -1996,7 +2069,7 @@ class Model(object) :
 		key = tuple(['Y2F']+parts+flatten(indices))
 		if key in self.InvariantResults:
 			res = self.InvariantResults[key]
-			loggingInfo("reading Y2F")
+			loggingDebug("reading Y2F",verbose=self.applyExtraConstrains2)
 		else :
 			f1,f2 = self.getparts(parts,indices)
 			if not(adj):
@@ -2013,7 +2086,7 @@ class Model(object) :
 		key = tuple(['Yab2S']+parts+flatten(indices))
 		if key in self.InvariantResults:
 			res = self.InvariantResults[key]
-			loggingInfo("reading Yab2S")
+			loggingDebug("reading Yab2S")
 		else :
 			sc1,sc2 = self.getparts(parts,indices)
 			res = Rational(1,2)*(
@@ -2030,7 +2103,7 @@ class Model(object) :
 		key = tuple(['Habc']+parts+flatten(indices))
 		if key in self.InvariantResults:
 			res = self.InvariantResults[key]
-			loggingInfo("reading Habcd")
+			loggingDebug("reading Habcd")
 		else :
 			sc1,sc2,sc3 = self.getparts(parts,indices)
 			res =	[Rational(1,2)*(self.Expand(((_mf,p1,p2),(_Ya,a,p2,p3),(_Y,b,p3,p4),(_Ya,c,p4,p1)),Layer=1)
@@ -2049,7 +2122,7 @@ class Model(object) :
 		key = tuple(['Habcd']+parts+flatten(indices))
 		if key in self.InvariantResults:
 			res = self.InvariantResults[key]
-			loggingInfo("reading Habcd")
+			loggingDebug("reading Habcd")
 		else :
 			sc1,sc2,sc3,sc4 = self.getparts(parts,indices)
 			res = [Rational(1,4)*(
@@ -2068,7 +2141,7 @@ class Model(object) :
 		key = tuple(['Hab']+parts+flatten(indices))
 		if key in self.InvariantResults:
 			res = self.InvariantResults[key]
-			loggingInfo("reading Hab")
+			loggingDebug("reading Hab")
 		else :
 			sc1,sc2= self.getparts(parts,indices)
 			#res = (self.Expand(((_Y,sc1,p1,p2),(_Ya,sc2,p2,p3),(_mf,p3,p4),(_mfa,p4,p1)),Layer=1)
@@ -2094,7 +2167,7 @@ class Model(object) :
 		key = tuple(['L2abS']+parts+flatten(indices))
 		if key in self.InvariantResults:
 			res = self.InvariantResults[key]
-			loggingInfo("reading L2abs")
+			loggingDebug("reading L2abs")
 		else :
 			a,b = self.getparts(parts,indices)
 			res = Rational(1,6)*self.Expand(((_L,a,s1,s2,s3),(_L,b,s1,s2,s3)),Layer=1)
@@ -2107,7 +2180,7 @@ class Model(object) :
 		"""Calculates the invariant Y2FabS Eq. 27"""
 		key = tuple(['Y2FabS']+parts+flatten(indices))
 		if key in self.InvariantResults:
-			loggingInfo("reading Y2FabS")
+			loggingDebug("reading Y2FabS")
 			res = self.InvariantResults[key]
 		else :
 			grp,sc1,sc2 = self.getparts(parts,indices)
@@ -2169,7 +2242,7 @@ class Model(object) :
 		key = tuple(['Chain3Y']+parts+flatten(indices)) if not(adj) else tuple(['Chain3Ya']+parts+flatten(indices))
 		if key in self.InvariantResults:
 			res = self.InvariantResults[key]
-			loggingInfo("reading chain3Y")
+			loggingDebug("reading chain3Y")
 		else :
 			sc1,sc2,sc3,f1,f2 = self.getparts(parts,indices)
 			if not(adj) : 

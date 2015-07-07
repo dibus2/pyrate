@@ -10,6 +10,7 @@ try :
 	import copy
 	from itertools import permutations,combinations
 	import os
+        import pudb
 except ImportError :
 	loggingCritical("Error while loading modules")
 try :
@@ -42,15 +43,21 @@ except ImportError :
 		loggingCritical("\tError while loading sympy. Check the manual for required modules.",verbose=True)
 		exit()
 localdir = os.path.realpath(os.path.dirname(__file__))
-fdb = open(localdir+'/CGCs.pickle','r')
+#fdb = open(localdir+'/CGCs.pickle','r')
+loggingInfo('Loading the database...',verbose=True)
+#fdb = open(localdir+'/CGCs-1.2.0.pickle','r')
+fdb = open(localdir+'/CGCs-1.2.0-sparse.pickle','r')
 db = pickle.load(fdb)
 #fdb1 = open(localdir+'/CGCsmat.pickle','r')
 #db1 = pickle.load(fdb1)
 fdb.close()
+loggingInfo('\t\t...done',verbose=True)
 
-def GetContractionFactor(dic,Group):
+def GetContractionFactor(dic,Group,CGCs=0):
 		"""Seeks the contraction Factor for the contracted particles in dic under the name group.
-			Works with any number of fields, at least 2,3,4"""
+			Works with any number of fields, at least 2,3,4.
+                       F.: Modified February 22 2015 in order to deal with multiple singlets. Actually, this function
+                       is called on only one place."""
 		#Translate the Qnb into Dynkin labels if given by their dim
 		key = []
 		for part in dic[Group[0]] :
@@ -60,11 +67,21 @@ def GetContractionFactor(dic,Group):
 		if not(len(key) in Match ):
 			loggingCritical("This term is nor a Bilinear, Trilinear nor Quartic : {}\nCheck your model file some term might not be gauge invariant.".format(dic[Group[0]]),verbose=True)
 			exit()
-		##take the permutations into account
 		Factor = 0
-		#for per in perm :
 		if tuple(key) in db[Group[1]._absname][Match[len(key)]] :
-			Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
+                        #F. Check wether it is a list of list
+                        if type(db[Group[1]._absname][Match[len(key)]][tuple(key)][0]) == tuple :
+                            if CGCs != 0 :
+                                loggingCritical("WARNING: `CGCs` specified for an invariant which is unique, ignored!",verbose=True)
+    		                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
+                            else :
+    		                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
+                        else :
+                            if CGCs == 0 :
+                                loggingCritical("WARNING, `CGCs` not specified for the invariant `{}` under {} which has several possible contractions to gauge singlet, using the first one! Please use the interactive mode (started via the option -idb to make sure it is the CGC you want to use.".format(key,Group[1]._absname),verbose=True)
+                                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)][0]
+                            else :
+                                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)][CGCs-1]
 		else : 
 			loggingCritical("The contraction factor for {} {} is not in the db, calculation not implemented yet or the term is not a singlet.".format(key,Group[1]._absname),verbose=True)
 			exit()
