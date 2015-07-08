@@ -317,7 +317,7 @@ else :
 		loggingInfo('Setting the Gut normalization for the U(1) group factor',verbose=RunSettings['vInfo'])
 		RunSettings['SetGutNorm'] = True
 	elif RunSettings['SetGutNorm'] and not(len(model.UGaugeGroups) == 1):
-		loggingCritical('**Warning** the `SetGutNorm` switch because multiple U(1) gauge groups found',verbose=RunSettings['vCritical'])
+		loggingCritical('**Warning** the `SetGutNorm` switch ignored because multiple U(1) gauge groups found',verbose=RunSettings['vCritical'])
 
         #add the element in ToOnly to Only
         #IF only is defined then skip the other terms

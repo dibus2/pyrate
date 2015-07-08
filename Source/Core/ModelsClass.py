@@ -71,18 +71,19 @@ class Model(object) :
 		self.Id = eye(len(self.UsectorMatrix))
 		#to be removed but during the modification Ill keep the two files GaugeCouplings and GaugeCouplingsKin separate
 		self.kinmixing = False
-		if len(self.UsectorMatrix) > 1: 
-			self.kinmixing = True
-			#we need to construct the G matrix
-			tempG = [['g_U_{}{}'.format(j+1,i+1) for i in range(len(self.UsectorMatrix))]for j in range(len(self.UsectorMatrix))]
-			self.declareSymbol(flatten(tempG))
-			tempG = [[Symbol(el) for el in ell] for ell in tempG]
-			for ii,elii in enumerate(self.UsectorMatrix):
-				tempG[ii][ii] = elii
-			self.UsectorMatrix = Matrix(tempG)
-			#one also needs to construct the W vector for each particle
-			for pp in self.Particles.values():
-				pp.W = self.UsectorMatrix.transpose()*pp.Q 
+                if self.kinmixing :
+                    if len(self.UsectorMatrix) > 1: 
+                            self.kinmixing = True
+                            #we need to construct the G matrix
+                            tempG = [['g_U_{}{}'.format(j+1,i+1) for i in range(len(self.UsectorMatrix))]for j in range(len(self.UsectorMatrix))]
+                            self.declareSymbol(flatten(tempG))
+                            tempG = [[Symbol(el) for el in ell] for ell in tempG]
+                            for ii,elii in enumerate(self.UsectorMatrix):
+                                    tempG[ii][ii] = elii
+                            self.UsectorMatrix = Matrix(tempG)
+                            #one also needs to construct the W vector for each particle
+                            for pp in self.Particles.values():
+                                    pp.W = self.UsectorMatrix.transpose()*pp.Q 
 
 		#############################################################################
 		#DEF of the class to store the Yuk this is dynamic and hence needs to be here
