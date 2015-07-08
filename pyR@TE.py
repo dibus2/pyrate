@@ -318,6 +318,7 @@ else :
 		RunSettings['SetGutNorm'] = True
 	elif RunSettings['SetGutNorm'] and not(len(model.UGaugeGroups) == 1):
 		loggingCritical('**Warning** the `SetGutNorm` switch ignored because multiple U(1) gauge groups found',verbose=RunSettings['vCritical'])
+                RunSettings['SetGutNorm'] = False
 
         #add the element in ToOnly to Only
         #IF only is defined then skip the other terms
