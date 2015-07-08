@@ -9,9 +9,6 @@ models/private/
 #all .pyc
 #
 *.pyc
-<<<<<<< HEAD
-=======
-
 *.m
 *.nb
 
@@ -26,3 +23,5 @@ Source/GroupTheory/update-database.py
 Source/GroupTheory/.ipynb_checkpoints/
 *.DS_Store
 *.swp
+#logfiles
+logFile*.log

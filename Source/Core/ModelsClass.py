@@ -22,7 +22,10 @@ class Model(object) :
 		self.saveSettings = copy.deepcopy(Settings)
 		self.GaugeGroups = []
 		self.NonUGaugeGroups = []
+		self.UsectorMatrix = []
+		self.UGaugeGroups = []
 		self.GaugeGroupsName = []
+		self.NonUGroupName = []
 		self.InvariantResults = {}#for storing the results of the invariants calculated at one loop for the two loop case
 		self.Databased = {} #for the results of Y,Lambda, mf ...
 		self.DimYuk = {}#store the dimension of the Yukawas
@@ -41,6 +44,8 @@ class Model(object) :
 		self.ScMToCalculate = {}
 		self.TriToCalculate = {}
 		self.FMToCalculate = {}
+		self.ScalarAnomalousToCalculate = {}
+		self.FermionAnomalousToCalculate = {}
 		self.MixingTerm = {}
 		self.ListLbd = []
 		self.ListScM = []
@@ -60,6 +65,25 @@ class Model(object) :
 		self.declarations()
 		self.ListYukawa = []
 		self.savesettingsforoutput = []
+		################################################
+		#Kinetic mixing
+		################################################
+		self.Id = eye(len(self.UsectorMatrix))
+		#to be removed but during the modification Ill keep the two files GaugeCouplings and GaugeCouplingsKin separate
+		self.kinmixing = False
+		if len(self.UsectorMatrix) > 1: 
+			self.kinmixing = True
+			#we need to construct the G matrix
+			tempG = [['g_U_{}{}'.format(j+1,i+1) for i in range(len(self.UsectorMatrix))]for j in range(len(self.UsectorMatrix))]
+			self.declareSymbol(flatten(tempG))
+			tempG = [[Symbol(el) for el in ell] for ell in tempG]
+			for ii,elii in enumerate(self.UsectorMatrix):
+				tempG[ii][ii] = elii
+			self.UsectorMatrix = Matrix(tempG)
+			#one also needs to construct the W vector for each particle
+			for pp in self.Particles.values():
+				pp.W = self.UsectorMatrix.transpose()*pp.Q 
+
 		#############################################################################
 		#DEF of the class to store the Yuk this is dynamic and hence needs to be here
 		#############################################################################
@@ -81,7 +105,6 @@ class Model(object) :
 		def aadjoint(self) : 
 			return adjoint(self.switchindices())
 		#############################################################################
-
 		#Extract the Yukawas
 		self.Classes = {}
 		if 'Yukawas' in self.Potential :
@@ -92,9 +115,13 @@ class Model(object) :
 		#extract the scalar masses terms
 		if 'ScalarMasses' in self.Potential :
 			self.Potential['ScalarMasses'],self.ScMToCalculate,self.ListScM = self.ExtractTerm('ScalarMasses')
+			self.ScalarAnomalousToCalculate = copy.deepcopy(self.ScMToCalculate)
 		###Extract the Fermion mass terms
 		if 'FermionMasses' in self.Potential : 
 			self.Potential['FermionMasses'],self.FMToCalculate,self.ListFM = self.ExtractTerm('FermionMasses')
+                        for fmkey,fmval in self.FMToCalculate.items():
+                                self.FermionAnomalousToCalculate['gamma_{{{}{}}}'.format(fmval[-1][0][0],fmval[-1][1][0])] = fmval
+			#self.FermionAnomalousToCalculate = copy.deepcopy(self.FMToCalculate)
 		if 'TrilinearTerms' in self.Potential : 
 			self.Potential['TrilinearTerms'],self.TriToCalculate,self.ListTri = self.ExtractTerm('TrilinearTerms')
 		#Check that there is no symbols that look like M or tM or atM or MatM because it interfers with the output
@@ -119,7 +146,8 @@ class Model(object) :
 			self.DefOrderYuk[key] = tuple([el[0] for el in val[-1]])
 		#Translation dictionary to determin the particle content of the chain in the Expand function
 		self.translation = {_Y:['s','f','f'],_Ya:['s','f','f'],_C:['g','f'],_Cs:['g','s'],_Cg:['g'],_S:['g'],_Ss:['g'],_G:['g'],
-												_mfa:['f','f'],_mf:['f','f'],_ms:['s','s'],_h:['s','s','s'],_L:['s','s','s','s'],_T:['g','f','f'],_Ta:['g','f','f'],_Th:['g','s','s'],'Y2F':['f','f'],'Y2Fa':['f','f'],'Yab2S':['s','s'],'Chain2Y':['s','s','f','f'],'Chain2Ya':['s','s','f','f'],'Chain3Y':['s','s','s','f','f'],'Chain3Ya':['s','s','s','f','f'],'Chain4Y':['s','s','s','s','f','f'],'Chain4Ya':['s','s','s','s','f','f'],'Chain5Y':['s','s','s','s','s','f','f'],'Chain5Ya':['s','s','s','s','s','f','f'],'Hbar2abS':['s','s'],'H2abS':['s','s'],'Y2FabS':['g','s','s'],'Habcd':['s','s','s','s'],'Theta4':['g','g','s','s','s','s'],'Theta2':['g','s','s','s','s'],'L2abS':['s','s'],'ffabc':['g'],'Hab':['s','s'],'Habc':['s','s','s']}
+				_mfa:['f','f'],_mf:['f','f'],_ms:['s','s'],_h:['s','s','s'],_L:['s','s','s','s'],_T:['g','f','f'],_Ta:['g','f','f'],_Th:['g','s','s'],'Y2F':['f','f'],'Y2Fa':['f','f'],'Yab2S':['s','s'],'Chain2Y':['s','s','f','f'],'Chain2Ya':['s','s','f','f'],'Chain3Y':['s','s','s','f','f'],'Chain3Ya':['s','s','s','f','f'],'Chain4Y':['s','s','s','s','f','f'],'Chain4Ya':['s','s','s','s','f','f'],'Chain5Y':['s','s','s','s','s','f','f'],'Chain5Ya':['s','s','s','s','s','f','f'],'Hbar2abS':['s','s'],'H2abS':['s','s'],'Y2FabS':['g','s','s'],'Y2FabSkin':['s','s'],'Habcd':['s','s','s','s'],'Theta4':['g','g','s','s','s','s'],'Theta2':['g','s','s','s','s'],'L2abS':['s','s'],'ffabc':['g'],'Hab':['s','s'],'Habc':['s','s','s'],'WW_T': ['f'],_Ckin:['f'],_Ckins:['s'],_SfCkinf:['f'],_SsCkinf:['f'],_SsCkins:['s'],_SfCkins:['s'],_Tkin:['f'], _Takin:['f'],_TkinT:['f'], _TakinT:['f']}
+
 		
 	def __repr__(self):
 		"""Change the representation of Model instances"""
@@ -191,7 +219,7 @@ class Model(object) :
 	def get_different_gaugegroups(self):
 		"""Create the different gauge groups"""
 		for GroupName, group in self.GaugeGroupsSettings.items():
-			#Identify the group and keep the information of weither or not it is a U1 factor this is a security in case people don't call U1 groups U...
+			#Identify the group and keep the information of wether or not it is a U1 factor this is a security in case people don't call U1 groups U...
 			if group == 'U1' :
 				self.GaugeGroups.append([GroupName,U1(GroupName),True])
 			elif group.split('U')[0] == 'S':#it a SUn group factor
@@ -206,13 +234,10 @@ class Model(object) :
 		for name,g,t in self.GaugeGroups :
 			if not(t):
 				self.NonUGaugeGroups.append([name,g,t])
-			self.GaugeGroupsName.append(name)
-			self.GetGroupFromName[name] = g
-		if self.NonUGaugeGroups == [] : 
-			#create a dummy SUN group to avoid problems
-			name,g,t = 'SUndum',SUn(2,'SUndum'),False
-			self.NonUGaugeGroups.append([name,g,t])
-			self.GaugeGroups.append([name,g,t])
+				self.NonUGroupName.append(name)
+			else :
+				self.UGaugeGroups.append([name,g,t])
+				self.UsectorMatrix.append(g.g)
 			self.GaugeGroupsName.append(name)
 			self.GetGroupFromName[name] = g
 
@@ -252,6 +277,72 @@ class Model(object) :
 		else :
 			return False
 	
+	def ApplyCGC(self,Term,combination):
+		if type(combination[0]) == tuple :
+			combout = [list(ell) for ell in combination]
+		else :
+			combout = [list(combination)]#in the case there is only one gauge group in the whole contractio it s a tuple
+		TempGroup = []
+		#The only thing one has to do is to construct the subs and apply them to the factor in Term
+		Sub = sum([[(Term[1][iel][iem][0],em) for iem,em in enumerate(el)] for iel,el in enumerate(combout)],[])
+		res = Term[-1].subs(Sub)
+		return res
+
+	def GetCombInd(self,CombInd,STOP,Term,counter,Full=False):
+		All = False
+		tempF = []
+		while True :
+			try :
+				tempcomb = CombInd.next()
+				#Construct the permutted tempcomb for each term in Collect
+				res = self.ApplyCGC(Term,tempcomb)
+				if res != 0 :
+					tempF = [tempcomb,res]
+					STOP = True
+					break
+			except StopIteration :
+				counter += 1
+				STOP = False
+				All = True
+				break
+		if not(Full) :
+			return tempF,STOP,counter
+		elif Full and All :
+			return tempF,STOP,counter,True
+		else :
+			return tempF,STOP,counter,False
+	
+	def ConstructReturn(self,el,tempF,Term,Return,ReturnToCalc):
+		"""Construct the Return list with the term to calculate """
+		LHfactor = tempF[-1]#Left Hand side overall factor by which to divide
+		#we need to get the value of each particle under the gauge groups
+		particles = [self.Particles[str(ell.args[0])] for ell in Term[0]]
+		CpContPart = {}#declare a copy of ContractedParticles
+		#update teh ContractedParticles dictionary
+		ContractedParticles = {}
+		for name,g,U in self.NonUGaugeGroups:
+			self.GetContractedParticles(ContractedParticles,name,g,particles)
+		outparticles = [[particles[i]._name] for i in range(len(particles))]
+		for key,vals in ContractedParticles.items():
+			CpContPart[key] = [elval._name for elval in vals]
+		NotCharge = [False]
+		inm = 0
+		for name,g,U in self.NonUGaugeGroups:
+			iff = 0
+			if all(NotCharge) :
+				inm -=1#decrease the group because the previous one was not in tempF
+			NotCharge = []
+			for ff in outparticles : #NOT SURE THE ORDER IS CONSERVED
+				if ff[0] in CpContPart[name]:
+					ff.append(tempF[0][inm][iff])
+					iff+=1
+					NotCharge.append(False)
+				else :
+					ff.append(0)
+					NotCharge.append(True)
+			inm+=1#count the group
+		return LHfactor,outparticles
+
 	def ExtractTerm(self,term):
 		"""Extract the Yukawas terms, i.e. expand the terms in component form"""
 		###########################
@@ -261,70 +352,9 @@ class Model(object) :
 		#Try the different permutations
 		##
 
-		def ApplyCGC(Term,combination):
-			if type(combination[0]) == tuple :
-				combout = [list(ell) for ell in combination]
-			else :
-				combout = [list(combination)]#in the case there is only one gauge group in the whole contractio it s a tuple
-			TempGroup = []
-			#The only thing one has to do is to construct the subs and apply them to the factor in Term
-			Sub = sum([[(Term[1][iel][iem][0],em) for iem,em in enumerate(el)] for iel,el in enumerate(combout)],[])
-			res = Term[-1].subs(Sub)
-			return res
+		
 
-		def GetCombInd(CombInd,STOP,Term,counter,Full=False):
-			All = False
-			tempF = []
-			while True :
-				try :
-					tempcomb = CombInd.next()
-					#Construct the permutted tempcomb for each term in Collect
-					res = ApplyCGC(Term,tempcomb)
-					if res != 0 :
-						tempF = [tempcomb,res]
-						STOP = True
-						break
-				except StopIteration :
-					counter += 1
-					STOP = False
-					All = True
-					break
-			if not(Full) :
-				return tempF,STOP,counter
-			elif Full and All :
-				return tempF,STOP,counter,True
-			else :
-				return tempF,STOP,counter,False
-
-		def ConstructReturn(el,tempF,Term,Return,ReturnToCalc):
-			"""Construct the Return list with the term to calculate """
-			LHfactor = tempF[-1]#Left Hand side overall factor by which to divide
-			#we need to get the value of each particle under the gauge groups
-			particles = [self.Particles[str(ell.args[0])] for ell in Term[0]]
-			CpContPart = {}#declare a copy of ContractedParticles
-			#update teh ContractedParticles dictionary
-			for name,g,U in self.NonUGaugeGroups:
-				self.GetContractedParticles(ContractedParticles,name,g,particles)
-			outparticles = [[particles[i]._name] for i in range(len(particles))]
-			for key,vals in ContractedParticles.items():
-				CpContPart[key] = [elval._name for elval in vals]
-			NotCharge = [False]
-			inm = 0
-			for name,g,U in self.NonUGaugeGroups:
-				iff = 0
-				if all(NotCharge) :
-					inm -=1#decrease the group because the previous one was not in tempF
-				NotCharge = []
-				for ff in outparticles : #NOT SURE THE ORDER IS CONSERVED
-					if ff[0] in CpContPart[name]:
-						ff.append(tempF[0][inm][iff])
-						iff+=1
-						NotCharge.append(False)
-					else :
-						ff.append(0)
-						NotCharge.append(True)
-				inm+=1#count the group
-			return LHfactor,outparticles
+		
 
 		########################
 		#End Auxiliary functions
@@ -442,7 +472,6 @@ class Model(object) :
                                                     TempFinalTerm[tempkey] = [subll[0],propindices,Factor]
 					else : #Full singlet
 						tempkey = subll[0]
-						#In case where afull singlet term is given by a zero overall coefficient it should be removed
 						if subll[1] != 0 :
 							if tempkey in TempFinalTerm :
 								TempFinalTerm[tempkey][-1] = TempFinalTerm[tempkey][-1] + subll[1]
@@ -473,12 +502,12 @@ class Model(object) :
 						if counter >= len(Return[el]) :
 							exit("error, no non zero contraction found for the term {}".format(el))
 						CombInd = itr.product(*[itr.product(*[range(1,x[1]+1) for idx,x in enumerate(element)]) for ielem,element in enumerate(Return[el][counter][1])])
-						tempF,STOP,counter = GetCombInd(CombInd,STOP,Return[el][counter],counter)
+						tempF,STOP,counter = self.GetCombInd(CombInd,STOP,Return[el][counter],counter)
 					if tempF == [] :
 						loggingCritical("Error no isospin contraction leading to non zero term were found in {}".format(el),verbose=True)
 						exit()
 					else : 
-						LHfactor,outparticles = ConstructReturn(el,tempF,Return[el][counter],Return,ReturnToCalc)
+						LHfactor,outparticles = self.ConstructReturn(el,tempF,Return[el][counter],Return,ReturnToCalc)
 				elif Factor == [] or FullSinglet:
 					#full singlet
 					counter = 0 
@@ -513,7 +542,7 @@ class Model(object) :
 							#save cterm
 							STOP2 = False
 							while not(STOP2) :
-								tempF,STOP1,counter,All = GetCombInd(CombInd,STOP1,Return[el][counter],counter,Full=True)#all tells us if all the combinations have been tried
+								tempF,STOP1,counter,All = self.GetCombInd(CombInd,STOP1,Return[el][counter],counter,Full=True)#all tells us if all the combinations have been tried
                                                                 #Let's initialize it here.
 								if All :
 									STOP2 = True
@@ -581,7 +610,6 @@ class Model(object) :
 																	if lcparts[ix] != lcparts[new] :
 																		lcparts[ix] = lcparts[new]
 																		lcparts[new] = x
-																		#permut the indices for all the groups
 																		for idjj,jj in enumerate(NewInd) :
 																			buff = jj[ix]
 																			jj[ix] = jj[new]
@@ -595,10 +623,8 @@ class Model(object) :
 												break
 											else :
 												pass
-										#Get rid of the zeros again
-										NewInd = [[elem for elem in ll if elem != 0] for ll in NewInd]
 										#Calculate the permutation with respect to the first list
-										res = ApplyCGC(TermIdentified,tuple([tuple(lll) for lll in NewInd]))
+										res = self.ApplyCGC(TermIdentified,tuple([tuple(lll) for lll in NewInd]))
 										if res != 0 : 
 											#it is not a valid combination
                                                                                         if LastRun :
@@ -618,11 +644,10 @@ class Model(object) :
 										Found = True
 										STOP2= True
                                                                                 LastRun = False
-										LHfactor,outparticles = ConstructReturn(el,tempF,Return[el][counter],Return,ReturnToCalc)
+										LHfactor,outparticles = self.ConstructReturn(el,tempF,Return[el][counter],Return,ReturnToCalc)
 										ReturnToCalc[el] = Return[el][counter][0],LHfactor,outparticles		
-				except IOError :
-					exit("error while disentengling should not get there, contact the authors")
-					pass
+				except :
+                                    pass
 		#Just before exiting the function one has to devide all the combinations by the overall factor
 		for key2,val2 in self.Combination[term].items():
 			for iv,vv in enumerate(val2):
@@ -655,6 +680,10 @@ class Model(object) :
 		#		for iel,el in enumerate(Return[ll]):
 		#				Return[ll][iel] = [el[0],el[1],el[2]*1/abs(CGCsnorm[0])]
 		return Return,ReturnToCalc,ListTerm
+
+
+	
+
 
 
 #################################
@@ -797,15 +826,18 @@ class Model(object) :
 		return self.MixingTerm 
 	
 
-	def ExpandPotential(self,fields,nbfields,term):
+	def ExpandPotential(self,fields,nbfields,term,AnomalousDim=False):
 		"""Expand the Potential	"""
 		SumFOut= []
 		#Replace the Complex higgs and create IndexedBase object
 		#Determin which configurations have to be calculated, i.e., which derivatives we will take
-		if not(type(self.Potential[term[0]][term[1]]['Norm'])) ==list :
-			lcNorm = [self.Potential[term[0]][term[1]]['Norm']]
+		if not(AnomalousDim) :
+			if not(type(self.Potential[term[0]][term[1]]['Norm'])) ==list :
+				lcNorm = [self.Potential[term[0]][term[1]]['Norm']]
+			else :
+				lcNorm = self.Potential[term[0]][term[1]]['Norm']
 		else :
-			lcNorm = self.Potential[term[0]][term[1]]['Norm']
+			lcNorm = [1]
 		for idelem,elemfields in enumerate(fields):
 			Out,ToDerive,FOut = [],[],[]
                         #F. February 25th There is actually a pretty big flaw here. I need different index count on group basis to skip singlets!!
@@ -986,7 +1018,10 @@ class Model(object) :
 		#we start by identifying all the particles that go together
 		scalars = self.ScalarsN
 		fermions = self.FermionsN
-		groups = self.GaugeGroupsName 
+		if self.kinmixing : 
+			groups = self.NonUGroupName 
+		else :
+			groups = self.GaugeGroupsName
 		#check if there is only one argument transform the tuple
 		if type(args[0]) != tuple and type(args[0]) != list :
 			args = (args,)
@@ -1135,7 +1170,7 @@ class Model(object) :
 							#cpGenIndices,cpindicesFull=list(GenIndices),list(indicesFull)
 							cpGenIndices,cpindicesFull=copy.deepcopy(GenIndices),copy.deepcopy(indicesFull)
 						for term in element :
-							if term == _Th or term == _T or term == _Ta : 
+							if term == _Th or term == _T or term == _Ta  or term == _Tkin or term == _Takin or term == _TakinT or term == _TkinT: 
 								exit("The linearity for theta and or T matrices is not taken into account exiting")
 							res = self.getcoeffterm(cpGenIndices,cpindicesFull,term)
 							if res[0] == 0 : 
@@ -1208,6 +1243,8 @@ class Model(object) :
 				argsum = [str(ll) for ll in listsum] 
 				if argsum != [] :
 					Out = eval("Sum(Out,"+','.join(argsum)+")")
+					if Out != 0 :
+						Out = Out.doit()
 				FinalTerm.append(Out)
 		FinalTerm = sum(FinalTerm)
 		return FinalTerm
@@ -1222,7 +1259,10 @@ class Model(object) :
 		#we start by identifying al the particles that go together
 		scalars = self.ScalarsN
 		fermions = self.FermionsN
-		groups = self.GaugeGroupsName 
+		if self.kinmixing : 
+			groups = self.NonUGroupName
+		else :
+			groups = self.GaugeGroupsName
 		#check if there is only one argument transform the tuple
 		if type(args[0]) != tuple :
 			args = (args,)
@@ -1289,7 +1329,7 @@ class Model(object) :
 			#generate the indices qui vont bien 
 			indices = iigen.GenConsInd(combo,Layer)
 			#duplicate the indices that are repeated
-			indicesFull = [indices[el[1]] for el in GeneratePosition]#position in Generate are given with respect to the Chain list :w
+			indicesFull = [indices[el[1]] for el in GeneratePosition]#position in Generate are given with respect to the Chain list 
 			#SummedIndices = list(indices)
 			SummedIndices = copy.deepcopy(indices)
 			#add the ones that are fixed in the correct place
@@ -1444,6 +1484,36 @@ class Model(object) :
 					if Indx != []:
 						SummedIndices.append(Indx)
 					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
+				################################
+				#New terms for kinetic mixing. F. 25.07.14
+				################################
+				elif tp =='WW_T':
+					res = self.WW_T(temp[:1])
+					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
+				elif tp == 'Y2FabSkin':
+					res = self.Y2FabSkin(temp[:2],indicesFull[:2])
+					STOP,temp,indicesFull = tempupdate(2,temp,indicesFull)
+				elif tp == _Ckin or tp == _Ckins:
+					res = self.Casimirkin(temp[:1])
+					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
+				elif  tp == _SfCkinf or tp == _SfCkins:
+					res = self.DynkinCasimirkin(temp[:1],fermion=True)
+					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
+				elif  tp == _SsCkins or tp == _SsCkinf:
+					res = self.DynkinCasimirkin(temp[:1],fermion=False)
+					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
+				elif tp == _Takin : 
+					res = self.TMatkin(temp[:1],adj=True,tp=False)
+					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
+				elif tp == _Tkin : 
+					res = self.TMatkin(temp[:1],adj=False,tp=False)
+					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
+				elif tp == _TakinT : 
+					res = self.TMatkin(temp[:1],adj=True,tp=True)
+					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
+				elif tp == _TkinT : 
+					res = self.TMatkin(temp[:1],adj=False,tp=True)
+					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
 				else :
 					exit("Expand Function : not implemented yet")
 			if Out != [] and not(STOP): 
@@ -1476,6 +1546,9 @@ class Model(object) :
 						Out = functools.reduce(operator.mul,OutOfTrace,1)*InTF*Tr(functools.reduce(operator.mul,InTS))
 				else :
 					Out = functools.reduce(operator.mul,Out,1)
+					#Scalar product when kinetic mixing is on
+					if type(Out) == tMM and Out.shape == (1,1):
+						Out = Out[0]
 				listsum = [[ll for ll in el if len(str(ll[0]).split('dum')) != 2 
 					and len(str(ll[1]).split('dum')) != 2] for el in SummedIndices]#got rid of the dummy indices
 				#apply the extraconstrains 
@@ -1484,13 +1557,29 @@ class Model(object) :
 				if ExtraConstrains != [] : 
 					constrains = self.applyExtraConstrains2(ExtraConstrains,MatStruc)
 				#multiply Out by the constrains
-				Out= sum([Out * llcons for llcons in constrains])
+				#Here we also need to switch on the type of Out for the kinetic micxing in case we deal with matrices
+				if type(Out) == tMM : 
+					Out= summatrix([Out * llcons for llcons in constrains])
+				else :
+					Out= sum([Out * llcons for llcons in constrains])
 				#create the sum out of this 
 				argsum = [str(ll) for ll in listsum] 
 				if argsum != [] :
-					Out = eval("Sum(Out,"+','.join(argsum)+")")
+					#Here we need some modifications for the kinetic mixing
+					if type(Out) == tMM :
+						for iel,el in enumerate(Out) : 
+							Out[iel] = eval("Sum(el,"+','.join(argsum)+")")
+							if Out[iel] != 0 : 
+								Out[iel] = Out[iel].doit()
+					else :
+						Out = eval("Sum(Out,"+','.join(argsum)+")")
+						if Out != 0 :
+							Out = Out.doit()
 				FinalTerm.append(Out)
-		FinalTerm = sum(FinalTerm)
+		if FinalTerm != [] and type(FinalTerm[0]) == tMM:
+			FinalTerm = summatrix(FinalTerm)
+		else :
+			FinalTerm = sum(FinalTerm)
 		return FinalTerm
 
 	def applyExtraConstrains2(self,ExtraConstrains,MatStruc):
@@ -1615,6 +1704,33 @@ class Model(object) :
 			indlabel = [iigen.nextind('',Layer) for ll in range(6)]
 			res,Indx = self.fabc(temp[:1],indicesFull[:1],indlabel)
 			return [res,Indx,1]
+		###########
+		#Kin mixing
+		###########
+		elif tp == _Ckin or tp == _Ckins :
+			res = self.Casimirkin(temp[:1])
+			return [res,1]
+		elif tp == _SfCkins or tp == _SfCkinf:
+			res = self.DynkinCasimirkin(temp[:1],fermion=True)
+			return [res,1]
+		elif tp == _SsCkins or tp == _SsCkinf:
+			res = self.DynkinCasimirkin(temp[:1],fermion=False)
+			return [res,1]
+		elif tp == 'Y2FabSkin':
+			res = self.Y2FabSkin(temp[:2],indicesFull[:2])
+			return [res,2]
+		elif tp == _Takin : 
+			res = self.TMatkin(temp[:1],adj=True,tp=False)
+			return [res,1]
+		elif tp == _Tkin : 
+			res = self.TMatkin(temp[:1],adj=False,tp=False)
+			return [res,1]
+		elif tp == _TakinT : 
+			res = self.TMatkin(temp[:1],adj=True,tp=True)
+			return [res,1]
+		elif tp == _TkinT : 
+			res = self.TMatkin(temp[:1],adj=False,tp=True)
+			return [res,1]
 		else :
 			exit("Expand Function : not implemented yet, contact the authors")
 
@@ -1654,8 +1770,19 @@ class Model(object) :
 				StartingV = elem[5]
 			elif elem[0] == 'Chain5Y' or elem[0] == 'Chain5Ya':
 				StartingV = elem[6]
+			###########
+			#kin mixing
+			###########
+			elif elem[0] == 'WW_T':
+				StartingV = elem[1]
+			elif elem[0] == _Ckin or elem[0] == _Ckins or elem[0] == _SfCkinf or elem[0] == _SfCkins or elem[0] == _SsCkinf or elem[0] == _SsCkins:
+				StartingV = elem[1]
+			elif elem[0] == 'Y2FabSkin':
+				StartingV = None
+			elif elem[0] == _Tkin or elem[0] == _Takin or elem[0] == _TakinT or elem[0] == _TkinT:
+				StartingV = elem[1]
 			else :
-				exit("not implemented")
+				exit("Determin Trace2 : {} not implemented".format(elem[0]))
 			#Get all the final values
 			iel4Y = 0
 			if StartingV != None :
@@ -1681,9 +1808,8 @@ class Model(object) :
 					if StartingV in FinalV : 
 						#we found one let's get it
 						InTrace= [iel for iel,el in enumerate(argsS) if iel in range(ielem+iel4Y,ix+ielem+1+1)]
-						if elem[0] == _C :#we have to subtract one since C is a number multiplied out already 
+						if elem[0] == _C or elem[0] == _Ckin or elem[0] == _Ckins or elem[0] == _SfCkinf or elem[0] == _SfCkins or elem[0] == 'WW_T' or elem[0] == _SsCkinf or elem[0] == _SsCkins :#we have to subtract one since C is a number multiplied out already 
 							InTrace.remove(ielem)
-						if elem[0] == _C : #WARNING IF THE C(F) IS OUT OF A SUMMED BLOCK IT IS NOT MULTIPLIED OUT AND THIS WOULD CRASH
 							InTrace = [el - 1 for el in InTrace]
 						return InTrace
 		#if we get out there is no trace 
@@ -1726,8 +1852,16 @@ class Model(object) :
 				StartingV = elem[5]
 			elif elem[0] == 'Chain5Y' or elem[0] == 'Chain5Ya':
 				StartingV = elem[6]
+			elif elem[0] == 'WW_T':
+				StartingV = elem[1]
+			elif elem[0] == _Ckin or elem[0] == _Ckins or elem[0] == _SfCkinf or elem[0] == _SfCkins or elem[0] == _SsCkinf or elem[0] == _SsCkins:
+				StartingV = elem[1]
+			elif elem[0] == 'Y2FabSkin' :
+				StartingV = None
+			elif elem[0] == _Tkin or elem[0] == _Takin or elem[0] == _TakinT or elem[0] == _TkinT:
+				StartingV = elem[1]
 			else :
-				exit("not implemented")
+				exit("Determin Trace: {} not implemented".format(elem[0]))
 			#Get all the final values
 			iel4Y = 0
 			if StartingV != None :
@@ -1747,16 +1881,14 @@ class Model(object) :
 						FinalV.append(tuple(x[4]) if type(x[5]) == list else x[5])
 					elif x[0] == _mf or x[0] == _mfa or x[0] == 'Y2F' or x[0] == 'Y2Fa': 
 						FinalV.append(tuple(x[2]) if type(x[2]) == list else x[2])
-					#elif x[0] == _C :
-					#	FinalV.append(tuple(x[2]) if type(x[2]) == list else x[2])
 					#Is the initial in the Final list ? 
 					if StartingV in FinalV : 
 						#we found one let's get it
 						InTrace= [iel for iel,el in enumerate(args) if iel in range(ielem+iel4Y,ix+ielem+1+1)]
-						if elem[0] == _C :#we have to remove the _C index since it is transformed as a number when called it is not in the trace
+						if elem[0] == _C or elem[0] == _Ckin or elem[0] == _Ckins or elem[0] == _SfCkins or elem[0] == _SfCkinf  or elem[0] == _SsCkins or elem[0] == _SsCkinf:#we have to remove the _C index since it is transformed as a number when called it is not in the trace
 							InTrace.remove(ielem)
-						elif x[0] == _C : 
-							inTrace.remoce(ix)
+						elif elem[0] == 'WW_T':
+							InTrace.remove(ielem)
 						return InTrace
 		#if we get out there is no trace 
 		return None,None
@@ -1902,6 +2034,30 @@ class Model(object) :
 			return out
 
 
+	def DynkinCasimirkin(self,label,fermion=False):
+		"""Wrapper for the Dynkin times Casimir operator, Eq. 19 of Staub, Malinsky and Renato"""
+		key = tuple(['SfCkin']+label) if fermion else tuple(['SsCkin']+label)
+		if key in self.InvariantResults: 
+			return self.InvariantResults[key]
+		else :
+			if fermion : 
+				res = sum(flatten([multiplicityKin(pp,self)*(pp.W.transpose()*self.Particles[str(label[0])].W)**2 for pp in self.Fermions.values()]))
+			else :
+				res = sum(flatten([multiplicityKin(pp,self)*(pp.W.transpose()*self.Particles[str(label[0])].W)**2 for pp in self.Scalars.values()]))
+			self.InvariantResults[key] = res
+		return res
+
+
+	def Casimirkin(self,label):
+		"""Wrapper for the kinetic mixing term of the Casimir operator i.e. KroneckerDelta(a,b)*W^T W"""
+		key = tuple(['Ckin']+label) 
+		if key in self.InvariantResults: 
+			return self.InvariantResults[key]
+		else :
+			res = self.Particles[str(label[0])].W.transpose()*self.Particles[str(label[0])].W
+			self.InvariantResults[key] = res[0]
+			return res[0]
+
 	def Casimir(self,label,Group=False):
 		"""wrapper for the casimir operator."""
 		#the particle and teh group are always known at this point the Casimir can be calculated
@@ -1989,16 +2145,21 @@ class Model(object) :
 						self.InvariantResults[key] = res,Indx
 						return res,Indx
 				else :#U1 group
-					f1,f2 = label[1],label[-1]
-					f1ind = [el[0] for el in indices[1] if len(str(el[0]).split('dum')) != 2]
-					f2ind = [el[0] for el in indices[2] if len(str(el[0]).split('dum')) != 2]
-					#Get the Hypercharge
-					f1h = self.Particles[str(label[1])].Qnb[label[0]]#f2h is the same condition enforced at the begining
-					f1,f2 = [self.ScalarsIndex[label[1]],f1h] + f1ind,[self.ScalarsIndex[label[2]],f1h] + f2ind
-					res = grp.MatRepr(f1,f2,HB=True)#no need for symbolic function here everything is known and nothing summed easy !
-					res = res if not(adj) else res.conjugate()
-					self.InvariantResults[key] = res,[]
-					return res,[]
+					if not(self.kinmixing):
+						f1,f2 = label[1],label[-1]
+						f1ind = [el[0] for el in indices[1] if len(str(el[0]).split('dum')) != 2]
+						f2ind = [el[0] for el in indices[2] if len(str(el[0]).split('dum')) != 2]
+						#Get the Hypercharge
+						f1h = self.Particles[str(label[1])].Qnb[label[0]]#f2h is the same condition enforced at the begining
+						f1,f2 = [self.ScalarsIndex[label[1]],f1h] + f1ind,[self.ScalarsIndex[label[2]],f1h] + f2ind
+						res = grp.MatRepr(f1,f2,HB=True)#no need for symbolic function here everything is known and nothing summed easy !
+						res = res if not(adj) else res.conjugate()
+						self.InvariantResults[key] = res,[]
+						return res,[]
+					else :
+						#Should never get here
+						self.InvariantResults[key] = Integer(0),[]
+						return Integer(0),[]
 			else :
 				self.InvariantResults[key] = Integer(0),[]
 				return Integer(0),[]
@@ -2038,22 +2199,68 @@ class Model(object) :
 						self.InvariantResults[key] = res,Indx
 						return res,Indx
 				else :#U1 group
-					f1,f2 = label[1],label[-1]
-					f1ind = [el[0] for el in indices[1] if len(str(el[0]).split('dum')) != 2]
-					f2ind = [el[0] for el in indices[2] if len(str(el[0]).split('dum')) != 2]
-					#Get the Hypercharge
-					f1h = self.Particles[str(label[1])].Qnb[label[0]]#f2h is the same condition enforced at the begining
-					f1,f2 = [f1h] + f1ind,[f1h] + f2ind
-					res = grp.MatRepr(f1,f2)#no need for symbolic function here everything is known and nothing summed easy !
-					res = res if not(adj) else res.conjugate()
-					self.InvariantResults[key] = res,[]
-					return res,[]
+					if not(self.kinmixing) :
+						f1,f2 = label[1],label[-1]
+						f1ind = [el[0] for el in indices[1] if len(str(el[0]).split('dum')) != 2]
+						f2ind = [el[0] for el in indices[2] if len(str(el[0]).split('dum')) != 2]
+						#Get the Hypercharge
+						f1h = self.Particles[str(label[1])].Qnb[label[0]]#f2h is the same condition enforced at the begining
+						f1,f2 = [f1h] + f1ind,[f1h] + f2ind
+						res = grp.MatRepr(f1,f2)#no need for symbolic function here everything is known and nothing summed easy !
+						res = res if not(adj) else res.conjugate()
+						self.InvariantResults[key] = res,[]
+						return res,[]
+					else :
+						self.InvariantResults[key] = Integer(0),[]
+						return Integer(0),[]	
 			else :
 				self.InvariantResults[key] = Integer(0),[]
 				return Integer(0),[]
 
 
-		
+			###################################
+			#Wrappers for the kinetic mixing
+			###################################
+
+	def WW_T(self,label):
+		"""wrapper for the WW^T term"""
+		#the particle and the group are always known at this point
+		key = tuple(['WWT']+label)
+		if key in self.InvariantResults:
+			return self.InvariantResults[key]
+		else :
+			res = self.Particles[str(label[0])].W*(self.Particles[str(label[0])].W).transpose()
+			self.InvariantResults[key] = res
+			return res
+
+	def Y2FabSkin(self,parts,indices):
+		"""Calculates the invariant Y2FabSkin Eq. 27 with replacement rules for C2(F)"""
+		key = tuple(['Y2FabSkin']+parts+flatten(indices))
+		if key in self.InvariantResults:
+			loggingInfo("reading Y2FabSkin")
+			res = self.InvariantResults[key]
+		else :
+			sc1,sc2 = self.getparts(parts,indices)
+			res = Rational(1,2)*(
+					self.Expand(((_Ckin,p1),(_Ya,sc1,p1,p2),(_Y,sc2,p2,p1)),Layer=1)
+				+ self.Expand(((_Ckin,p1),(_Ya,sc2,p1,p2),(_Y,sc1,p2,p1)),Layer=1) 
+				)
+			if res != 0 :
+				res = res.doit()
+			self.InvariantResults[key] = res
+		return res
+
+	def TMatkin(self,label,adj=False,tp=False):
+		"Wrapper for the kinetic term of the t^A t^A matrices see Eq. (20) of Staub Malinsky Renato.Calculates W^F^T_i W^F_k"""
+		if tp : 
+			res = self.Fermions[str(label[0])].W.transpose()
+		else :
+			res = self.Fermions[str(label[0])].W
+		if adj :
+			#res = res.adjoint()
+			pass
+		return res
+	
 ##########################################
 #DEFINITION of the INVARIANTS
 ##########################################
@@ -2360,7 +2567,7 @@ class Model(object) :
 			#particle place holders
 			self.declareSymbol(flatten([('p{}'.format(i),'s{}'.format(i),'gg{}'.format(i)) for i in range(15)]))
 			#Yukawas,Casimir,Dynkin,Group,mf,ms,Lambda,trilinear,thethas,tAs
-			self.declareSymbol(['_Y','_Ya','_C','_Cs','_S','_Ss','_Cg','_G','_mf','_mfa','_ms','_L','_h','_Tha','_Ta','_Th','_T']) #the last symbls is for the C2(G)
+			self.declareSymbol(['_Y','_Ya','_C','_Cs','_S','_Ss','_Cg','_G','_mf','_mfa','_ms','_L','_h','_Tha','_Ta','_Th','_T','_Ckin','_Ckins','_SfCkinf','_SfCkins','_SsCkinf','_SsCkins','_TkinT','_TakinT','_Tkin','_Takin','l1','l2','l3','l4','l5','l6','l7','l8','l9','l10','l100','l101','l11','l12','l13','l14','l15','l16','l17','l140','l141','l142','l143','l150','l151','l152']) #the last symbls is for the C2(G)
 			#declare all the yukawas and quartics appearing in the model file
 			if 'Yukawas' in self.Potential :
 				self.declareSymbol(self.Potential['Yukawas'].keys())
@@ -2474,4 +2681,94 @@ class Index(object):
 		self.grextind = 0 
 		self.grintind = 0 
 				
+#def ExtractScalarAnomalous(self):
+	#	"""
+	#	Extract the various Scalar Anomalous dimesnsions to calculate:
+	#	1) create all the combinations
+	#	2) for each one of them find a non zero CGCs contraction
+	#	3) Store it and add it to the ToCalculate list
+	#	Note, that there is no notion of mixing here it is a simple calculation
+	#	"""
+	#	#generate the pairs of scalars for which to calculate the anomalous dimension
+	#	Pairs = itr.product(self.Scalars.keys(),self.Scalars.keys())
+	#	#Calculate the CGCs for each one of the pairs
+	#	FinalTerm = []
+	#	FinalSinglet = []
+	#	for pp in Pairs : 
+	#		#Get te quantum numbers per group 
+	#		#The switch allows to skip the norm determination in ExpandPotential
+	#		ExpandedTerm = self.ExpandPotential([[self.Particles[ipp] for ipp in pp]],2,'',True)
+	#		FullSinglet = {}
+	#		TempFinalTerm = {}
+	#		for ill,ll in enumerate(ExpandedTerm) : 
+	#			ContractedParticles = {}
+	#			FullSinglet[ill] = False
+	#			for subll in ll : 
+	#				Factor = []
+	#				for g in self.NonUGaugeGroups:
+	#					Qnbs = self.Scalars[pp[0]],self.Scalars[pp[1]]
+	#					self.GetContractedParticles(ContractedParticles,g[0],g[1],Qnbs)
+	#					#Get the contraction factor
+	#					if ContractedParticles[g[0]] != [] : 
+	#						Factor.append(GetContractionFactor(ContractedParticles,[g[0],g[1]]))
+	#					else :
+	#						Factor.append((0,))#in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
+	#				if not(all([cc == (0,) for cc in Factor])) :
+	#					#For each group plug the indices in the CGCs
+	#					#The fact that the indices have been generated according to the ordering of self.NonUGaugeGroups and that it s the same for the Factor we know that the indices are in the same order
+	#					#TODO I AM HERE 
+	#					indicesff = [0]*len(Factor)
+	#					propindices = [0]*len(Factor)
+	#					for idd,fac in enumerate(Factor) : 
+	#						if fac != (0,) :
+	#							#replace i j is cosmetic
+	#							#NOTE the str in line 342 is a fix because in version 0.7.3 of sympy the method indices returns symbols
+	#							indicesff[idd] = tuple([str(part.indices[idd]).replace('j','i') for part in subll[0] if part.indices[idd] != 0])
+	#							propindices[idd] = [[part.indices[idd],getdimIrrep(self.Particles[str(part.args[0])].Qnb[self.NonUGaugeGroups[idd][0]],self.NonUGaugeGroups[idd][1])] for part in subll[0] if part.indices[idd] != 0]
+	#							Factor[idd] = FF(indicesff[idd],fac)
+	#						else :
+	#							#particles are not charged under this group
+	#							Factor[idd] = 1
+	#					#Get rid of the zero in propindices and indicesff if there any
+	#					indicesff = [xx2 for xx2 in indicesff if xx2 != 0]
+	#					propindices = [xx2 for xx2 in propindices if xx2 != 0]
+	#					Factor = evaluate_deltas((functools.reduce(operator.mul,Factor,1)*subll[1]).expand())
+	#					tempkey = subll[0]
+	#					TempFinalTerm[tempkey] = [subll[0],propindices,Factor]
+	#				else : #Full singlet
+	#					tempkey = subll[0]
+	#					TempFinalTerm[tempkey] = [subll[0],[],subll[1]]
+	#					FullSinglet[ill] = True
+	#		FullSingletcheck = all([lement == FullSinglet.values()[0] for lement in FullSinglet.values()[1:]])
+	#		if not(FullSinglet):
+	#			loggingCritical("Error, value for `FullSingletcheck` inconsistent, contact the author.")
+	#			exit()
+	#		FinalTerm.append(TempFinalTerm.values())
+	#		#Sanity check the FullSinglet values should all be the same either True or False
+	#		FinalSinglet.append(FullSinglet.values()[0])
+	#	#Oki for each one of the terms in FinalTerm we have to find a non zero combination of indices and calculate for it	
+	#	FinalTerm = sum(FinalTerm,[])
+	#	Return = []
+	#	for ielem, elem in enumerate(FinalTerm) :
+	#		#dummy def for the re-use of existing functions
+	#		counter = 0
+	#		Factor = elem[-1]
+	#		STOP = False
+	#		if Factor != [] and not(FinalSinglet[ielem]):
+	#			#For each contraction we generate an iterator for the possible contraction
+	#			CombInd = itr.product(*[itr.product(*[range(1,x[1]+1) for idx,x in enumerate(element)]) for ielem,element in enumerate(elem[1])])
+	#			tempF,STOP,counter = self.GetCombInd(CombInd,STOP,elem,counter)
+	#			if tempF == [] :
+	#				LHfactor,outparticles = 0,[]
+	#			else : 
+	#				LHfactor,outparticles = self.ConstructReturn(elem[0],tempF,elem,[],[])
+	#		elif Factor == [] or FullSinglet:
+	#			#full singlet
+	#			counter = 0 
+	#			LHfactor = elem[-1]
+	#			outparticles = [[Symbol(str(ell.args[0]))] + len(self.NonUGaugeGroups)*[0]  for ell in elem[0]]
+	#			#fill out the dictionary
+	#		Return.append((elem[0], LHfactor,outparticles))
+	#	return Return
+
 

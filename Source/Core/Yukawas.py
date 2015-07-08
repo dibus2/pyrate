@@ -15,7 +15,7 @@ def set_globalsYuk(model):
 	for key,val in model.glob.items():
 		globals()[key] = val 
 
-def CompileYukawas(Translated,y,comb,model,Weyl):
+def CompileYukawas(Translated,y,comb,model,Weyl,GutNorm):
 	"""Compile a given beta function for the Yukawas i.e. divide by the LHS factor"""
 	LH = model.YukToCalculate[y][1]
 	FinalBeta = (sum([el[0] for el  in Translated[y]]).doit()/LH).expand()
@@ -23,6 +23,8 @@ def CompileYukawas(Translated,y,comb,model,Weyl):
 		FinalBeta = FinalBeta.subs(kappa,Rational(1,2)) 
 	else :
 		FinalBeta = FinalBeta.subs(kappa,1) 
+	if GutNorm:
+            FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g,sqrt(Rational(3,5))*model.UGaugeGroups[0][1].g)
 	FinalBeta = FinalBeta.subs(tuple([(el,0) for el in ListAllSymbols['Yukawas']]))
 	FinalBeta = DeterminOrdering(model,FinalBeta)	
 	return FinalBeta

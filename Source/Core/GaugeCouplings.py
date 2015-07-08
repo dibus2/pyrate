@@ -10,15 +10,19 @@ from RGEsmathModule import DynkinIndex,DynkinCasimir,DeterminOrdering
 #update global variables 
 
 #powe 3
-def CompileGaugeCouplings(model,Translated,x,Weyl): 
+def CompileGaugeCouplings(model,Translated,x,Weyl,GutNorm): 
 	FinalBeta = sum([el[0] for el in Translated[x]]).expand()
 	if Weyl :
 		FinalBeta = FinalBeta.subs(kappa,Rational(1,2))
 	else :
 		FinalBeta = FinalBeta.subs(kappa,1)
 	FinalBeta = DeterminOrdering(model,FinalBeta)
+	if GutNorm:
+            FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g,sqrt(Rational(3,5))*model.UGaugeGroups[0][1].g)
+            if x == model.UGaugeGroups[0][0] : 
+                #divide by the overal constant
+                FinalBeta = FinalBeta/sqrt(Rational(3,5))
 	return FinalBeta
-
 
 def set_globals(model):
 	"""coppy the globals from RGEsModule into the local gloabls()"""

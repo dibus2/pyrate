@@ -5,7 +5,7 @@ try :
     import sys
     import argparse
     import os
-    import pdb
+    import time
     wd = os.getcwd()
     sys.path.append(wd+'/Source/Core')
 except :
@@ -16,9 +16,8 @@ except :
 #
 ####
 welcomemessage = """\n\n\n\n\t\t==================================================================================\n
-=======
-\t\t\t\tPyR@TE version X.X.X released  X, 2014\n
-\t\t\tF. Lyonnet, I. Schienbein, F.Staub, A.Wingerter, arxiv 1309.7030\n
+\t\t\t\tPyR@TE version x.x.x  released  ???\n
+\t\t\tF. Lyonnet, I. Schienbein, F.Staub, A.Wingerter, arxiv 1309.7030
 \t\t==================================================================================\n
 """
 print(welcomemessage)
@@ -39,7 +38,7 @@ parser.add_argument('--Trilinear','-tr', dest ='Trilinear', action = 'store_true
 parser.add_argument('--All-Contributions','-a', dest ='All-Contributions', action = 'store_true',  default = False, help='Set the calculation to all the contributions')
 parser.add_argument('--Two-Loop','-tl', dest ='Two-Loop', action = 'store_true',  default = False, help='Set the calculation to two loop order')
 parser.add_argument('--LogFile','-lg', dest ='LogFile', action = 'store',  default = 'logFile.log', help='Set the logFile name')
-parser.add_argument('--LogLevel','-lv', dest ='LogLevel', action = 'store',  default = 'Critical', help='Set the LogLevel ')
+parser.add_argument('--LogLevel','-lv', dest ='LogLevel', action = 'store',  default = 'Info', help='Set the LogLevel ')
 parser.add_argument('--LatexFile','-tex', dest ='LatexFile', action = 'store',  default = 'RGEsOutput.tex', help='Set the name of the Latex output file')
 parser.add_argument('--LatexOutput','-texOut', dest ='LatexOutput', action = 'store_true',  default = True, help='Write the results in a Latex file')
 parser.add_argument('--Results','-res', dest ='Results', action = 'store',  default = './results/', help='store all the results in the path')
@@ -54,6 +53,9 @@ parser.add_argument('--Only','-onl',dest = 'Only', action ='store', default = {}
 parser.add_argument('--Skip','-sk',dest = 'Skip', action= 'store', default = '', help = 'Set the different terms to neglect in the calculation. E.g. ["CAabcd","CL2abcd"]. The list of terms that can be neglected are listed in Source/Core/RGEsDefinition.py' )
 #parser.add_argument('--database','-db',dest='database',action='store', default='', help='Interrogate the Clebsh-Gordan Coefficient database. It returns the list of invariants. E.g. --databas ["SU2",((1,),(1,True))]')
 parser.add_argument('--interactive-db','-idb',dest='interactivedb',action='store_true',default=False,help='Starts the interactive database mode. Allows one to check what are the CGCs implemented for a given contraction and more (Casimir, Dynkin,...)')
+parser.add_argument('--ScalarAnomalous','-sa',dest = 'ScalarAnomalous', action ='store_true', default = False, help='set the calculation of scalar anomalous dimensions to True')
+parser.add_argument('--FermionAnomalous','-fa',dest = 'FermionAnomalous', action ='store_true', default = False, help='set the calculation of fermion anomalous dimensions to True')
+parser.add_argument('--SetGutNorm','-gutn',dest='SetGutNorm',action='store_true', default=False, help='set the normalization to gut normalization in case there is a U(1) gauge group, it normalizes g1 -> sqrt(3/5)*g\'')
 
 #Collect the arguments
 args = parser.parse_args()
@@ -104,7 +106,11 @@ if not(os.path.exists(RunSettings['Results'])) :
 #Get the logLevel from RunSettings
 LogLevel = {'Info':logging.INFO,'Debug':logging.DEBUG,'Critical':logging.CRITICAL}
 #create the config of the logging system
-logging.basicConfig(filename = RunSettings['Results'] + '/' + RunSettings['LogFile'], level = LogLevel['{}'.format(RunSettings['LogLevel'])], format="%(levelname)s [%(asctime)s] [%(funcName)s] %(message)s")
+if RunSettings['LogFile'] == 'logFile.log':
+	#add the time stamp
+	RunSettings['LogFile'] = RunSettings['LogFile'].split('.')[0]+'_{}.log'.format(time.time())
+
+logging.basicConfig(filename = RunSettings['LogFile'], level = LogLevel['{}'.format(RunSettings['LogLevel'])], format="%(levelname)s [%(asctime)s] [%(funcName)s] %(message)s")
 #Setting up the verbose level
 if RunSettings['verbose'] : 
         if RunSettings['VerboseLevel'] == 'Info' :
@@ -307,14 +313,22 @@ else :
         model = Model(yamlSettings)
         #Create the instance Model
         loggingCritical("Creating the instance of the Model: {}, {}, by {}...done".format(yamlSettings['Name'],yamlSettings['Date'],yamlSettings['Author']),verbose=RunSettings['vCritical'])
+        if RunSettings['SetGutNorm'] and len(model.UGaugeGroups) == 1 : 
+		loggingInfo('Setting the Gut normalization for the U(1) group factor',verbose=RunSettings['vInfo'])
+		RunSettings['SetGutNorm'] = True
+	elif RunSettings['SetGutNorm'] and not(len(model.UGaugeGroups) == 1):
+		loggingCritical('**Warning** the `SetGutNorm` switch because multiple U(1) gauge groups found',verbose=RunSettings['vCritical'])
+
         #add the element in ToOnly to Only
- #IF only is defined then skip the other terms
-        trans = { 'QuarticTerms': model.LbdToCalculate,
-                                                'ScalarsMasses': model.ScMToCalculate,
-                                                'FermionMasses': model.FMToCalculate,
-                                                'TrilinearTerms': model.TriToCalculate,
-                                                'Yukawas': model.YukToCalculate
-                                        }
+        #IF only is defined then skip the other terms
+	trans = { 'QuarticTerms': model.LbdToCalculate,
+						'ScalarsMasses': model.ScMToCalculate,
+						'FermionMasses': model.FMToCalculate,
+						'TrilinearTerms': model.TriToCalculate,
+						'Yukawas': model.YukToCalculate,
+						'ScalarAnomalous': model.ScalarAnomalousToCalculate,
+						'FermionAnomalous': model.FermionAnomalousToCalculate
+					}
         if RunSettings['Only'] != {} :
                         if type(RunSettings['Only']) == str :
                             try : 
@@ -456,72 +470,87 @@ else :
         #LateX output
         #############
 
-        if RunSettings['LatexOutput'] :
-                loggingInfo("\nWriting a latex file `{}` .".format(RunSettings['Results']+'/'+ RunSettings['LatexFile']),verbose=RunSettings['vInfo'])
-                #Call the writeLateX function
-                writeLatexOutput(RunSettings,FinalRGE,model,ToCalculate)
+	try :
+            if RunSettings['LatexOutput'] :
+                    loggingInfo("\nWriting a latex file `{}` .".format(RunSettings['Results']+'/'+ RunSettings['LatexFile']),verbose=RunSettings['vInfo'])
+                    #Call the writeLateX function
+                    writeLatexOutput(RunSettings,FinalRGE,model,ToCalculate)
 
+	except : 
+		loggingCritical('"\nError in the LateX export, skipping. Contact the authors',verbose=True)
+		pass
         ###################
         #Mathematica Output
         ###################
-        if RunSettings['ToM']:
-                loggingInfo("Writing a txt to Mathematica file `{}`.".format(RunSettings['Results'] + '/' + RunSettings['ToMF']),verbose=RunSettings['vInfo'])
-                AllMathematicaRGEs = []
-                Dimension = []
-                for iel,el in enumerate(FinalRGE):
-                        tp = TranslateToMathematica(el,'{}_{}'.format(RunSettings['Results']+'/'+RunSettings['ToMF'],ToCalculate[iel]),ToCalculate[iel],model)
-                        AllMathematicaRGEs.append(tp[0])
-                        Dimension.append(tp[1])
-                f = open(RunSettings['Results'] + '/' + RunSettings['ToMF'].split('.txt')[0] +'_numerics.m','w')
-                Dimension = 'DimensionParameter={{{}}};\n'.format(','.join(flatten(Dimension)))
-                AllMathematicaRGEs = 'AllRGEs={{{}}}'.format(','.join(flatten(AllMathematicaRGEs)))
-                f.write(Dimension)
-                f.write('\n')
-                f.write(AllMathematicaRGEs)
-                f.close()
+	try :
+            if RunSettings['ToM']:
+                    loggingInfo("Writing a txt to Mathematica file `{}`.".format(RunSettings['Results'] + '/' + RunSettings['ToMF']),verbose=RunSettings['vInfo'])
+                    AllMathematicaRGEs = []
+                    Dimension = []
+                    for iel,el in enumerate(FinalRGE):
+                            tp = TranslateToMathematica(el,'{}_{}'.format(RunSettings['Results']+'/'+RunSettings['ToMF'],ToCalculate[iel]),ToCalculate[iel],model)
+                            AllMathematicaRGEs.append(tp[0])
+                            Dimension.append(tp[1])
+                    f = open(RunSettings['Results'] + '/' + RunSettings['ToMF'].split('.txt')[0] +'_numerics.m','w')
+                    Dimension = 'DimensionParameter={{{}}};\n'.format(','.join(flatten(Dimension)))
+                    AllMathematicaRGEs = 'AllRGEs={{{}}}'.format(','.join(flatten(AllMathematicaRGEs)))
+                    f.write(Dimension)
+                    f.write('\n')
+                    f.write(AllMathematicaRGEs)
+                    f.close()
+	except :
+		loggingCritical('"\nError in the Mathematica export, skipping. Contact the authors',verbose=True)
+		pass
 
 	##############
 	#Pickle Output
 	##############
-	if RunSettings['Pickle'] :
-		try :
-			fPickle = open('{}'.format(RunSettings['Results'] + '/' + RunSettings['PickleFile']),'w')			
-		except :
-			loggingCritical('ERROR while opening the pickle output file `{}`.'.format(fPickle),verbose=RunSettings['vCritical'])
-		try : 
-			#create a string of the result
-			strres = [str(el).replace('Dagger','adjoint') for el in RGEs]
-			strsettings = ([str(el) for el in model.ListYukawa],
-										[str(el) for el in model.ListFM],
-										[str(el) for el in model.ListTri],
-										[str(el) for el in model.ListLbd],
-										[str(el) for el in model.ListScM],
-										[str(el[-1]) for el in model.ListGroups],
-										[str(el[0]) for el in model.GaugeGroups],
-										[str(el) for el in model.Particles.keys()],
-										[str(el)+'_f' for el in model.Particles.keys()],
-                                                                                [str(el)+'1_f' for el in model.Particles.keys()]#for the indices of the generations
-										)
-                        #Fix for the Sudummy gauge group 
-                        if 'SUndum' in strsettings[-4] : 
-                            strsettings[-5].append('g_SUndum')
-			pickle.dump([strres,strsettings,'Generated by PyR@TE for {}.'.format(model._Name)],fPickle)
-			fPickle.close()
-			loggingInfo("\nWriting a pickle output file `{}`.".format(RunSettings['PickleFile']),verbose=RunSettings['vInfo'])
-		except :
-			loggingCritical('ERROR while storing the pickle output file.',verbose=RunSettings['vCritical'])
+	try :
+            if RunSettings['Pickle'] :
+                    try :
+                            fPickle = open('{}'.format(RunSettings['Results'] + '/' + RunSettings['PickleFile']),'w')			
+                    except :
+                            loggingCritical('ERROR while opening the pickle output file `{}`.'.format(fPickle),verbose=RunSettings['vCritical'])
+                    try : 
+                            #create a string of the result
+                            strres = [str(el).replace('Dagger','adjoint') for el in RGEs]
+                            strsettings = ([str(el) for el in model.ListYukawa],
+                                                                                    [str(el) for el in model.ListFM],
+                                                                                    [str(el) for el in model.ListTri],
+                                                                                    [str(el) for el in model.ListLbd],
+                                                                                    [str(el) for el in model.ListScM],
+                                                                                    [str(el[-1]) for el in model.ListGroups],
+                                                                                    [str(el[0]) for el in model.GaugeGroups],
+                                                                                    [str(el) for el in model.Particles.keys()],
+                                                                                    [str(el)+'_f' for el in model.Particles.keys()],
+                                                                                    [str(el)+'1_f' for el in model.Particles.keys()]#for the indices of the generations
+                                                                                    )
+                            #Fix for the Sudummy gauge group 
+                            if 'SUndum' in strsettings[-4] : 
+                                strsettings[-5].append('g_SUndum')
+                            pickle.dump([strres,strsettings,'Generated by PyR@TE for {}.'.format(model._Name)],fPickle)
+                            fPickle.close()
+                            loggingInfo("\nWriting a pickle output file `{}`.".format(RunSettings['PickleFile']),verbose=RunSettings['vInfo'])
+                    except :
+                            loggingCritical('ERROR while storing the pickle output file.',verbose=RunSettings['vCritical'])
+	except :
+		loggingCritical('"\nError in the Pickle export, skipping. Contact the authors',verbose=True)
+		pass
 
         ########################
         #Python numerical Output
         ########################
-        if RunSettings['Export'] and Check :
-                loggingInfo("Exporting the results to a python function...",verbose=RunSettings['vInfo'])
-                pythonoutput = ExportBetaFunction(model,FinalRGEForTranslation,RunSettings,StrucYuk)
-                loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
-                loggingInfo("Exporting the results to a c++ function...",verbose=RunSettings['vInfo'])
-                ExportBetaToCpp(pythonoutput,'BetaFunction{}.cpp'.format(model._Name))
-                loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
-        loggingCritical('End of the run.',verbose = RunSettings['vCritical'])
-        #mv the logging into results
-        #os.system('mv {} {}'.format(RunSettings['LogFile'],RunSettings['Results']))
-
+        try :
+            if RunSettings['Export'] and Check :
+                    loggingInfo("Exporting the results to a python function...",verbose=RunSettings['vInfo'])
+                    pythonoutput = ExportBetaFunction(model,FinalRGEForTranslation,RunSettings,StrucYuk)
+                    loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
+                    loggingInfo("Exporting the results to a c++ function...",verbose=RunSettings['vInfo'])
+                    ExportBetaToCpp(pythonoutput,'BetaFunction{}.cpp'.format(model._Name))
+                    loggingInfo("\t\t...done",verbose=RunSettings['vInfo'])
+	except :
+		loggingCritical('"\nError in the numerical export, skipping. Contact the authors',verbose=True)
+		pass
+	loggingCritical('End of the run.',verbose = RunSettings['vCritical'])
+	#mv the logging into results
+	os.system('mv {} {}'.format(RunSettings['LogFile'],RunSettings['Results']))

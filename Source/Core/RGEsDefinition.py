@@ -47,6 +47,8 @@ L2abc,Habc,LYabc,LSabc = symbols('L2abc Habc LYabc LSabc')
 #2 Loop
 L2habc,Lbar3abc,Lbar2Yabc,Hbarlmabc,Hbarhabc,H2habc,Hbar2habc,HYabc,HbarYabc,H3abc = symbols('L2habc Lbar3abc Lbar2Yabc Hbarlmabc Hbarhabc H2habc Hbar2habc HYabc HbarYabc H3abc')
 Lbar2Sabc,L2gabc,HSabc,HFabc,Y2Fhabc,g4LSabc,LSSabc,Alabc,Abarlabc,BYabc,BbarYabc = symbols('Lbar2Sabc L2gabc HSabc HFabc Y2Fhabc g4LSabc LSSabc Alabc Abarlabc BYabc BbarYabc')
+Y2ab,Y2Fab,Hbar2ab,H2ab,ScalarAnoI,ScalarAnoII,xi,L2ab,C2SC2S= symbols('Y2ab Y2Fab Hbar2ab H2ab ScalarAnoI ScalarAnoII xi L2ab C2SC2S')
+FermionAnoI,FermionAnoIg2,FermionAnoII,FermionAnoIIg2,FermionAnoIIg4 = symbols('FermionAnoI FermionAnoIg2 FermionAnoII FermionAnoIIg2 FermionAnoIIg4')
 ####################
 #Collect all symbols
 ####################
@@ -55,7 +57,10 @@ ListAllSymbols = {'Yukawas': ['Yuk', 'YukGauge', 'YY2S', 'YukII', 'YukGaugeIIg2'
 			'QuarticTerms' : ['L2abcd', 'Habcd', 'LYabcd','L2labcd','Lbar3abcd', 'Lbar2Yabcd', 'Hbarlabcd', 'H2labcd' ,'Hbar2labcd', 'HYabcd', 'HbarYabcd', 'H3abcd','LSabcd', 'Lbar2Sabcd', 'L2gabcd', 'HSabcd', 'HFabcd', 'Y2Flabcd','g4LSabcd', 'LSSabcd', 'Alabcd', 'Abarlabcd', 'BYabcd', 'BbarYabcd','Atabcd', 'Agabcd', 'ASabcd', 'Aabcd'],
 			'FermionMasses': ['YukFermionMassI','YukFermionMassII', 'YukGaugeFermionMass', 'YukGaugeFermionMassIIg2', 'YukGaugeFermionMassIIg4'],
 			'ScalarMasses': ['meflabef', 'haefhbef', 'Hab', 'LSab', 'LSabg4', 'LYab', 'L2mab', 'Lbar3ab', 'Lbar2Yab', 'Hbarlab', 'H2mab', 'Hbar2mab', 'HYab', 'HbarYab', 'H3ab', 'Lbar2Sab', 'L2gab', 'HSab', 'HFab', 'Y2Fmab', 'LSab', 'LSSab', 'Alab', 'Abarlab', 'BYab', 'BbarYab'],
-			'TrilinearTerm': ['L2abc', 'Habc', 'LYabc', 'LSabc','L2habc', 'Lbar3abc', 'Lbar2Yabc', 'Hbarlmabc', 'Hbarhabc', 'H2habc', 'Hbar2habc', 'HYabc', 'HbarYabc', 'H3abc','Lbar2Sabc', 'L2gabc', 'HSabc', 'HFabc', 'Y2Fhabc', 'g4LSabc', 'LSSabc', 'Alabc', 'Abarlabc', 'BYabc', 'BbarYabc']}
+			'TrilinearTerm': ['L2abc', 'Habc', 'LYabc', 'LSabc','L2habc', 'Lbar3abc', 'Lbar2Yabc', 'Hbarlmabc', 'Hbarhabc', 'H2habc', 'Hbar2habc', 'HYabc', 'HbarYabc', 'H3abc','Lbar2Sabc', 'L2gabc', 'HSabc', 'HFabc', 'Y2Fhabc', 'g4LSabc', 'LSSabc', 'Alabc', 'Abarlabc', 'BYabc', 'BbarYabc'],
+			'ScalarAnomalous': ['Yab', 'Y2Fab','Hbar2ab', 'H2ab','ScalarAnoI','ScalarAnoII'],
+			'FermionAnomalous': ['FermionAnoI','FermionAnoIg2','FermionAnoII','FermionAnoIIg2','FermionAnoIIg4']}
+
 
 ##################
 #List of Equations
@@ -96,7 +101,15 @@ ListEquations['Trilinear'] = {0 : {'one-loop' :['CL2abc','CHabc','CLYabc'],
 																		4 : {'one-loop': [],
 																			'two-loop' : ['Cg4LSabc','CLSSabc','CAlabc','CAbarlabc','CBYabcBbarYabc']
 																			}}
-
+ListEquations['ScalarAnomalous'] ={ 0 : {'one-loop': ['CY2ab'],
+																					'two-loop': ['CL2ab','CH2ab','CHbar2ab']},
+																		2 : {'one-loop': ['CScalarAnoI'],
+																					'two-loop': ['CY2Fab']},
+																		4 : {'one-loop': [],
+																					'two-loop': ['CScalarAnoII','CC2SC2S']}
+																		}
+ListEquations['FermionAnomalous'] ={ 0 : {'one-loop': ['CFermionAnoI'],
+'two-loop': ['CFermionAnoII']},	2 : {'one-loop': ['CFermionAnoIg2'],'two-loop': ['CFermionAnoIIg2']},4 : {'one-loop': [],'two-loop': ['CFermionAnoIIg4']}																		}																	
 #################
 #RGEs Definitions
 #################
@@ -133,6 +146,7 @@ RGEsDefinitions['Quartic-Couplings'] = {
 			- 3*g**2*LSabcd
 		  + 3*g**4*Aabcd)
 		,
+		
 'II':
 		1/(4*pi)**4*(
 			L2labcd
@@ -238,3 +252,34 @@ RGEsDefinitions['Trilinear']={
 	 ,
 'Ref': 'Eq 64 and 69 of 0211440v3'
 }
+RGEsDefinitions['ScalarAnomalous'] ={
+		'I':
+		1/(4*pi)**2*(
+			2*kappa*Y2ab 
+			-g**2*ScalarAnoI)
+		,
+		'II':
+		1/(4*pi)**4*(
+			-g**4*ScalarAnoII
+		+ Rational(1,2)*L2ab
+		+ Rational(3,2)*g**4*C2SC2S - 3*kappa*H2ab
+		- 2 *kappa*Hbar2ab + 10*kappa*g**2*Y2Fab
+		)
+		,
+		'Ref': 'Eq 	22,23 of 0211440v3'
+	}	
+RGEsDefinitions['FermionAnomalous'] ={
+		'I':
+		1/(4*pi)**2*(
+			FermionAnoI+
+		g**2*xi*FermionAnoIg2)
+		,
+		'II':
+		1/(4*pi)**4*(
+			FermionAnoII 
+			+ g**2*FermionAnoIIg2
+			+ g**4*FermionAnoIIg4
+		)
+		,
+		'Ref': 'Eq 	22,23 of 0211440v3'
+	}

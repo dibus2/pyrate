@@ -9,7 +9,6 @@ try :
 except ImportError :
         exit('error while loading modules in latexRGEs.py')
 from Contraction import *
-import pudb
 from ToMathematica import ToMathematicaNotation,findclosingbracket
 
 def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):

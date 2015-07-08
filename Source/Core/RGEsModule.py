@@ -9,6 +9,8 @@ from GaugeCouplings import *
 from ScalarMass import *
 from FermionMass import *
 from Trilinear import *
+from ScalarAnomalous import *
+from FermionAnomalous import *
 
 def Translate(RGE, model, RunSettings):
 	"""Do the translation for a given RGE in a general g group into a product of semi simple groups."""
@@ -21,7 +23,12 @@ def Translate(RGE, model, RunSettings):
 	#Check if it is gauge couplings beta functions
 	if RGE == 'Gauge-Couplings':
 		set_globals(model)
-		for idx,x in enumerate(model.GaugeGroups):
+		if model.kinmixing :
+			gaugegrouptocalculate = model.NonUGaugeGroups
+		else :
+			gaugegrouptocalculate = model.GaugeGroups
+		for idx,x in enumerate(gaugegrouptocalculate):
+		#for idx,x in enumerate(model.GaugeGroups):
 			loggingInfo('\t\tGauge-Couplings calculation, Group {} ...'.format(x[0]),verbose=RunSettings['vInfo'])
 			#x contains the name and the instance of the Group
 			Translated[x[0]] = LocalRGE.expand()
@@ -41,7 +48,7 @@ def Translate(RGE, model, RunSettings):
 					#doing the calculation
 					Translated[x[0]][ipow][0] = Translated[x[0]][ipow][0].doit()
 				if powe[1] == 5 : 
-				#	#Eq. 108
+					#Eq. 108
 					Translated[x[0]][ipow][0] = ApplyEq108(powe,model,x)
 					loggingInfo('\t\t\t Applying Eq. 108...done',verbose=RunSettings['vInfo']) 
 					#Eq. 109
@@ -56,7 +63,26 @@ def Translate(RGE, model, RunSettings):
 					Translated[x[0]][ipow][0] = Y4F(powe,model,x)
 					loggingInfo('\t\t\t Calculating the Y4(F) term...done',verbose=RunSettings['vInfo'])
 					Translated[x[0]][ipow][0] = Translated[x[0]][ipow][0].doit()
-			Translated[x[0]] = CompileGaugeCouplings(model,Translated,x[0],RunSettings['Weyl'])
+			Translated[x[0]] = CompileGaugeCouplings(model,Translated,x[0],RunSettings['Weyl'],RunSettings['SetGutNorm'])
+			#Kinetic mixing terms
+		if model.kinmixing :
+			loggingInfo('\t\tGauge-Couplings calculation of the abelian sector {} ...'.format(' ,'.join([el[0] for el in model.UGaugeGroups])),verbose=RunSettings['vInfo'])
+			#x contains the name and the instance of the Group
+			Translated['abelian'] = LocalRGE.expand()
+			#separation or the different powers, note the power 0 of g is obtained by putting it to zero
+			Translated['abelian'] = [Translated['abelian'].coeff(g**2),Translated['abelian'].coeff(g**3),Translated['abelian'].coeff(x[1].g**4),Translated['abelian'].coeff(g**5)]
+			##elimination of the powers that do not appear above
+			Translated['abelian'] = [[elt,ilt+2] for ilt,elt in enumerate(Translated['abelian']) if elt != 0]
+			##Loop over the power of g and apply the translation rules
+			for ipow,powe in 	enumerate(Translated['abelian']):
+				if powe[1] == 3 :
+					#Eq. 106
+					Translated['abelian'][ipow][0] = abeliansector1loop(model)
+					loggingInfo('\t\t\t Abelian sector 1-Loop...done',verbose=RunSettings['vInfo']) 
+				if powe[1] == 5 :
+					Translated['abelian'][ipow][0] = abeliansector2loop(model)
+					loggingInfo('\t\t\t Abelian sector 2-Loop...done',verbose=RunSettings['vInfo']) 
+			Translated['abelian'] = CompileGaugeCouplings(model,Translated,'abelian',RunSettings['Weyl'],RunSettings['SetGutNorm'])
 		loggingInfo("\t\t...Gauge-Couplings calculation done.",verbose=RunSettings['vInfo'])
 	elif RGE == 'Quartic-Couplings' :
 		set_globalsLbd(model)
@@ -92,7 +118,7 @@ def Translate(RGE, model, RunSettings):
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
                                                 Translated[lbd][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[lbd] = CompileQuartic(Translated,lbd,comb,model,RunSettings['Weyl'])
+				Translated[lbd] = CompileQuartic(Translated,lbd,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 	elif RGE == 'Yukawas' :
 		set_globalsYuk(model)
 		if model.YukToCalculate == {} :
@@ -128,7 +154,7 @@ def Translate(RGE, model, RunSettings):
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
                                                 Translated[y][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[y] = CompileYukawas(Translated,y,comb,model,RunSettings['Weyl'])
+				Translated[y] = CompileYukawas(Translated,y,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 				loggingInfo('\t\t Compiling the results for the Yukawa...done',verbose=RunSettings['vInfo'])
 	elif RGE == 'ScalarMass':
 		set_globalsScM(model)
@@ -162,7 +188,7 @@ def Translate(RGE, model, RunSettings):
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
                                                 Translated[mqt][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[mqt] = CompileScalar(Translated,mqt,comb,model,RunSettings['Weyl'])
+				Translated[mqt] = CompileScalar(Translated,mqt,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 	elif RGE == 'FermionMass' :
 		set_globalsFM(model)
 		if model.FMToCalculate == {} :
@@ -195,7 +221,7 @@ def Translate(RGE, model, RunSettings):
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
                                                 Translated[mf][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[mf] = CompileFM(Translated,mf,comb,model,RunSettings['Weyl'])
+				Translated[mf] = CompileFM(Translated,mf,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 				loggingInfo('\t\t Compiling the results for the Yukawa...done',verbose=RunSettings['vInfo'])
 	elif RGE == 'Trilinear' :
 		set_globalsTri(model)
@@ -214,21 +240,88 @@ def Translate(RGE, model, RunSettings):
 				comb = model.TriToCalculate[hf][2]  # Choice only one calculated
 				##############################################################
 				for ipow,powe in enumerate(Translated[hf]):
-                                    for elemineq in ListEquations['Trilinear'][powe[1]]['one-loop']:
-                                        if elemineq in RunSettings['Skip']:
-                                            loggingCritical('\t\t\t WARNING skipping {} ...'.format(elemineq),verbose=True)
-                                        else :
-                                            loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
-                                            Translated[hf][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
-                                            loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-                                    if RunSettings['Two-Loop']:
-                                        for elemineq in ListEquations['Trilinear'][powe[1]]['two-loop']:
-                                            if elemineq in RunSettings['Skip']:
-                                                loggingCritical('\t\t\t WARNING skipping {} ...'.format(elemineq),verbose=True)
-                                            else :
-                                                loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
-                                                Translated[hf][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
-                                                loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[hf] = CompileTri(Translated,hf,comb,model,RunSettings['Weyl'])
+					for elemineq in ListEquations['Trilinear'][powe[1]]['one-loop']:
+						if elemineq in RunSettings['Skip']:
+								loggingCritical('\t\t\t WARNING skipping {} ...'.format(elemineq),verbose=True)
+						else :
+									loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
+									Translated[hf][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
+									loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
+					if RunSettings['Two-Loop']:
+							for elemineq in ListEquations['Trilinear'][powe[1]]['two-loop']:
+									if elemineq in RunSettings['Skip']:
+											loggingCritical('\t\t\t WARNING skipping {} ...'.format(elemineq),verbose=True)
+									else :
+											loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
+											Translated[hf][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
+											loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
+				Translated[hf] = CompileTri(Translated,hf,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 				loggingInfo("\t\t\tCompiling the results for the trilinear terms",verbose = RunSettings['vInfo'])
+	elif RGE == 'ScalarAnomalous' :
+		set_globalsScalarAnomalous(model)
+		if model.ScalarAnomalousToCalculate == {} :
+			loggingCritical("WARNING, no scalar anomalous dimension to calculate",verbose=RunSettings['vCritical'])
+		else :
+			for sc,valsc in model.ScalarAnomalousToCalculate.items():
+				loggingInfo('\t\tScalar anomalous dimension calculation, for combination {}...\n'.format(sc),verbose=RunSettings['vInfo'])
+				Translated[sc] = LocalRGE.expand()
+				#separation of the different powers of g 
+				Translated[sc] = [Translated[sc].subs(g,0),Translated[sc].coeff(g),Translated[sc].coeff(g**2),Translated[sc].coeff(g**3),Translated[sc].coeff(g**4),Translated[sc].coeff(g**5),Translated[sc].coeff(g**6)]
+				#elimination of the component that are equals to zero 
+				Translated[sc] = [[elt,ilt] for ilt,elt in enumerate(Translated[sc]) if elt != 0]
+				##############################################################
+				comb = model.ScalarAnomalousToCalculate[sc][-1] 
+				##############################################################
+				for ipow,powe in enumerate(Translated[sc]):
+								for elemineq in ListEquations['ScalarAnomalous'][powe[1]]['one-loop']:
+										if elemineq in RunSettings['Skip']:
+												loggingCritical('\t\t\t WARNING skipping {} ...'.format(elemineq),verbose=True)
+										else :
+												loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
+												Translated[sc][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
+												loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
+								if RunSettings['Two-Loop']:
+										for elemineq in ListEquations['ScalarAnomalous'][powe[1]]['two-loop']:
+												if elemineq in RunSettings['Skip']:
+														loggingCritical('\t\t\t WARNING skipping {} ...'.format(elemineq),verbose=True)
+												else :
+														loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
+														Translated[sc][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
+														loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
+				Translated[sc] = CompileScalarAnomalous(Translated,sc,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
+				loggingInfo("\t\t\tCompiling the results for the Scalar anomalous dimension terms",verbose = RunSettings['vInfo'])
+	elif RGE == 'FermionAnomalous' :
+		set_globalsFermionAnomalous(model)
+		if model.FermionAnomalousToCalculate == {} :
+			loggingCritical("WARNING, no fermion anomalous dimension to calculate",verbose=RunSettings['vCritical'])
+		else :
+			for sc,valsc in model.FermionAnomalousToCalculate.items():
+				loggingInfo('\t\tFermion anomalous dimension calculation, for combination {}...\n'.format(sc),verbose=RunSettings['vInfo'])
+				Translated[sc] = LocalRGE.expand()
+				#separation of the different powers of g 
+				Translated[sc] = [Translated[sc].subs(g,0),Translated[sc].coeff(g),Translated[sc].coeff(g**2),Translated[sc].coeff(g**3),Translated[sc].coeff(g**4),Translated[sc].coeff(g**5),Translated[sc].coeff(g**6)]
+				#elimination of the component that are equals to zero 
+				Translated[sc] = [[elt,ilt] for ilt,elt in enumerate(Translated[sc]) if elt != 0]
+				##############################################################
+				comb = model.FermionAnomalousToCalculate[sc][-1] 
+				#comb = [[Symbol('Qbar'),1,1],[Symbol('Q'),1,1]]
+				##############################################################
+				for ipow,powe in enumerate(Translated[sc]):
+								for elemineq in ListEquations['FermionAnomalous'][powe[1]]['one-loop']:
+										if elemineq in RunSettings['Skip']:
+												loggingCritical('\t\t\t WARNING skipping {} ...'.format(elemineq),verbose=True)
+										else :
+												loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
+												Translated[sc][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
+												loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
+								if RunSettings['Two-Loop']:
+										for elemineq in ListEquations['FermionAnomalous'][powe[1]]['two-loop']:
+												if elemineq in RunSettings['Skip']:
+														loggingCritical('\t\t\t WARNING skipping {} ...'.format(elemineq),verbose=True)
+												else :
+														loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
+														Translated[sc][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
+														loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
+				Translated[sc] = CompileFermionAnomalous(Translated,sc,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
+				loggingInfo("\t\t\tCompiling the results for the Fermion anomalous dimension terms",verbose = RunSettings['vInfo'])
 	return Translated
