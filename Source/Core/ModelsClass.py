@@ -623,6 +623,8 @@ class Model(object) :
 												break
 											else :
 												pass
+                                                                                #Get rid of the zeros againF.:This I copied from online
+										NewInd = [[elem for elem in ll if elem != 0] for ll in NewInd]
 										#Calculate the permutation with respect to the first list
 										res = self.ApplyCGC(TermIdentified,tuple([tuple(lll) for lll in NewInd]))
 										if res != 0 : 
@@ -646,39 +648,13 @@ class Model(object) :
                                                                                 LastRun = False
 										LHfactor,outparticles = self.ConstructReturn(el,tempF,Return[el][counter],Return,ReturnToCalc)
 										ReturnToCalc[el] = Return[el][counter][0],LHfactor,outparticles		
-				except :
-                                    pass
+				except IOError :
+					exit("error while disentengling should not get there, contact the authors")
+					pass
 		#Just before exiting the function one has to devide all the combinations by the overall factor
 		for key2,val2 in self.Combination[term].items():
 			for iv,vv in enumerate(val2):
 				self.Combination[term][key2][iv] = vv[0],vv[1]/ReturnToCalc[key2][1]
-		#F. March 9th 2015 
-		#One has to extract the contribution comming from the CGCs such that it can be normalized to one. This is important since the normalization of the CGCs since Susyno v3 are different.
-		#This has to be done for each one of the terms
-		#for ll in ListTerm:
-		#		#Get the corresponding term from the potential
-		#		tppotentialterm = [el[-1] for iel,el in enumerate(Return[ll]) if el[0] == ReturnToCalc[ll][0]]
-		#		assert len(tppotentialterm) == 1
-		#		tppotentialterm = tppotentialterm[0]
-		#		#split up the contributions and keep only the CGCs i.e. FF terms
-		#		coefficient = np.array([functools.reduce(operator.mul,[ell for ell in el.args if type(ell) != FF],1) for el in tppotentialterm.args])
-		#		coefficient = coefficient*1/coefficient[0]
-		#		tppotentialterm = [functools.reduce(operator.mul,[ell for ell in el.args if type(ell) == FF],1)*norm for el,norm in zip(tppotentialterm.args,coefficient)]
-		#		#Create list of substitution
-		#		tosubs = tuple(flatten([tuple(zip(ff.indices,gg[1:])) for ff,gg in zip(ReturnToCalc[ll][0],ReturnToCalc[ll][-1])],1))
-		#		CGCsnorm = np.array([el.subs(tosubs) for el in tppotentialterm])
-		#		#At this stage all the different CGCs should return the same overal factor 
-		#		checkCGCsnorm = np.all(abs(CGCsnorm)-abs(CGCsnorm[0])==0)
-		#		#TODO The pb is how do we know which overall factor to use ? Plus or minus sign? I think the one of the selected combination
-		#		if not(checkCGCsnorm) :
-		#				loggingCritical("Error while determining the overall normalization of the CGCs, please contact the author.",verbose=True)
-		#		tpaddtoReturnToCalc = list(ReturnToCalc[ll])
-		#		tpaddtoReturnToCalc.append(CGCsnorm[0])
-		#		print(CGCsnorm,tpaddtoReturnToCalc)
-		#		tpaddtoReturnToCalc[1] = tpaddtoReturnToCalc[1]/abs(CGCsnorm[0])
-		#		ReturnToCalc[ll] = tuple(tpaddtoReturnToCalc)
-		#		for iel,el in enumerate(Return[ll]):
-		#				Return[ll][iel] = [el[0],el[1],el[2]*1/abs(CGCsnorm[0])]
 		return Return,ReturnToCalc,ListTerm
 
 
