@@ -144,7 +144,7 @@ class Model(object) :
 			self.DefOrderYuk[key] = tuple([el[0] for el in val[-1]])
 		#Translation dictionary to determin the particle content of the chain in the Expand function
 		self.translation = {_Y:['s','f','f'],_Ya:['s','f','f'],_C:['g','f'],_Cs:['g','s'],_Cg:['g'],_S:['g'],_Ss:['g'],_G:['g'],
-				_mfa:['f','f'],_mf:['f','f'],_ms:['s','s'],_h:['s','s','s'],_L:['s','s','s','s'],_T:['g','f','f'],_Ta:['g','f','f'],_Th:['g','s','s'],'Y2F':['f','f'],'Y2Fa':['f','f'],'Yab2S':['s','s'],'Chain2Y':['s','s','f','f'],'Chain2Ya':['s','s','f','f'],'Chain3Y':['s','s','s','f','f'],'Chain3Ya':['s','s','s','f','f'],'Chain4Y':['s','s','s','s','f','f'],'Chain4Ya':['s','s','s','s','f','f'],'Chain5Y':['s','s','s','s','s','f','f'],'Chain5Ya':['s','s','s','s','s','f','f'],'Hbar2abS':['s','s'],'H2abS':['s','s'],'Y2FabS':['g','s','s'],'Y2FabSkin':['s','s'],'Habcd':['s','s','s','s'],'Theta4':['g','g','s','s','s','s'],'Theta2':['g','s','s','s','s'],'L2abS':['s','s'],'ffabc':['g'],'Hab':['s','s'],'Habc':['s','s','s'],'WW_T': ['f'],_Ckin:['f'],_Ckins:['s'],_SfCkinf:['f'],_SsCkinf:['f'],_SsCkins:['s'],_SfCkins:['s'],_Tkin:['f'], _Takin:['f'],_TkinT:['f'], _TakinT:['f']}
+						_mfa:['f','f'],_mf:['f','f'],_ms:['s','s'],_h:['s','s','s'],_L:['s','s','s','s'],_T:['g','f','f'],_Ta:['g','f','f'],_Th:['g','s','s'],'Y2F':['f','f'],'Y2Fa':['f','f'],'Yab2S':['s','s'],'Chain2Y':['s','s','f','f'],'Chain2Ya':['s','s','f','f'],'Chain3Y':['s','s','s','f','f'],'Chain3Ya':['s','s','s','f','f'],'Chain4Y':['s','s','s','s','f','f'],'Chain4Ya':['s','s','s','s','f','f'],'Chain5Y':['s','s','s','s','s','f','f'],'Chain5Ya':['s','s','s','s','s','f','f'],'Hbar2abS':['s','s'],'H2abS':['s','s'],'Y2FabS':['g','s','s'],'Y2FabSkin':['s','s'],'Habcd':['s','s','s','s'],'Theta4':['g','g','s','s','s','s'],'Theta2':['g','s','s','s','s'],'L2abS':['s','s'],'ffabc':['g'],'Hab':['s','s'],'Habc':['s','s','s'],'WW_T': ['f'],_Ckin:['f'],_Ckins:['s'],_SfCkinf:['f'],_SsCkinf:['f'],_SsCkins:['s'],_SfCkins:['s'],_Tkin:['f'], _Takin:['f'],_TkinT:['f'], _TakinT:['f'], 'Theta2g2kin': ['s','s','s','s'], 'Thetakin': ['s','s','s','s']}
 
 		
 	def __repr__(self):
@@ -1415,6 +1415,12 @@ class Model(object) :
 				elif tp == _TkinT : 
 					res = self.TMatkin(temp[:1],adj=False,tp=True)
 					STOP,temp,indicesFull = tempupdate(1,temp,indicesFull)
+				elif tp == 'Theta2g2kin':
+						res = self.Theta2g2kin(temp[:4],indicesFull[:4])
+						STOP,temp,indicesFull = tempupdate(4,temp,indicesFull)
+				elif tp == 'Thetakin':
+						res = self.Thetakin(temp[:4],indicesFull[:4])
+						STOP,temp,indicesFull = tempupdate(4,temp,indicesFull)
 				else :
 					exit("Expand Function : not implemented yet")
 			if Out != [] and not(STOP): 
@@ -1632,6 +1638,7 @@ class Model(object) :
 		elif tp == _TkinT : 
 			res = self.TMatkin(temp[:1],adj=False,tp=True)
 			return [res,1]
+
 		else :
 			exit("Expand Function : not implemented yet, contact the authors")
 
@@ -1655,7 +1662,7 @@ class Model(object) :
 				StartingV = None
 			elif elem[0] == 'Y2F' or elem[0] == 'Y2Fa' or elem[0] == _mf or elem[0] == _mfa:
 				StartingV = elem[1]
-			elif elem[0] == 'Yab2S' or elem[0] == 'Theta2' or elem[0] == 'Theta4' or elem[0] == _Th or elem[0] == 'Agabcd':
+			elif elem[0] == 'Yab2S' or elem[0] == 'Theta2' or elem[0] == 'Theta4' or elem[0] == _Th or elem[0] == 'Agabcd' or elem[0] == 'Theta2g2kin' or elem[0] == 'Thetakin':
 				StartingV = None
 			elif elem[0] == 'Y2FabS' or elem[0] == _ms or elem[0] == 'Hab':
 				StartingV = None
@@ -1737,7 +1744,7 @@ class Model(object) :
 				StartingV = None
 			elif elem[0] == 'Y2F' or elem[0] == 'Y2Fa' or elem[0] == _mf or elem[0] == _mfa:
 				StartingV = elem[1]
-			elif elem[0] == 'Yab2S' or elem[0] == 'Theta2' or elem[0] == 'Theta4' or elem[0] == _Th or elem[0] == 'Agabcd':
+			elif elem[0] == 'Yab2S' or elem[0] == 'Theta2' or elem[0] == 'Theta4' or elem[0] == _Th or elem[0] == 'Agabcd' or elem[0] == 'Theta2g2kin' or elem[0] == 'Thetakin':
 				StartingV = None
 			elif elem[0] == 'Y2FabS' or elem[0] == _ms or elem[0] == 'Hab':
 				StartingV = None
@@ -2161,7 +2168,69 @@ class Model(object) :
 			#res = res.adjoint()
 			pass
 		return res
+
+	def Theta2g2kin(self,parts,indices):
+		"""Implements the matrix part of Eq 22"""
+		#TODO MAKE SURE THAT TAKING THE SUM OVER G1 DOES NOT CHANGE THE RESULT !!!!
+		key = tuple(['Theta2g2kin']+parts+flatten(indices))
+		if key in self.InvariantResults:
+				res = self.InvariantResults[key]
+		else :
+				sc1,sc2,sc3,sc4 = self.getparts(parts,indices)
+				res = (self.Expand(((_G,gg1),(_Th,gg1,sc1,sc3),(_Th,gg1,sc2,sc4)),Layer=1,MatStruc=['A','A']))
+				if res != 0 :
+						res = res.doit()
+						self.InvariantResults[key] = res
+		return res
+
+
+	def Thetakin(self,parts,indices):
+			"""Implemts the right part of Eq. 22"""
+			key = tuple(['Thetakin'] + parts + flatten(indices))
+			if key in self.InvariantResults:
+					res = self.InvariantResults[key]
+			else :
+					sc1,sc2,sc3,sc4 = parts
+					res = self.Scalars[str(sc1)].W.transpose()*self.Scalars[str(sc2)].W*self.deltatilde(sc1,sc2,sc3,sc4)
+			return res
+
+	def deltatilde(self,sc1,sc2,sc3,sc4):
+			"""Implements the product of two deltatilde as in they appear in Eq. 22"""
+			#One has to check that sc1,sc2 are the real and imaginary parts of an eigenvalue of U(1)
+			if all([self.Particles[str(sci)].FromCplx for sci in [sc1,sc2,sc3,sc4]]) :
+					cplxsc1,cplxsc2 = self.getHiggsFromScalar[sc1],self.getHiggsFromScalar[sc2]
+					cplxsc3,cplxsc4 = self.getHiggsFromScalar[sc3],self.getHiggsFromScalar[sc4]
+					assert len(cplxsc1) >= 1 and len(cplxsc2)  >= 1 
+					assert len(cplxsc3) >= 1 and len(cplxsc4)  >= 1 
+					#cplxsc1 contains the complex scalar and its conjugate. Since they have the same real and complex part it does not matter which one we use to check
+					rsc1,isc1 = self.Particles[cplxsc1[0]].RealPart, self.Particles[cplxsc1[0]].CplxPart
+					rsc2,isc2 = self.Particles[cplxsc2[0]].RealPart, self.Particles[cplxsc2[0]].CplxPart
+					rsc3,isc3 = self.Particles[cplxsc3[0]].RealPart, self.Particles[cplxsc3[0]].CplxPart
+					rsc4,isc4 = self.Particles[cplxsc4[0]].RealPart, self.Particles[cplxsc4[0]].CplxPart
+					#Checking that sci scj come from the same eigenvalue is equivalent to checkin that the real and complex parts are the same rsc1 == rsc2 and isc1 == isc2
+					res = 1
+					if rsc1 == rsc3 and isc1 == isc3 and rsc2 == rsc4 and isc3 == isc4 : 
+							#Then we can check the different possibiliies i.e. sci is the real and scj the imaginary or vice versa
+							if (sc1 == rsc1 and sc3 == isc3) or (sc1 == isc1 and sc3 == rsc3) : 
+									res = res*I
+							else :
+									res = 0
+							if (sc2 == rsc2 and sc4 == isc4) or (sc2 == isc2 and sc4 == rsc4) : 
+									res = res*I
+							else :
+									res = 0
+					else :
+							res = 0
+			else :
+					res = 0
+			return res
+
+
+
+
 	
+
+
 ##########################################
 #DEFINITION of the INVARIANTS
 ##########################################
@@ -2313,6 +2382,7 @@ class Model(object) :
 				res = res.doit()
 			self.InvariantResults[key] = res
 		return res
+
 
 
 	def Theta2(self,parts,indices):#not used 

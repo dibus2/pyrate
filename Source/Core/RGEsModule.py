@@ -4,7 +4,7 @@ from RGEsDefinition import *
 from ModelsClass import	Model,loggingInfo,loggingDebug,loggingCritical
 from RGEsmathModule import SimplifyTraces
 from Yukawaskin import *
-from QuarticCouplings import *
+from QuarticCouplingskin import *
 from GaugeCouplingskin import *
 from ScalarMass import *
 from FermionMass import *

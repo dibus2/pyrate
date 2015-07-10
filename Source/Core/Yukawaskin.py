@@ -116,24 +116,24 @@ def CYukGaugeIIg2(powe,comb,model):
 	reskin = 0
 	if model.kinmixing : 
 		reskin = (
-				l7*3*(model.Expand2((([[(_Ckin,f1),(_Y,s1,f1,p1),(_Ya,sc,p1,p2),(_Y,s1,p2,f2)],
+				3*(model.Expand2((([[(_Ckin,f1),(_Y,s1,f1,p1),(_Ya,sc,p1,p2),(_Y,s1,p2,f2)],
 				[(_Y,s1,f1,p1),(_Ya,sc,p1,p2),(_Y,s1,p2,f2),(_Ckin,f2)]])),dotrace=False)
 				)#Line 7
-			+ l7*5*(model.Expand2(((_Y,s1,f1,p1),([[(_Ckin,p1),(_Ya,sc,p1,p2)],[(_Ya,sc,p1,p2),(_Ckin,p2)]]),(_Y,s1,p2,f2)),dotrace=False)
+			+ 5*(model.Expand2(((_Y,s1,f1,p1),([[(_Ckin,p1),(_Ya,sc,p1,p2)],[(_Ya,sc,p1,p2),(_Ckin,p2)]]),(_Y,s1,p2,f2)),dotrace=False)
 				)#Line 7
-			- l8*Rational(7,4)*(model.Expand2((([[(_Ckin,f1),('Y2Fa',f1,p1),(_Y,sc,p1,f2)],[(_Y,sc,f1,p1),('Y2F',p1,f2),(_Ckin,f2)]])),dotrace=False)
+			- Rational(7,4)*(model.Expand2((([[(_Ckin,f1),('Y2Fa',f1,p1),(_Y,sc,p1,f2)],[(_Y,sc,f1,p1),('Y2F',p1,f2),(_Ckin,f2)]])),dotrace=False)
 				)#Line 8
-			-l9*Rational(1,4)*(model.Expand2((([[(_Y,s1,f1,p1),(_Ckin,p1),(_Ya,s1,p1,p2),(_Y,sc,p2,f2)],
+			-Rational(1,4)*(model.Expand2((([[(_Y,s1,f1,p1),(_Ckin,p1),(_Ya,s1,p1,p2),(_Y,sc,p2,f2)],
 					[(_Y,sc,f1,p1),(_Ya,s1,p1,p2),(_Ckin,p2),(_Y,s1,p2,f2)]])),dotrace=False)
 				)#Line 9
-			+ l17*10*kappa*model.Expand(((_Y,s1,f1,f2),('Y2FabSkin',sc,s1)),dotrace=False)#Line 10
-			+ l11*6*(model.Expand(((_Ckins,s1),(_Y,s1,f1,p1),(_Ya,sc,p1,p2),(_Y,s1,p2,f2)),dotrace=False)#Line 11
+			+ 10*kappa*model.Expand(((_Y,s1,f1,f2),('Y2FabSkin',sc,s1)),dotrace=False)#Line 10
+			+ 6*(model.Expand(((_Ckins,s1),(_Y,s1,f1,p1),(_Ya,sc,p1,p2),(_Y,s1,p2,f2)),dotrace=False)#Line 11
 				 -2*model.Expand(((_Ckins,sc),(_Y,s1,f1,p1),(_Ya,sc,p1,p2),(_Y,s1,p2,f2)),dotrace=False)#Line 11
 				)
-			+ l12*Rational(9,2)*(model.Expand2(((_Ckins,s1),([[(_Y,s1,f1,p1),(_Ya,s1,p1,p2),(_Y,sc,p2,f2)],
+			+ Rational(9,2)*(model.Expand2(((_Ckins,s1),([[(_Y,s1,f1,p1),(_Ya,s1,p1,p2),(_Y,sc,p2,f2)],
 					[(_Y,sc,f1,p1),(_Ya,s1,p1,p2),(_Y,s1,p2,f2)]])),dotrace=False)
 				)
-			+ l10*6*(model.Expand(((_TakinT,f1),(_Y,sc,f1,p1),(_Ya,s1,p1,p2),(_Takin,p2),(_Y,s1,p2,f2)))
+			+ 6*(model.Expand(((_TakinT,f1),(_Y,sc,f1,p1),(_Ya,s1,p1,p2),(_Takin,p2),(_Y,s1,p2,f2)))
 			 		+ model.Expand(((_Y,s1,f1,p1),(_TkinT,p1),(_Ya,s1,p1,p2),(_Y,sc,p2,f2),(_Tkin,f2)))
 				)
 		)
