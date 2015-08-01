@@ -377,7 +377,6 @@ def CBYabcdBbarYabcd(powe,comb,model):
 		else : 
 			tot.append(calculated[key])
 	res = sum(tot)
-	res = res.doit()
 	tf = time.time()
 	powe[0] = powe[0].subs(BYabcd,res).subs(BbarYabcd,0)
 	return powe[0]
