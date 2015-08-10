@@ -16,15 +16,13 @@ def set_globalsLbd(model):
 	for key,val in model.glob.items():
 		globals()[key] = val 
 
-def CompileQuartic(Translated,lbd,comb,model,Weyl,GutNorm):
+def CompileQuartic(Translated,lbd,comb,model,Weyl):
 	LH = model.LbdToCalculate[lbd][1]
 	FinalBeta = (sum([el[0] for el in Translated[lbd]]).doit()/LH).expand()
 	if Weyl : 
 		FinalBeta = FinalBeta.subs(kappa,Rational(1,2)) 
 	else :
 		FinalBeta = FinalBeta.subs(kappa,1) 
-	if GutNorm:
-            FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g,sqrt(Rational(3,5))*model.UGaugeGroups[0][1].g)
 	#Set all the terms that have been skipped to zero
 	FinalBeta = FinalBeta.subs(tuple([(el,0) for el in ListAllSymbols['QuarticTerms']]))
 	FinalBeta = DeterminOrdering(model,FinalBeta)	
