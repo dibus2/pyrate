@@ -92,7 +92,7 @@ def Translate(RGE, model, RunSettings):
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
                                                 Translated[lbd][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[lbd] = CompileQuartic(Translated,lbd,comb,model,RunSettings['Weyl'])
+				Translated[lbd] = CompileQuartic(Translated,lbd,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 	elif RGE == 'Yukawas' :
 		set_globalsYuk(model)
 		if model.YukToCalculate == {} :
@@ -128,7 +128,7 @@ def Translate(RGE, model, RunSettings):
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
                                                 Translated[y][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[y] = CompileYukawas(Translated,y,comb,model,RunSettings['Weyl'])
+				Translated[y] = CompileYukawas(Translated,y,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 				loggingInfo('\t\t Compiling the results for the Yukawa...done',verbose=RunSettings['vInfo'])
 	elif RGE == 'ScalarMass':
 		set_globalsScM(model)
@@ -162,7 +162,7 @@ def Translate(RGE, model, RunSettings):
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
                                                 Translated[mqt][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[mqt] = CompileScalar(Translated,mqt,comb,model,RunSettings['Weyl'])
+				Translated[mqt] = CompileScalar(Translated,mqt,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 	elif RGE == 'FermionMass' :
 		set_globalsFM(model)
 		if model.FMToCalculate == {} :
@@ -195,7 +195,7 @@ def Translate(RGE, model, RunSettings):
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
                                                 Translated[mf][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[mf] = CompileFM(Translated,mf,comb,model,RunSettings['Weyl'])
+				Translated[mf] = CompileFM(Translated,mf,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 				loggingInfo('\t\t Compiling the results for the Yukawa...done',verbose=RunSettings['vInfo'])
 	elif RGE == 'Trilinear' :
 		set_globalsTri(model)
@@ -229,6 +229,6 @@ def Translate(RGE, model, RunSettings):
                                                 loggingInfo("\t\t\t Calculating the {} term ...".format(elemineq),verbose=RunSettings['vInfo'])
                                                 Translated[hf][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq),verbose=RunSettings['vInfo'])
-				Translated[hf] = CompileTri(Translated,hf,comb,model,RunSettings['Weyl'])
+				Translated[hf] = CompileTri(Translated,hf,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 				loggingInfo("\t\t\tCompiling the results for the trilinear terms",verbose = RunSettings['vInfo'])
 	return Translated

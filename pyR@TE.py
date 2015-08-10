@@ -47,6 +47,7 @@ parser.add_argument('--Only','-onl',dest = 'Only', action ='store', default = {}
 parser.add_argument('--Skip','-sk',dest = 'Skip', action= 'store', default = '', help = 'Set the different terms to neglect in the calculation. E.g. ["CAabcd","CL2abcd"]. The list of terms that can be neglected are listed in Source/Core/RGEsDefinition.py' )
 #parser.add_argument('--database','-db',dest='database',action='store', default='', help='Interrogate the Clebsh-Gordan Coefficient database. It returns the list of invariants. E.g. --databas ["SU2",((1,),(1,True))]')
 parser.add_argument('--interactive-db','-idb',dest='interactivedb',action='store_true',default=False,help='Starts the interactive database mode. Allows one to check what are the CGCs implemented for a given contraction and more (Casimir, Dynkin,...)')
+parser.add_argument('--SetGutNorm','-gutn',dest='SetGutNorm',action='store_true', default=False, help='set the normalization to gut normalization in case there is a U(1) gauge group, it normalizes g1 -> sqrt(3/5)*g\'')
 
 #Collect the arguments
 args = parser.parse_args()
