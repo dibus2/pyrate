@@ -97,7 +97,7 @@ class Idbquerry(cmd.Cmd):
             #load the database
             print("loading database of CGCs...")
             localdir = os.path.realpath(os.path.dirname(__file__))
-            fdb = open(localdir+'/../GroupTheory/CGCs-1.2.0-sparse.pickle','r')
+            fdb = open(localdir+'/../GroupTheory/CGCs-1.2.0.pickle','r')
             self.db = pickle.load(fdb)
             fdb.close()
             self.extractinfo()
