@@ -17,6 +17,5 @@ pickles = [pickle.load(file(ff,'r')) for ff in filenames]
 for ip,pp in enumerate(pickles) : 
     print("adding {} to the database".format(filenames[ip]))
     output.update(pp)
-
 pickle.dump(output,file('CGCslast.pickle','w'))
 print("done")

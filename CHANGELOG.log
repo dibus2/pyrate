@@ -1,4 +1,7 @@
-June 5th: 
+August 20th:
+Corrected a bug in the naming of the output. No impact on the results.
+
+June 5th:
 
 Bug introduced in version 1.1.1 fixed: with models where there is a singlet contracted with other fields. I introduced a fix for the permutations of indices but missed out one case which was never encountered in the demo model files. In case it was encoutered the program would crash. Therefore, no wrong results coudl have been produced.
 

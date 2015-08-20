@@ -5,19 +5,16 @@ It allows one to check efficiently what is implemented what is not and how to sp
 
 """
 
-try :
+try:
     import cmd
     import os
     from sys import exit
     import readline
     import rlcompleter
     from sympy import symbols,Symbol,Rational,sqrt,IndexedBase,Matrix
-    if 'libedit' in readline.__doc__:
-        readline.parse_and_bind("bind ^I rl_complete")
-    else :
-        readline.parse_and_bind("tab: complete")
     import pickle
-except : 
+    import pudb
+except:
     exit("Error while loading one of the modules: `cmd, os, readline, rlcompleter, pickle`")
 
 
@@ -97,7 +94,7 @@ class Idbquerry(cmd.Cmd):
             #load the database
             print("loading database of CGCs...")
             localdir = os.path.realpath(os.path.dirname(__file__))
-            fdb = open(localdir+'/../GroupTheory/CGCs-1.2.0.pickle','r')
+            fdb = open(localdir+'/../GroupTheory/CGCs-1.2.0-sparse.pickle','r')
             self.db = pickle.load(fdb)
             fdb.close()
             self.extractinfo()
@@ -266,14 +263,16 @@ class Idbquerry(cmd.Cmd):
 
     def do_Matrices(self, line):
         mats = self.do_generic(line,'Matrices',toreturn=True)
-        print("{}".format("\n\n".join([str(Matrix(el)) for el in mats['mat']])))
+        print("Sparse matrices, showing non zero components:\n")
+        print(mats)
+        # print("{}".format("\n\n".join([str(Matrix(el)) for el in mats['mat']])))
 
     def complete_Matrices(self,text,line,begidx,endidx):
         return self.complete_generic(text,line,begidx,endidx,'Matrices')
 
     def do_generic_onearg(self,line,function):
         args = line.split(' ')
-        try :
+        try:
             if len(args) == 1 and args[0] == '':
                 raise IdbquerryMissingArgument('gauge')
             elif len(args) > 1 :
