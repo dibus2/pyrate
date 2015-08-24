@@ -18,43 +18,64 @@ import pudb
 # <codecell>
 
 #open the file as a string do the replacement un put it back before loading it
-f = open('CGCsnewsu2.m','r')
+f = open('CGCssu28.m','r')
 dic = f.readlines()
 f.close()
-
-# <codecell>
-
+#
+## <codecell>
+#
 dic = ''.join(dic).replace('^','**')
+
 while 'Sqrt[' in dic:
     dic =dic.replace('Sqrt[{}]'.format(re.search('Sqrt\[([^\]]*)\]',dic).group(1)),'sqrt({})'.format(re.search('Sqrt\[([^\]]*)\]',dic).group(1)))
 while re.search('sqrt\([0-9]*/[0-9]*\)',dic) != None :
     src = re.search('sqrt\(([0-9]*)/([0-9]*)\)',dic)  
     dic = dic.replace('sqrt({}/{})'.format(src.group(1),src.group(2)),'sqrt(Rational({},{}))'.format(src.group(1),src.group(2)))#
+
+while re.search('[0-9]{3}/[0-9]{4}',dic) != None :
+   src = re.search('([0-9]{3})/([0-9]{4})',dic)
+   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+
+while re.search('[0-9]{2}/[0-9]{4}',dic) != None :
+   src = re.search('([0-9]{2})/([0-9]{4})',dic)
+   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+
+while re.search('[0-9]{1}/[0-9]{4}',dic) != None :
+   src = re.search('([0-9]{1})/([0-9]{4})',dic)
+   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+
 while re.search('[0-9]{3}/[0-9]{3}',dic) != None :
    src = re.search('([0-9]{3})/([0-9]{3})',dic)
    dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
-while re.search('[0-9]{1,2}/[0-9]{3}',dic) != None :
-   src = re.search('([0-9]{1,2})/([0-9]{3})',dic)
+
+while re.search('[0-9]{2}/[0-9]{3}',dic) != None :
+   src = re.search('([0-9]{2})/([0-9]{3})',dic)
    dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+
+while re.search('[0-9]{1}/[0-9]{3}',dic) != None :
+   src = re.search('([0-9]{1})/([0-9]{3})',dic)
+   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+
 while re.search('[0-9]{2}/[0-9]{2}',dic) != None :
    src = re.search('([0-9]{2})/([0-9]{2})',dic)
    dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+
 while re.search('[0-9]{1}/[0-9]{2}',dic) != None :
    src = re.search('([0-9]{1})/([0-9]{2})',dic)
    dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+
 while re.search('[0-9]{2}/[0-9]',dic) != None :
    src = re.search('([0-9]{2})/([0-9])',dic)
    dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+
 while re.search('[0-9]/[0-9]',dic) != None :
    src = re.search('([0-9])/([0-9])',dic)
    dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
-# <codecell>
 
 f = open('CGCsnew.py','w')
 f.write('from sympy import sqrt,Rational,I\n')
 f.write(dic)
 f.close()
-# <codecell>
 
 from sympy import sqrt,Rational,I,Matrix
 from CGCsnew import db
