@@ -1,13 +1,11 @@
-#!/usr/bin/env python 
-import re as regular  # avoid the double definition of real part of sympy
-from RGEsDefinition import *
-from ModelsClass import Model, loggingInfo, loggingDebug, loggingCritical
-from RGEsmathModule import SimplifyTraces
+#!/usr/bin/env python
+
+from ModelsClass import loggingInfo, loggingCritical
 from Yukawaskin import *
 from QuarticCouplingskin import *
 from GaugeCouplingskin import *
 from FermionMasskin import *
-from ScalarMass import *
+from ScalarMasskin import *
 from Trilinear import *
 from ScalarAnomalous import *
 from FermionAnomalous import *
