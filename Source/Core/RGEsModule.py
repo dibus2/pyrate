@@ -129,7 +129,7 @@ def Translate(RGE, model, RunSettings):
                                             verbose=RunSettings['vInfo'])
                                 Translated[lbd][ipow][0] = eval("{}(powe,comb,model)".format(elemineq))
                                 loggingInfo("\t\t\t\t\t ...done".format(elemineq), verbose=RunSettings['vInfo'])
-                Translated[lbd] = CompileQuartic(Translated, lbd, comb, model, RunSettings['Weyl'])
+                Translated[lbd] = CompileQuartic(Translated, lbd, comb, model, RunSettings['Weyl'],RunSettings['SetGutNorm'])
     elif RGE == 'Yukawas':
         set_globalsYuk(model)
         if model.YukToCalculate == {}:

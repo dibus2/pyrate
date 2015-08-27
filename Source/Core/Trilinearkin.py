@@ -13,7 +13,7 @@ def set_globalsTri(model):
         globals()[key] = val
 
 
-def CompileTri(Translated, y, comb, model, Weyl):
+def CompileTri(Translated, y, comb, model, Weyl, GutNorm):
     """Compile a given beta function for the Yukawas i.e. divide by the LHS factor"""
     LH = model.TriToCalculate[y][1]
     FinalBeta = (sum([el[0] for el in Translated[y]]).doit() / LH).expand()
@@ -21,6 +21,8 @@ def CompileTri(Translated, y, comb, model, Weyl):
         FinalBeta = FinalBeta.subs(kappa, Rational(1, 2))
     else:
         FinalBeta = FinalBeta.subs(kappa, 1)
+    if GutNorm:
+        FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g, sqrt(Rational(3, 5)) * model.UGaugeGroups[0][1].g)
     FinalBeta = FinalBeta.subs(tuple([(el, 0) for el in ListAllSymbols['TrilinearTerm']]))
     FinalBeta = DeterminOrdering(model, FinalBeta)
     return FinalBeta
@@ -39,6 +41,7 @@ def CHabc(powe, comb, model):
     powe[0] = powe[0].subs(Habc, res)
     return powe[0]
 
+
 def CL2abc(powe, comb, model):
     """Calculate the L2abc term Eq 65"""
     sc1, sc2, sc3 = comb
@@ -52,6 +55,7 @@ def CL2abc(powe, comb, model):
         powe[0] = powe[0].subs(L2abc, Integer(0))
     return powe[0]
 
+
 def CLYabc(powe, comb, model):
     """Calculate the LYabc term. Eq 67"""
     sc1, sc2, sc3 = comb
@@ -61,6 +65,7 @@ def CLYabc(powe, comb, model):
     res = sum(res)
     powe[0] = powe[0].subs(LYabc, res)
     return powe[0]
+
 
 # power 2
 
@@ -74,12 +79,13 @@ def CLSabc(powe, comb, model):
     reskin = 0
     if model.kinmixing:
         reskin = [model.Expand(((_Ckins, s), (_h, a, b, c)))
-           for s in [a, b, c]
+                  for s in [a, b, c]
                   ]
         reskin = sum(reskin)
     res += reskin
     powe[0] = powe[0].subs(LSabc, res)
     return powe[0]
+
 
 ######
 # 2Loop
@@ -226,7 +232,7 @@ def CHYabcHbarYabcH3abc(powe, comb, model):
                     + model.Expand((('Chain3Ya', c, s1, a, p1, p2), (_Y, s1, p2, p3), (_Ya, b, p3, p4), (_mf, p4, p1)),
                                    dotrace=False)  # Line 3
                     + model.Expand((('Chain4Ya', a, s1, b, c, p1, p2), (_mfa, p2, p3), (_Y, s1, p3, p1)), dotrace=False)
-					# Line 4
+                    # Line 4
                 )
             )
             resHYbarad = resHYbar.adjoint() if resHYbar != 0 else 0
@@ -240,7 +246,7 @@ def CHYabcHbarYabcH3abc(powe, comb, model):
                                                           (_mfa, p3, p1)))  # Line 3
                                           + model.Expand(
                                               (('Chain4Y', a, b, s1, c, p1, p2), (_mf, p2, p3), (_Ya, s1, p3, p1)))
-										  # Line 4
+                                          # Line 4
                                           )
             )
             resHY = resHY.doit() if resHY != 0 else 0
@@ -329,7 +335,7 @@ def CHFabc(powe, comb, model):
            + model.Expand(
         ((_G, gg1), (_C, gg1, p1), (_Y, a, p1, p2), (_Ya, b, p2, p3), (_Y, c, p3, p4), (_mf, p4, p1)))  # Line 4
            + model.Expand(((_G, gg1), (_Y, a, p1, p2), (_C, gg1, p2), (_Ya, b, p2, p3), (_Y, c, p3, p4), (_mf, p4, p1)))
-		   # Line 4
+           # Line 4
            for (a, b, c) in list(permutations([sc1, sc2, sc3], 3))
            ]
     res = sum(res)
@@ -426,10 +432,10 @@ def CBYabcBbarYabc(powe, comb, model):
                                                             (_Ya, c, p4, p1)),
                                                            MatStruc=[['A', 'B', 'A', 'B'], ['B', 'A', 'A', 'B']])
                                               + model.Expand((
-                                                             (_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b),
-                                                             (_Ta, gg3, p1, p2), (_Ya, c, p2, p3), (_T, gg4, p3, p4),
-                                                             (_mf, p4, p1)),
-                                                             MatStruc=[['A', 'B', 'A', 'B'], ['B', 'A', 'A', 'B']])
+                                                  (_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b),
+                                                  (_Ta, gg3, p1, p2), (_Ya, c, p2, p3), (_T, gg4, p3, p4),
+                                                  (_mf, p4, p1)),
+                                                  MatStruc=[['A', 'B', 'A', 'B'], ['B', 'A', 'A', 'B']])
                                               )
                    )
             if res != 0:

@@ -3,7 +3,6 @@ import sys
 sys.path.append('./Source/GroupTheory')
 from GroupDefinitions import *
 from RGEsmathModule import *
-import pudb
 from Particles import *
 
 try:
@@ -89,7 +88,7 @@ class Model(object):
             for pp in self.Particles.values():
                 pp.W = self.UsectorMatrix.transpose() * pp.Q
 
-            #############################################################################
+                #############################################################################
         # DEF of the class to store the Yuk this is dynamic and hence needs to be here
         #############################################################################
         def constructor(self, *args):
@@ -165,7 +164,8 @@ class Model(object):
                             'Habc': ['s', 's', 's'], 'WW_T': ['f'], _Ckin: ['f'], _Ckins: ['s'], _SfCkinf: ['f'],
                             _SsCkinf: ['f'], _SsCkins: ['s'], _SfCkins: ['s'], _Tkin: ['f'], _Takin: ['f'],
                             _TkinT: ['f'], _TakinT: ['f'], 'Theta2g2kin': ['s', 's', 's', 's'],
-                            'Thetakin': ['s', 's', 's', 's']}
+                            'Thetakin': ['s', 's', 's', 's'], 'Thetakin4W': ['s', 'f', 's', 'f'],
+                            'ThetakinWsWf': ['s', 'f'], 'ThetakinC4': ['s','s','s','s'], 'ThetakinWsWs': ['s','s']}
 
     def __repr__(self):
         """Change the representation of Model instances"""
@@ -256,7 +256,7 @@ class Model(object):
             else:
                 loggingCritical("ERROR gauge group {} is not known, exiting.".format(group), verbose=True)
                 exit()
-            # Extract the list of the gauge groups and the corresponding gauge coupling
+                # Extract the list of the gauge groups and the corresponding gauge coupling
         self.ListGroups = [[self.GaugeGroups[i][1], self.GaugeGroups[i][1].g] for i in range(len(self.GaugeGroups))]
         for name, g, t in self.GaugeGroups:
             if not (t):
@@ -408,7 +408,7 @@ class Model(object):
                         for idii, ii in enumerate(scpos):
                             outfields[idii][-1] = termval['Fields'][idii][ii[0]]
                             outfields[idii][0] = ferms[idii][0] if self.Fermions[ferms[idii][0]].Gen != 1 else \
-                            ferms[idii][1]
+                                ferms[idii][1]
                             outfields[idii][1] = ferms[idii][
                                 [il for il in range(2) if il != ferms[idii].index(outfields[idii][0])][0]]
                 else:
@@ -454,7 +454,7 @@ class Model(object):
                             Factor.append(GetContractionFactor(ContractedParticles, [g[0], g[1]]))
                         else:
                             Factor.append((
-                                          0,))  # in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
+                                0,))  # in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
                     if not (all([cc == (0,) for cc in Factor])):
                         # For each group plug the indices in the CGCs
                         # The fact that the indices have been generated according to the ordering of self.NonUGaugeGroups and that it s the same for the Factor we now that the indices are in the same order
@@ -1514,6 +1514,18 @@ class Model(object):
                 elif tp == 'Thetakin':
                     res = self.Thetakin(temp[:4], indicesFull[:4])
                     STOP, temp, indicesFull = tempupdate(4, temp, indicesFull)
+                elif tp == 'Thetakin4W':
+                    res = self.Thetakin4W(temp[:4], indicesFull[:4])
+                    STOP, temp, indicesFull = tempupdate(4, temp, indicesFull)
+                elif tp == 'ThetakinWsWf':
+                    res = self.ThetakinWsWf(temp[:2], indicesFull[:2])
+                    STOP, temp, indicesFull = tempupdate(2, temp, indicesFull)
+                elif tp == 'ThetakinC4':
+                    res = self.ThetakinC4(temp[:4], indicesFull[:4])
+                    STOP, temp, indicesFull = tempupdate(4, temp, indicesFull)
+                elif tp == 'ThetakinWsWs':
+                    res = self.ThetakinWsWs(temp[:2], indicesFull[:2])
+                    STOP, temp, indicesFull = tempupdate(2, temp, indicesFull)
                 else:
                     exit("Expand Function : not implemented yet")
             if Out != [] and not (STOP):
@@ -1600,7 +1612,7 @@ class Model(object):
             Doubles = sum((Doubles), [])
             # construct kronecker for the required indices
             GroupConstrains = [el[0].split('A')[-1] if el != [] and len(el[0].split('fabc')) == 1 else (
-            el[0].split('fabc')[-1] if el != [] and len(el[0].split('fabc')) != 1 else 1) for el in ExtraConstrains]
+                el[0].split('fabc')[-1] if el != [] and len(el[0].split('fabc')) != 1 else 1) for el in ExtraConstrains]
             Constrains = functools.reduce(operator.mul, [KroneckerDelta(ExtraConstrains[i][0], ExtraConstrains[j][0])
                                                          for (i, j) in Doubles if
                                                          ExtraConstrains[i] != [] and ExtraConstrains[j] != []], 1)
@@ -1764,7 +1776,8 @@ class Model(object):
             elif elem[0] == 'Y2F' or elem[0] == 'Y2Fa' or elem[0] == _mf or elem[0] == _mfa:
                 StartingV = elem[1]
             elif elem[0] == 'Yab2S' or elem[0] == 'Theta2' or elem[0] == 'Theta4' or elem[0] == _Th or elem[
-                0] == 'Agabcd' or elem[0] == 'Theta2g2kin' or elem[0] == 'Thetakin':
+                0] == 'Agabcd' or elem[0] == 'Theta2g2kin' or elem[0] == 'Thetakin' or elem[0] == 'Thetakin4W' or elem[
+                0] == 'ThetakinWsWf' or elem[0] == 'ThetakinWsWs' or elem[0] == 'ThetakinC4':
                 StartingV = None
             elif elem[0] == 'Y2FabS' or elem[0] == _ms or elem[0] == 'Hab':
                 StartingV = None
@@ -1850,7 +1863,8 @@ class Model(object):
             elif elem[0] == 'Y2F' or elem[0] == 'Y2Fa' or elem[0] == _mf or elem[0] == _mfa:
                 StartingV = elem[1]
             elif elem[0] == 'Yab2S' or elem[0] == 'Theta2' or elem[0] == 'Theta4' or elem[0] == _Th or elem[
-                0] == 'Agabcd' or elem[0] == 'Theta2g2kin' or elem[0] == 'Thetakin':
+                0] == 'Agabcd' or elem[0] == 'Theta2g2kin' or elem[0] == 'Thetakin' or elem[0] == 'Thetakin4W' or elem[
+                0] == 'ThetakinWsWf' or elem[0] == 'ThetakinWsWs' or elem[0] == 'ThetakinC4':
                 StartingV = None
             elif elem[0] == 'Y2FabS' or elem[0] == _ms or elem[0] == 'Hab':
                 StartingV = None
@@ -2269,9 +2283,9 @@ class Model(object):
                 return Integer(0), []
 
 
-            ###################################
-            # Wrappers for the kinetic mixing
-            ###################################
+                ###################################
+                # Wrappers for the kinetic mixing
+                ###################################
 
     def WW_T(self, label):
         """wrapper for the WW^T term"""
@@ -2323,22 +2337,102 @@ class Model(object):
             res = (self.Expand(((_G, gg1), (_Th, gg1, sc1, sc3), (_Th, gg1, sc2, sc4)), Layer=1, MatStruc=['A', 'A']))
             if res != 0:
                 res = res.doit()
-                self.InvariantResults[key] = res
+            self.InvariantResults[key] = res
         return res
 
     def Thetakin(self, parts, indices):
-        """Implemts the right part of Eq. 22"""
+        """Implemts the right part of Eq. 22. Implements C(a,b,c,d) = W^T_a W_b * del_ab * del_cd"""
         key = tuple(['Thetakin'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
         else:
             sc1, sc2, sc3, sc4 = parts
-            res = self.Scalars[str(sc1)].W.transpose() * self.Scalars[str(sc2)].W * self.deltatilde(sc1, sc2, sc3, sc4)
+            # Whatch out, here the deltatilde_double is del_ac del_bd !
+            res = self.Scalars[str(sc1)].W.transpose() * self.Scalars[str(sc2)].W * self.deltatilde_double(sc1, sc3,
+                                                                                                           sc2, sc4)
+            res = sum(res)
+            self.InvariantResults[key] = res
         return res
 
-    def deltatilde(self, sc1, sc2, sc3, sc4):
-        """Implements the product of two deltatilde as in they appear in Eq. 22"""
-        # One has to check that sc1,sc2 are the real and imaginary parts of an eigenvalue of U(1)
+    def Thetakin4W(self, parts, indices):
+        """Implemts the second term of Eq. 21. Note that the deltas are applied at the level up."""
+        key = tuple(['Thetakin4W'] + parts + flatten(indices))
+        if key in self.InvariantResults:
+            res = self.InvariantResults[key]
+        else:
+            sc1, p1, sc2, p2 = parts
+            res = self.Scalars[str(sc1)].W.transpose() * self.Fermions[str(p1)].W * self.Scalars[
+                str(sc2)].W.transpose() * self.Fermions[str(p2)].W
+            res = sum(res)
+            self.InvariantResults[key] = res
+        return res
+
+    def ThetakinC4(self, parts, indices):
+        """Implements the right hand side of Eq.23."""
+        key = tuple(['ThetakinC4'] + parts + flatten(indices))
+        if key in self.InvariantResults:
+            res = self.InvariantResults[key]
+        else:
+            sc1, sc2, sc3, sc4 = parts
+            # del_ab del_cd need to switch because of def deltatilde_double
+            res = sum([sum(self.Scalars[str(sc1)].W.transpose() * pp.W * pp.W.transpose() * self.Scalars[str(sc2)].W)
+                       for pp in self.Scalars.values()]) * self.deltatilde_double(sc1, sc3, sc2, sc4)
+            self.InvariantResults[key] = res
+        return res
+
+    def ThetakinWsWf(self, parts, indices):
+        """Implemts the second term of Eq. 21. Note that the deltas are applied at the level up."""
+        key = tuple(['ThetakinWsWf'] + parts + flatten(indices))
+        if key in self.InvariantResults:
+            res = self.InvariantResults[key]
+        else:
+            sc1, p1 = parts
+            res = self.Scalars[str(sc1)].W.transpose() * self.Fermions[str(p1)].W
+            res = sum(res)
+            self.InvariantResults[key] = res
+        return res
+
+    def ThetakinWsWs(self, parts, indices):
+        """Implemts the second term of Eq. 21. Note that the deltas are applied at the level up."""
+        key = tuple(['ThetakinWsWs'] + parts + flatten(indices))
+        if key in self.InvariantResults:
+            res = self.InvariantResults[key]
+        else:
+            sc1, sc2 = parts
+            res = self.Scalars[str(sc1)].W.transpose() * self.Scalars[str(sc2)].W
+            res = sum(res)
+            self.InvariantResults[key] = res
+        return res
+
+    def deltatilde(self, sc1, sc2):
+        """Implements the deltatilde. """
+        if type(sc1) == list:
+            sc1 = sc1[0]
+        if type(sc2) == list:
+            sc2 = sc2[0]
+        if all([self.Particles[str(sci)].FromCplx for sci in [sc1, sc2]]):
+            cplxsc1, cplxsc2 = self.getHiggsFromScalar[sc1], self.getHiggsFromScalar[sc2]
+            assert len(cplxsc1) >= 1 and len(cplxsc2) >= 1
+            rsc1, isc1 = self.Particles[cplxsc1[0]].RealPart, self.Particles[cplxsc1[0]].CplxPart
+            rsc2, isc2 = self.Particles[cplxsc2[0]].RealPart, self.Particles[cplxsc2[0]].CplxPart
+            res = 1
+            if rsc1 == rsc2 and isc1 == isc2:
+                if (sc1 == rsc1 and sc2 == isc2):
+                    res = res * I
+                elif (sc1 == isc1 and sc2 == rsc2):
+                    res = res * (-I)
+                else:
+                    res = 0
+            else:
+                res = 0
+        else:
+            res = 0
+        return res
+
+    def deltatilde_double(self, sc1, sc2, sc3, sc4):
+        """Implements the product of two deltatilde as in they appear in Eq. 22. WARNING! THIS IS C(a,b,c,d) = del_ac del_bd"""
+        # One has to check that sc1,sc2 are the real and imaginary parts of an eigenvalue of U(1
+
         if all([self.Particles[str(sci)].FromCplx for sci in [sc1, sc2, sc3, sc4]]):
             cplxsc1, cplxsc2 = self.getHiggsFromScalar[sc1], self.getHiggsFromScalar[sc2]
             cplxsc3, cplxsc4 = self.getHiggsFromScalar[sc3], self.getHiggsFromScalar[sc4]
@@ -2351,14 +2445,18 @@ class Model(object):
             rsc4, isc4 = self.Particles[cplxsc4[0]].RealPart, self.Particles[cplxsc4[0]].CplxPart
             # Checking that sci scj come from the same eigenvalue is equivalent to checkin that the real and complex parts are the same rsc1 == rsc2 and isc1 == isc2
             res = 1
-            if rsc1 == rsc3 and isc1 == isc3 and rsc2 == rsc4 and isc3 == isc4:
+            if rsc1 == rsc3 and isc1 == isc3 and rsc2 == rsc4 and isc2 == isc4:
                 # Then we can check the different possibiliies i.e. sci is the real and scj the imaginary or vice versa
-                if (sc1 == rsc1 and sc3 == isc3) or (sc1 == isc1 and sc3 == rsc3):
+                if (sc1 == rsc1 and sc3 == isc3):
                     res = res * I
+                elif (sc1 == isc1 and sc3 == rsc3):  # the tensor is anti-symmetric
+                    res = res * (-I)
                 else:
                     res = 0
-                if (sc2 == rsc2 and sc4 == isc4) or (sc2 == isc2 and sc4 == rsc4):
+                if (sc2 == rsc2 and sc4 == isc4):
                     res = res * I
+                elif (sc2 == isc2 and sc4 == rsc4):
+                    res = res * (-I)
                 else:
                     res = 0
             else:
@@ -2420,8 +2518,8 @@ class Model(object):
         else:
             sc1, sc2, sc3 = self.getparts(parts, indices)
             res = [Rational(1, 2) * (
-            self.Expand(((_mf, p1, p2), (_Ya, a, p2, p3), (_Y, b, p3, p4), (_Ya, c, p4, p1)), Layer=1)
-            + self.Expand(((_Y, a, p1, p2), (_mfa, p2, p3), (_Y, b, p3, p4), (_Ya, c, p4, p1)), Layer=1)
+                self.Expand(((_mf, p1, p2), (_Ya, a, p2, p3), (_Y, b, p3, p4), (_Ya, c, p4, p1)), Layer=1)
+                + self.Expand(((_Y, a, p1, p2), (_mfa, p2, p3), (_Y, b, p3, p4), (_Ya, c, p4, p1)), Layer=1)
             )
                    for (a, b, c) in list(permutations([sc1, sc2, sc3], 3))
                    ]
@@ -2515,10 +2613,10 @@ class Model(object):
         else:
             g1, g2, sc1, sc2, sc3, sc4 = self.getparts(parts, indices)
             res = (
-            self.Expand(((_Th, g1, sc1, s1), (_Th, g1, sc3, s2), (_Th, g2, s1, sc2), (_Th, g2, s2, sc4)), Layer=1,
-                        MatStruc=['A', 'A', 'B', 'B'])
-            + self.Expand(((_Th, g1, sc1, s2), (_Th, g1, s1, sc4), (_Th, g2, s1, sc3), (_Th, g2, sc2, s2)), Layer=1,
-                          MatStruc=['A', 'A', 'B', 'B']))
+                self.Expand(((_Th, g1, sc1, s1), (_Th, g1, sc3, s2), (_Th, g2, s1, sc2), (_Th, g2, s2, sc4)), Layer=1,
+                            MatStruc=['A', 'A', 'B', 'B'])
+                + self.Expand(((_Th, g1, sc1, s2), (_Th, g1, s1, sc4), (_Th, g2, s1, sc3), (_Th, g2, sc2, s2)), Layer=1,
+                              MatStruc=['A', 'A', 'B', 'B']))
             if res != 0:
                 res = res.doit()
             self.InvariantResults[key] = res
@@ -2797,92 +2895,92 @@ class Index(object):
         self.grextind = 0
         self.grintind = 0
 
-    # def ExtractScalarAnomalous(self):
-    #	"""
-    #	Extract the various Scalar Anomalous dimesnsions to calculate:
-    #	1) create all the combinations
-    #	2) for each one of them find a non zero CGCs contraction
-    #	3) Store it and add it to the ToCalculate list
-    #	Note, that there is no notion of mixing here it is a simple calculation
-    #	"""
-    #	#generate the pairs of scalars for which to calculate the anomalous dimension
-    #	Pairs = itr.product(self.Scalars.keys(),self.Scalars.keys())
-    #	#Calculate the CGCs for each one of the pairs
-    #	FinalTerm = []
-    #	FinalSinglet = []
-    #	for pp in Pairs : 
-    #		#Get te quantum numbers per group 
-    #		#The switch allows to skip the norm determination in ExpandPotential
-    #		ExpandedTerm = self.ExpandPotential([[self.Particles[ipp] for ipp in pp]],2,'',True)
-    #		FullSinglet = {}
-    #		TempFinalTerm = {}
-    #		for ill,ll in enumerate(ExpandedTerm) : 
-    #			ContractedParticles = {}
-    #			FullSinglet[ill] = False
-    #			for subll in ll : 
-    #				Factor = []
-    #				for g in self.NonUGaugeGroups:
-    #					Qnbs = self.Scalars[pp[0]],self.Scalars[pp[1]]
-    #					self.GetContractedParticles(ContractedParticles,g[0],g[1],Qnbs)
-    #					#Get the contraction factor
-    #					if ContractedParticles[g[0]] != [] : 
-    #						Factor.append(GetContractionFactor(ContractedParticles,[g[0],g[1]]))
-    #					else :
-    #						Factor.append((0,))#in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
-    #				if not(all([cc == (0,) for cc in Factor])) :
-    #					#For each group plug the indices in the CGCs
-    #					#The fact that the indices have been generated according to the ordering of self.NonUGaugeGroups and that it s the same for the Factor we know that the indices are in the same order
-    #					#TODO I AM HERE 
-    #					indicesff = [0]*len(Factor)
-    #					propindices = [0]*len(Factor)
-    #					for idd,fac in enumerate(Factor) : 
-    #						if fac != (0,) :
-    #							#replace i j is cosmetic
-    #							#NOTE the str in line 342 is a fix because in version 0.7.3 of sympy the method indices returns symbols
-    #							indicesff[idd] = tuple([str(part.indices[idd]).replace('j','i') for part in subll[0] if part.indices[idd] != 0])
-    #							propindices[idd] = [[part.indices[idd],getdimIrrep(self.Particles[str(part.args[0])].Qnb[self.NonUGaugeGroups[idd][0]],self.NonUGaugeGroups[idd][1])] for part in subll[0] if part.indices[idd] != 0]
-    #							Factor[idd] = FF(indicesff[idd],fac)
-    #						else :
-    #							#particles are not charged under this group
-    #							Factor[idd] = 1
-    #					#Get rid of the zero in propindices and indicesff if there any
-    #					indicesff = [xx2 for xx2 in indicesff if xx2 != 0]
-    #					propindices = [xx2 for xx2 in propindices if xx2 != 0]
-    #					Factor = evaluate_deltas((functools.reduce(operator.mul,Factor,1)*subll[1]).expand())
-    #					tempkey = subll[0]
-    #					TempFinalTerm[tempkey] = [subll[0],propindices,Factor]
-    #				else : #Full singlet
-    #					tempkey = subll[0]
-    #					TempFinalTerm[tempkey] = [subll[0],[],subll[1]]
-    #					FullSinglet[ill] = True
-    #		FullSingletcheck = all([lement == FullSinglet.values()[0] for lement in FullSinglet.values()[1:]])
-    #		if not(FullSinglet):
-    #			loggingCritical("Error, value for `FullSingletcheck` inconsistent, contact the author.")
-    #			exit()
-    #		FinalTerm.append(TempFinalTerm.values())
-    #		#Sanity check the FullSinglet values should all be the same either True or False
-    #		FinalSinglet.append(FullSinglet.values()[0])
-    #	#Oki for each one of the terms in FinalTerm we have to find a non zero combination of indices and calculate for it	
-    #	FinalTerm = sum(FinalTerm,[])
-    #	Return = []
-    #	for ielem, elem in enumerate(FinalTerm) :
-    #		#dummy def for the re-use of existing functions
-    #		counter = 0
-    #		Factor = elem[-1]
-    #		STOP = False
-    #		if Factor != [] and not(FinalSinglet[ielem]):
-    #			#For each contraction we generate an iterator for the possible contraction
-    #			CombInd = itr.product(*[itr.product(*[range(1,x[1]+1) for idx,x in enumerate(element)]) for ielem,element in enumerate(elem[1])])
-    #			tempF,STOP,counter = self.GetCombInd(CombInd,STOP,elem,counter)
-    #			if tempF == [] :
-    #				LHfactor,outparticles = 0,[]
-    #			else : 
-    #				LHfactor,outparticles = self.ConstructReturn(elem[0],tempF,elem,[],[])
-    #		elif Factor == [] or FullSinglet:
-    #			#full singlet
-    #			counter = 0 
-    #			LHfactor = elem[-1]
-    #			outparticles = [[Symbol(str(ell.args[0]))] + len(self.NonUGaugeGroups)*[0]  for ell in elem[0]]
-    #			#fill out the dictionary
-    #		Return.append((elem[0], LHfactor,outparticles))
-    #	return Return
+        # def ExtractScalarAnomalous(self):
+        #	"""
+        #	Extract the various Scalar Anomalous dimesnsions to calculate:
+        #	1) create all the combinations
+        #	2) for each one of them find a non zero CGCs contraction
+        #	3) Store it and add it to the ToCalculate list
+        #	Note, that there is no notion of mixing here it is a simple calculation
+        #	"""
+        #	#generate the pairs of scalars for which to calculate the anomalous dimension
+        #	Pairs = itr.product(self.Scalars.keys(),self.Scalars.keys())
+        #	#Calculate the CGCs for each one of the pairs
+        #	FinalTerm = []
+        #	FinalSinglet = []
+        #	for pp in Pairs :
+        #		#Get te quantum numbers per group
+        #		#The switch allows to skip the norm determination in ExpandPotential
+        #		ExpandedTerm = self.ExpandPotential([[self.Particles[ipp] for ipp in pp]],2,'',True)
+        #		FullSinglet = {}
+        #		TempFinalTerm = {}
+        #		for ill,ll in enumerate(ExpandedTerm) :
+        #			ContractedParticles = {}
+        #			FullSinglet[ill] = False
+        #			for subll in ll :
+        #				Factor = []
+        #				for g in self.NonUGaugeGroups:
+        #					Qnbs = self.Scalars[pp[0]],self.Scalars[pp[1]]
+        #					self.GetContractedParticles(ContractedParticles,g[0],g[1],Qnbs)
+        #					#Get the contraction factor
+        #					if ContractedParticles[g[0]] != [] :
+        #						Factor.append(GetContractionFactor(ContractedParticles,[g[0],g[1]]))
+        #					else :
+        #						Factor.append((0,))#in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
+        #				if not(all([cc == (0,) for cc in Factor])) :
+        #					#For each group plug the indices in the CGCs
+        #					#The fact that the indices have been generated according to the ordering of self.NonUGaugeGroups and that it s the same for the Factor we know that the indices are in the same order
+        #					#TODO I AM HERE
+        #					indicesff = [0]*len(Factor)
+        #					propindices = [0]*len(Factor)
+        #					for idd,fac in enumerate(Factor) :
+        #						if fac != (0,) :
+        #							#replace i j is cosmetic
+        #							#NOTE the str in line 342 is a fix because in version 0.7.3 of sympy the method indices returns symbols
+        #							indicesff[idd] = tuple([str(part.indices[idd]).replace('j','i') for part in subll[0] if part.indices[idd] != 0])
+        #							propindices[idd] = [[part.indices[idd],getdimIrrep(self.Particles[str(part.args[0])].Qnb[self.NonUGaugeGroups[idd][0]],self.NonUGaugeGroups[idd][1])] for part in subll[0] if part.indices[idd] != 0]
+        #							Factor[idd] = FF(indicesff[idd],fac)
+        #						else :
+        #							#particles are not charged under this group
+        #							Factor[idd] = 1
+        #					#Get rid of the zero in propindices and indicesff if there any
+        #					indicesff = [xx2 for xx2 in indicesff if xx2 != 0]
+        #					propindices = [xx2 for xx2 in propindices if xx2 != 0]
+        #					Factor = evaluate_deltas((functools.reduce(operator.mul,Factor,1)*subll[1]).expand())
+        #					tempkey = subll[0]
+        #					TempFinalTerm[tempkey] = [subll[0],propindices,Factor]
+        #				else : #Full singlet
+        #					tempkey = subll[0]
+        #					TempFinalTerm[tempkey] = [subll[0],[],subll[1]]
+        #					FullSinglet[ill] = True
+        #		FullSingletcheck = all([lement == FullSinglet.values()[0] for lement in FullSinglet.values()[1:]])
+        #		if not(FullSinglet):
+        #			loggingCritical("Error, value for `FullSingletcheck` inconsistent, contact the author.")
+        #			exit()
+        #		FinalTerm.append(TempFinalTerm.values())
+        #		#Sanity check the FullSinglet values should all be the same either True or False
+        #		FinalSinglet.append(FullSinglet.values()[0])
+        #	#Oki for each one of the terms in FinalTerm we have to find a non zero combination of indices and calculate for it
+        #	FinalTerm = sum(FinalTerm,[])
+        #	Return = []
+        #	for ielem, elem in enumerate(FinalTerm) :
+        #		#dummy def for the re-use of existing functions
+        #		counter = 0
+        #		Factor = elem[-1]
+        #		STOP = False
+        #		if Factor != [] and not(FinalSinglet[ielem]):
+        #			#For each contraction we generate an iterator for the possible contraction
+        #			CombInd = itr.product(*[itr.product(*[range(1,x[1]+1) for idx,x in enumerate(element)]) for ielem,element in enumerate(elem[1])])
+        #			tempF,STOP,counter = self.GetCombInd(CombInd,STOP,elem,counter)
+        #			if tempF == [] :
+        #				LHfactor,outparticles = 0,[]
+        #			else :
+        #				LHfactor,outparticles = self.ConstructReturn(elem[0],tempF,elem,[],[])
+        #		elif Factor == [] or FullSinglet:
+        #			#full singlet
+        #			counter = 0
+        #			LHfactor = elem[-1]
+        #			outparticles = [[Symbol(str(ell.args[0]))] + len(self.NonUGaugeGroups)*[0]  for ell in elem[0]]
+        #			#fill out the dictionary
+        #		Return.append((elem[0], LHfactor,outparticles))
+        #	return Return

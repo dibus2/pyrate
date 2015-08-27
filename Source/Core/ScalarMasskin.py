@@ -15,13 +15,15 @@ def set_globalsScM(model):
         globals()[key] = val
 
 
-def CompileScalar(Translated, mqt, comb, model, Weyl):
+def CompileScalar(Translated, mqt, comb, model, Weyl, GutNorm):
     LH = model.ScMToCalculate[mqt][1]
     FinalBeta = (sum([el[0] for el in Translated[mqt]]).doit() / LH).expand()
     if Weyl:
         FinalBeta = FinalBeta.subs(kappa, Rational(1, 2))
     else:
         FinalBeta = FinalBeta.subs(kappa, 1)
+    if GutNorm:
+        FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g, sqrt(Rational(3, 5)) * model.UGaugeGroups[0][1].g)
     FinalBeta = FinalBeta.subs(tuple([(el, 0) for el in ListAllSymbols['ScalarMasses']]))
     FinalBeta = DeterminOrdering(model, FinalBeta)
     return FinalBeta

@@ -15,7 +15,7 @@ def set_globalsLbd(model):
         globals()[key] = val
 
 
-def CompileQuartic(Translated, lbd, comb, model, Weyl):
+def CompileQuartic(Translated, lbd, comb, model, Weyl, GutNorm):
     LH = model.LbdToCalculate[lbd][1]
     FinalBeta = (sum([el[0] for el in Translated[lbd]]).doit() / LH).expand()
     if Weyl:
@@ -23,6 +23,8 @@ def CompileQuartic(Translated, lbd, comb, model, Weyl):
     else:
         FinalBeta = FinalBeta.subs(kappa, 1)
     # Set all the terms that have been skipped to zero
+    if GutNorm:
+        FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g, sqrt(Rational(3, 5)) * model.UGaugeGroups[0][1].g)
     FinalBeta = FinalBeta.subs(tuple([(el, 0) for el in ListAllSymbols['QuarticTerms']]))
     FinalBeta = DeterminOrdering(model, FinalBeta)
     return FinalBeta
@@ -99,16 +101,16 @@ def CAabcd(powe, comb, model):
     res = sum(res)
     reskin = 0
     if model.kinmixing:
-        reskin = [(
-                      # Terms Lambda*C
-                      model.Expand((('Theta2g2kin', a, c, s1, s2), ('Thetakin', s1, b, s2, d)))
-                      + model.Expand((('Theta2g2kin', s1, s2, b, d), ('Thetakin', a, s1, c, s2)))
-                      + model.Expand((('Theta2g2kin', a, s2, s1, d), ('Thetakin', s1, b, c, s2)))
-                      + model.Expand((('Theta2g2kin', s1, c, b, s2), ('Thetakin', a, s1, s2, d)))
-                      # Terms C*C
-                      + model.Expand((('Thetakin', a, s1, c, s2), ('Thetakin', s1, b, s2, d)))
-                      + model.Expand((('Thetakin', a, s1, s2, d), ('Thetakin', s1, b, c, s2)))
-                  )
+        reskin = [Rational(1, 4) * (
+            # Terms Lambda*C
+            model.Expand((('Theta2g2kin', a, c, s1, s2), ('Thetakin', s1, b, s2, d)))
+            + model.Expand((('Theta2g2kin', s1, s2, b, d), ('Thetakin', a, s1, c, s2)))
+            + model.Expand((('Theta2g2kin', a, s2, s1, d), ('Thetakin', s1, b, c, s2)))
+            + model.Expand((('Theta2g2kin', s1, c, b, s2), ('Thetakin', a, s1, s2, d)))
+            # Terms C*C
+            + model.Expand((('Thetakin', a, s1, c, s2), ('Thetakin', s1, b, s2, d)))
+            + model.Expand((('Thetakin', a, s1, s2, d), ('Thetakin', s1, b, c, s2)))
+        )
                   for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
                   ]
         reskin = sum(reskin)
@@ -183,9 +185,7 @@ def CHbarlabcd(powe, comb, model):
     """Calculates the term Hbarlabcd Eq 47"""
     sc1, sc2, sc3, sc4 = comb
     res = [Rational(1, 8) * (
-        # model.Expand(((_L,a,b,s1,s2),('Chain4Y',c,s1,d,s2,p1,p1)))
         model.Expand(((_L, a, b, s1, s2), ('Chain3Y', c, s1, d, p1, p2), (_Ya, s2, p2, p1)))
-        # +model.Expand(((_L,a,b,s1,s2),('Chain4Ya',c,s1,d,s2,p1,p1)))
         + model.Expand(((_L, a, b, s1, s2), (_Ya, c, p1, p2), ('Chain3Y', s1, d, s2, p2, p1)))
     )
            for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
@@ -244,9 +244,6 @@ def CHYabcdHbarYabcdH3abcd(powe, comb, model):
                                                model.Expand(((_Y, s1, p1, p2), (_Ya, a, p2, p3),
                                                              ('Chain3Y', s1, b, c, p3, p4), (_Ya, d, p4, p1)))
                                                )
-            # resHYbarad =  2*Rational(1,2)*(#HbarY
-            #				model.Expand(((_Y,d,p1,p2),(_Ya,c,p2,p3),('Chain3Y',b,s1,a,p3,p4),(_Ya,s1,p4,p1)))
-            #				)
             resH3 = 2 * Rational(1, 2) * (
                 model.Expand((('Chain3Y', a, b, s1, p1, p2), (_Ya, c, p2, p3), (_Y, d, p3, p4), (_Ya, s1, p4, p1)))
             )
@@ -274,7 +271,18 @@ def CLbar2Sabcd(powe, comb, model):
     res = [Rational(1, 8) * model.Expand(((_G, gg1), (_Cs, gg1, s1), (_L, a, b, s2, s1), (_L, c, d, s2, s1)))
            for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
            ]
-    res = sum(res).doit()
+    res = sum(res)
+    if res != 0:
+        res = res.doit()
+    reskin = 0
+    if model.kinmixing:
+        reskin = [Rational(1, 8) * model.Expand2(((_Ckins, s1), (_L, a, b, s2, s1), (_L, c, d, s2, s1)))
+                  for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
+                  ]
+        reskin = sum(reskin)
+        if reskin != 0:
+            reskin = reskin.doit()
+    res += reskin
     powe[0] = powe[0].subs(Lbar2Sabcd, res)
     return powe[0]
 
@@ -285,11 +293,20 @@ def CL2gabcd(powe, comb, model):
     res = [Rational(1, 8) * model.Expand(
         ((_G, gg1), (_L, a, b, s1, s2), (_L, c, d, s3, s4), (_Th, gg1, s1, s3), (_Th, gg1, s2, s4)),
         MatStruc=['A', 'A'])
-           for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
-           ]
+           for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))]
     res = sum(res)
     if res != 0:
         res = res.doit()
+    reskin = 0
+    if model.kinmixing:
+        reskin = [Rational(1, 8) * model.Expand(
+            ((_L, a, b, s1, s2), (_L, c, d, s3, s4), ('Thetakin', s1, s3, s2, s4))
+        )  # Theta * C Only one term here
+                  for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))]
+        reskin = sum(reskin)
+        if reskin != 0:
+            reskin = reskin.doit()
+    res += reskin
     powe[0] = powe[0].subs(L2gabcd, res)
     return powe[0]
 
@@ -303,7 +320,15 @@ def CY2Flabcd(powe, comb, model):
     res = sum(res)
     if res != 0:
         res = res.doit()
-
+    reskin = 0
+    if model.kinmixing:
+        reskin = [model.Expand((('Y2FabSkin', i, i), (_L, sc1, sc2, sc3, sc4)))
+                  for i in [sc1, sc2, sc3, sc4]
+                  ]
+    reskin = sum(reskin)
+    if reskin != 0:
+        reskin = reskin.doit()
+    res += reskin
     powe[0] = powe[0].subs(Y2Flabcd, res)
     return powe[0]
 
@@ -317,6 +342,15 @@ def CHSabcd(powe, comb, model):
     res = sum(res)
     if res != 0:
         res = res.doit()
+    reskin = 0
+    if model.kinmixing:
+        reskin = [model.Expand(((_Ckins, i), ('Habcd', sc1, sc2, sc3, sc4)))
+                  for i in [sc1, sc2, sc3, sc4]
+                  ]
+        reskin = sum(reskin)
+        if reskin != 0:
+            reskin = reskin.doit()
+    res += reskin
     powe[0] = powe[0].subs(HSabcd, res)
     return powe[0]
 
@@ -331,6 +365,16 @@ def CHFabcd(powe, comb, model):
     res = sum(res)
     if res != 0:
         res = res.doit()
+    reskin = 0
+    if model.kinmixing:
+        reskin = [model.Expand2((([[(_Ckin, p1), (_Y, a, p1, p2)], [(_Y, a, p1, p2), (_Ckin, p2)]]),
+                                 ('Chain3Ya', b, c, d, p2, p1)))
+                  for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
+                  ]
+        reskin = sum(reskin)
+        if reskin != 0:
+            reskin = reskin.doit()
+    res += reskin
     powe[0] = powe[0].subs(HFabcd, res)
     return powe[0]
 
@@ -353,6 +397,19 @@ def Cg4LSabcd(powe, comb, model):
     res = sum(res)
     if res != 0:
         res = res.doit()
+    reskin = 0
+    if model.kinmixing:
+        reskin = [
+            - Rational(10, 3) * kappa * model.Expand(
+                ((_SfCkins, i), (_L, sc1, sc2, sc3, sc4)))
+            - Rational(11, 12) * model.Expand(
+                ((_SsCkins, i), (_L, sc1, sc2, sc3, sc4)))
+            for i in [sc1, sc2, sc3, sc4]
+            ]
+        reskin = sum(reskin)
+        if reskin != 0:
+            reskin = reskin.doit()
+    res += reskin
     powe[0] = powe[0].subs(g4LSabcd, res)
     return powe[0]
 
@@ -366,6 +423,17 @@ def CLSSabcd(powe, comb, model):
     res = sum(res)
     if res != 0:
         res = res.doit()
+    reskin = 0
+    if model.kinmixing:
+        reskin = [
+            2 * model.Expand(((_G, gg1), (_Cs, gg1, i), (_Ckins, i), (_L, sc1, sc2, sc3, sc4)))  # C Ckin *2
+            + model.Expand(((_Ckins, i), (_Ckins, i), (_L, sc1, sc2, sc3, sc4)))  # Ckin Ckin
+            for i in [sc1, sc2, sc3, sc4]
+            ]
+        reskin = sum(reskin)
+        if reskin != 0:
+            reskin = reskin.doit()
+    res += reskin
     powe[0] = powe[0].subs(LSSabcd, res)
     return powe[0]
 
@@ -374,13 +442,35 @@ def CAlabcd(powe, comb, model):
     """Calculates the tern Alabcd Eq 56"""
     sc1, sc2, sc3, sc4 = comb
     res = [Rational(1, 2) * (
-        model.Expand(((_G, gg1), (_G, gg2), (_L, a, b, s1, s2), ('Theta4', gg1, gg2, s1, s2, c, d)))
-    )
+        model.Expand(((_G, gg1), (_G, gg2), (_L, a, b, s1, s2), ('Theta4', gg1, gg2, s1, s2, c, d))))
            for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
            ]
     res = sum(res)
     if res != 0:
         res = res.doit()
+    reskin = 0
+    if model.kinmixing:
+        reskin = [Rational(1, 2) * (  # Terms Lambda*C
+                                      model.Expand(((_L, a, b, s1, s2), ('Theta2g2kin', s1, c, s3, s4),
+                                                    ('Thetakin', s3, s2, s4, d)))
+                                      + model.Expand(((_L, a, b, s1, s2), ('Theta2g2kin', s3, s4, s2, d),
+                                                      ('Thetakin', s1, s3, c, s4)))
+                                      + model.Expand(((_L, a, b, s1, s2), ('Theta2g2kin', s1, s4, s3, d),
+                                                      ('Thetakin', s3, s2, c, s4)))
+                                      + model.Expand(((_L, a, b, s1, s2), ('Theta2g2kin', s3, c, s2, s4),
+                                                      ('Thetakin', s1, s3, s4, d)))
+                                      # Terms C*C
+                                      + model.Expand(((_L, a, b, s1, s2), ('Thetakin', s1, s3, c, s4),
+                                                      ('Thetakin', s3, s2, s4, d)))
+                                      + model.Expand(((_L, a, b, s1, s2), ('Thetakin', s1, s3, s4, d),
+                                                      ('Thetakin', s3, s2, c, s4)))
+                                      )
+                  for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
+                  ]
+        reskin = sum(reskin)
+        if reskin != 0:
+            reskin = reskin.doit()
+    res += reskin
     powe[0] = powe[0].subs(Alabcd, res)
     return powe[0]
 
@@ -396,6 +486,24 @@ def CAbarlabcd(powe, comb, model):
     res = sum(res)
     if res != 0:
         res = res.doit()
+    reskin = 0
+    if model.kinmixing:
+        reskin = [Rational(1, 2) * (
+            # This is the permutation from Alabcd by Replacing in F of L_abef * F(efcd) by: e->c, f->e c->d, d->f
+        model.Expand(((_L, a, b, s1, s2), ('Theta2g2kin', c, d, s3, s4), ('Thetakin', s3, s1, s4, s2)))
+        + model.Expand(((_L, a, b, s1, s2), ('Theta2g2kin', s3, s4, s1, s2), ('Thetakin', c, s3, d, s4)))
+        + model.Expand(((_L, a, b, s1, s2), ('Theta2g2kin', c, s4, s3, s2), ('Thetakin', s3, s1, d, s4)))
+        + model.Expand(((_L, a, b, s1, s2), ('Theta2g2kin', s3, d, s1, s4), ('Thetakin', c, s3, s4, s2)))
+        # Terms C*C
+        + model.Expand(((_L, a, b, s1, s2), ('Thetakin', c, s3, d, s4), ('Thetakin', s3, s1, s4, s2)))
+        + model.Expand(((_L, a, b, s1, s2), ('Thetakin', c, s3, s4, s2), ('Thetakin', s3, s1, d, s4)))
+        )
+                  for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
+                  ]
+        reskin = sum(reskin)
+        if reskin != 0:
+            reskin = reskin.doit()
+    res += reskin
     powe[0] = powe[0].subs(Abarlabcd, res)
     return powe[0]
 
@@ -405,31 +513,54 @@ def CBYabcdBbarYabcd(powe, comb, model):
     sc1, sc2, sc3, sc4 = comb
     tot = []
     calculated = {}
-    ts = time.time()
-    By, Bybar = symbols('By Bybar')
     for perm in list(permutations([sc1, sc2, sc3, sc4], 4)):
         key = tuple(flatten(perm))
         if not (key in calculated):
             a, b, c, d = perm
             res = Rational(1, 4) * (
                 model.Expand(((_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_Ta, gg3, p1, p2),
-                              (_Ta, gg4, p2, p3), (_Y, c, p3, p4), (_Ya, d, p4, p1)),
-                             MatStruc=[['a', 'b', 'a', 'b'], ['b', 'a', 'a', 'b']])
-                + model.Expand(((_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_Y, c, p1, p2),
-                                (_T, gg3, p2, p3), (_T, gg4, p3, p4), (_Ya, d, p4, p1)),
-                               MatStruc=[['a', 'b', 'a', 'b'], ['b', 'a', 'a', 'b']])
-                - 10 * model.Expand(((_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_Ta, gg3, p1, p2),
-                                     (_Y, c, p2, p3), (_T, gg4, p3, p4), (_Ya, d, p4, p1)),
-                                    MatStruc=[['a', 'b', 'a', 'b'], ['b', 'a', 'a', 'b']])
-            )
+                           (_Ta, gg4, p2, p3), (_Y, c, p3, p4), (_Ya, d, p4, p1)),
+                         MatStruc=[['a', 'b', 'a', 'b'], ['b', 'a', 'a', 'b']])
+                           + model.Expand(((_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_Y, c, p1, p2),
+                                           (_T, gg3, p2, p3), (_T, gg4, p3, p4), (_Ya, d, p4, p1)),
+                                         MatStruc=[['a', 'b', 'a', 'b'], ['b', 'a', 'a', 'b']])
+                           - 10 * model.Expand(((_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_Ta, gg3, p1, p2),
+                                                (_Y, c, p2, p3), (_T, gg4, p3, p4), (_Ya, d, p4, p1)),
+                                         MatStruc=[['a', 'b', 'a', 'b'], ['b', 'a', 'a', 'b']])
+                )
+            reskin = 0
+            if model.kinmixing:
+                #BY T^* T^*
+                reskin = Rational(1, 4) * (
+                    # Note that the delta_ij delta_kl is implicit here
+                    2 * model.Expand((('Thetakin4W', a, p1, a, p1), (_Y, c, p1, p2), (_Ya, d, p2, p1)))
+                    + model.Expand((('ThetakinWsWf', a, p1), (_Th, gg1, s1, b), (_Ta, gg1, p1, p2), (_Y, c, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+                    + model.Expand((('ThetakinWsWf', a, p2), (_Th, gg1, s1, b), (_Ta, gg1, p1, p2), (_Y, c, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+                    + model.Expand((('ThetakinWsWf', b, p1), (_Th, gg1, a, s1), (_Ta, gg1, p1, p2), (_Y, c, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+                    + model.Expand((('ThetakinWsWf', b, p2), (_Th, gg1, a, s1), (_Ta, gg1, p1, p2), (_Y, c, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+                    #Y T^A T^B
+                    + 2 * model.Expand((('Thetakin4W', a, p1, a, p1), (_Y, c, p2, p1), (_Ya, d, p1, p2)))
+                    + model.Expand((('ThetakinWsWf', a, p2), (_Th, gg1, s1, b), (_Y, c, p1, p2), (_T, gg1, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+                    + model.Expand((('ThetakinWsWf', a, p3), (_Th, gg1, s1, b), (_Y, c, p1, p2), (_T, gg1, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+                    + model.Expand((('ThetakinWsWf', b, p2), (_Th, gg1, a, s1), (_Y, c, p1, p2), (_T, gg1, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+                    + model.Expand((('ThetakinWsWf', b, p3), (_Th, gg1, a, s1), (_Y, c, p1, p2), (_T, gg1, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+                    #BYbar
+                    - 10 * (
+                        2 * model.Expand((('Thetakin4W', a, p1, a, p2), (_Y, c, p1, p2), (_Ya, d, p2, p1)))
+                        + model.Expand((('ThetakinWsWf', a, p1), (_Th, gg1, s1, b), (_Y, c, p1, p2), (_T, gg1, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+                        + model.Expand((('ThetakinWsWf', a, p2), (_Th, gg1, s1, b), (_T, gg1, p1, p2), (_Y, c, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+                        + model.Expand((('ThetakinWsWf', b, p1), (_Th, gg1, a, s1), (_Y, c, p1, p2), (_T, gg1, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+                        + model.Expand((('ThetakinWsWf', b, p3), (_Th, gg1, a, s1), (_T, gg1, p1, p2), (_Y, c, p2, p3), (_Ya, d, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+                    )
+                )
+            res += reskin
             if res != 0:
-                tot.append(res.doit())
-            calculated[key] = res.doit()
+                res = res.doit()
+                tot.append(res)
+            calculated[key] = res
         else:
             tot.append(calculated[key])
     res = sum(tot)
-    res = res.doit()
-    tf = time.time()
     powe[0] = powe[0].subs(BYabcd, res).subs(BbarYabcd, 0)
     return powe[0]
 
@@ -443,16 +574,50 @@ def CtAabcd(powe, comb, model):
     sc1, sc2, sc3, sc4 = comb
     res = [Rational(161, 6) * Rational(1, 4) * (
         model.Expand(((_G, gg1), (_G, gg1), (_G, gg2), (_Cg, gg1), ('Theta4', gg1, gg2, a, b, c, d)))
-    )
-           - Rational(32, 3) * kappa * Rational(1, 4) * (
-               model.Expand(((_G, gg1), (_G, gg1), (_G, gg2), (_S, gg1), ('Theta4', gg1, gg2, a, b, c, d)))
-           )
-           - Rational(7, 3) * Rational(1, 4) * (
-               model.Expand(((_G, gg1), (_G, gg1), (_G, gg2), (_Ss, gg1), ('Theta4', gg1, gg2, a, b, c, d)))
-           )
-           for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
-           ]
+       )
+       - Rational(32, 3) * kappa * Rational(1, 4) * (
+           model.Expand(((_G, gg1), (_G, gg1), (_G, gg2), (_S, gg1), ('Theta4', gg1, gg2, a, b, c, d)))
+       )
+       - Rational(7, 3) * Rational(1, 4) * (
+           model.Expand(((_G, gg1), (_G, gg1), (_G, gg2), (_Ss, gg1), ('Theta4', gg1, gg2, a, b, c, d)))
+       )
+       for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
+       ]
     res = sum(res)
+    reskin = 0
+    if model.kinmixing:
+        reskin = [Rational(161, 6) * Rational(1,4) * (
+            # C_g terms
+                model.Expand(((_G, gg1), (_G, gg1), (_Cg, gg1), (_Th, gg1, a, s1), (_Th, gg1, c, s2), ('Thetakin', s1, b, s2, d)),MatStruc=['a','a'])
+              + model.Expand(((_G, gg1), (_G, gg1), (_Cg, gg1), (_Th, gg1, a, s1), (_Th, gg1, c, s2), ('Thetakin', s1, b, c, s2)),MatStruc=['a','a'])
+            )
+            - Rational(32,3) * kappa * Rational(1,4) * (
+                # S terms 6 additional contributions for the kinetics modifications
+              + model.Expand(((_G, gg1), (_G, gg1), (_S, gg1), (_Th, gg1, a, s1), (_Th, gg1, c, s2), ('Thetakin', s1, b, s2, d)),MatStruc=['a','a'])
+              + model.Expand(((_G, gg1), (_G, gg1), (_S, gg1), (_Th, gg1, a, s1), (_Th, gg1, s2, d), ('Thetakin', s1, b, c, s2)),MatStruc=['a','a'])
+              # TODO NEED TO BE ADAPTED ONCE FLORIAN HAS CONFIRMED THAT THEY FUCKED IT UP AGAIN.
+              + model.Expand(((_G, gg1), (_Th, gg1, s1, b), (_Th, gg1, s2, d), ('ThetakinC4', a, s1, c, s2)),MatStruc=['a','a'])
+              + model.Expand(((_G, gg1), (_Th, gg1, s1, b), (_Th, gg1, c, s2), ('ThetakinC4', a, s1, s2, d)),MatStruc=['a','a'])
+                # Finally the C4 * C terms
+              + model.Expand((('ThetakinC4', a, s1, c, s2), ('Thetakin', s1, b, s2, d)))
+              + model.Expand((('ThetakinC4', a, s1, s2, d), ('Thetakin', s1, b, c, s2)))
+            )
+            - Rational(7,3) * Rational(1,4) *(
+              + model.Expand(((_G, gg1), (_G, gg1), (_Ss, gg1), (_Th, gg1, a, s1), (_Th, gg1, c, s2), ('Thetakin', s1, b, s2, d)),MatStruc=['a','a'])
+              + model.Expand(((_G, gg1), (_G, gg1), (_Ss, gg1), (_Th, gg1, a, s1), (_Th, gg1, s2, d), ('Thetakin', s1, b, c, s2)),MatStruc=['a','a'])
+              # TODO NEED TO BE ADAPTED ONCE FLORIAN HAS CONFIRMED THAT THEY FUCKED IT UP AGAIN.
+              + model.Expand(((_G, gg1), (_Th, gg1, s1, b), (_Th, gg1, s2, d), ('ThetakinC4', a, s1, c, s2)),MatStruc=['a','a'])
+              + model.Expand(((_G, gg1), (_Th, gg1, s1, b), (_Th, gg1, c, s2), ('ThetakinC4', a, s1, s2, d)),MatStruc=['a','a'])
+              # Finally the C4 * C terms
+              + model.Expand((('ThetakinC4', a, s1, c, s2), ('Thetakin', s1, b, s2, d)))
+              + model.Expand((('ThetakinC4', a, s1, s2, d), ('Thetakin', s1, b, c, s2)))
+            )
+        for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
+        ]
+        reskin = sum(reskin)
+    res += reskin
+    if res != 0:
+        res.doit()
     powe[0] = powe[0].subs(Atabcd, res)
     return powe[0]
 
@@ -462,11 +627,24 @@ def CASabcd(powe, comb, model):
     sc1, sc2, sc3, sc4 = comb
     res = [Rational(1, 4) * (
         model.Expand(((_G, gg1), (_Cs, gg1, ii), (_G, gg2), (_G, gg3), ('Theta4', gg2, gg3, a, b, c, d)))
-    )
+        )
            for ii in [sc1, sc2, sc3, sc4]
            for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
            ]
     res = sum(res)
+    reskin = 0
+    if model.kinmixing:
+        reskin = [
+            Rational(1,4) * (
+                model.Expand(((_G, gg1), (_G, gg2), ('ThetakinWsWs', ii, ii), ('Theta4', gg1, gg2, a, b, c, d)))
+            )
+            for ii in [sc1, sc2, sc3, sc4]
+            for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
+        ]
+        reskin = sum(reskin)
+    res += reskin
+    if res != 0:
+        res = res.doit()
     powe[0] = powe[0].subs(ASabcd, res)
     return powe[0]
 

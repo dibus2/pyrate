@@ -1,6 +1,7 @@
 #!/usr/bin/env python 
 from RGEsDefinition import *
 from RGEsmathModule import DeterminOrdering
+import pudb
 
 
 ###########################################################################################################
@@ -99,8 +100,7 @@ def CYukII(powe, comb, model):
 def CYukGaugeIIg2(powe, comb, model):
     """Calculates Eq 36 Lines 7-12"""
     sc, f1, f2 = comb
-    res = (
-        3 * (model.Expand2(((_G, gg1), ([[(_C, gg1, f1), (_Y, s1, f1, p1), (_Ya, sc, p1, p2), (_Y, s1, p2, f2)],
+    res = (3 * (model.Expand2(((_G, gg1), ([[(_C, gg1, f1), (_Y, s1, f1, p1), (_Ya, sc, p1, p2), (_Y, s1, p2, f2)],
                                          [(_Y, s1, f1, p1), (_Ya, sc, p1, p2), (_Y, s1, p2, f2), (_C, gg1, f2)]])),
                            dotrace=False)
              )  # Line 7
