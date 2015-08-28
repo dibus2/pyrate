@@ -6,7 +6,7 @@ from QuarticCouplingskin import *
 from GaugeCouplingskin import *
 from FermionMasskin import *
 from ScalarMasskin import *
-from Trilinear import *
+from Trilinearkin import *
 from ScalarAnomalous import *
 from FermionAnomalous import *
 
