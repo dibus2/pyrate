@@ -95,7 +95,7 @@ def CHab(powe, comb, model):
 
 
 #######
-# 2-loop
+# 2-Loop
 #######
 
 def CL2mab(powe, comb, model):
@@ -244,6 +244,12 @@ def CLbar2Sab(powe, comb, model):
     res = (model.Expand(((_G, gg1), (_Cs, gg1, s1), (_L, a, b, s2, s1), (_ms, s2, s1)))
            + model.Expand(((_G, gg1), (_Cs, gg1, s1), (_h, a, s2, s1), (_h, b, s2, s1)))
            )
+    reskin = 0
+    if model.kinmixing:
+        reskin = (model.Expand(((_Ckins, s1), (_L, a, b, s2, s1), (_ms, s2, s1)))
+        + model.Expand(((_Ckins, s1), (_h, a, s2, s1), (_h, b, s2, s1)))
+                  )
+    res += reskin
     powe[0] = powe[0].subs(Lbar2Sab, res)
     return powe[0]
 
@@ -256,6 +262,13 @@ def CL2gab(powe, comb, model):
            + model.Expand(((_G, gg1), (_h, a, s1, s2), (_h, b, s3, s4), (_Th, gg1, s1, s3), (_Th, gg1, s2, s4)),
                           MatStruc=['a', 'a'])
            )
+    reskin = 0
+    if model.kinmixing:
+        reskin = (
+            model.Expand(((_L, a, b, s1, s2), (_ms, s3, s4), ('Thetakin', s1, s3, s2, s4)))
+            + model.Expand(((_h, a, s1, s2), (_h, b, s3, s4), ('Thetakin', s1, s3, s2, s4)))
+            )
+    res += reskin
     powe[0] = powe[0].subs(L2gab, res)
     return powe[0]
 
@@ -267,6 +280,13 @@ def CY2Fmab(powe, comb, model):
            for i in comb
            ]
     res = sum(res)
+    reskin = 0
+    if model.kinmixing:
+        reskin = [model.Expand((('Y2FabSkin', i, i), (_ms, a, b)))
+                  for i in comb
+                  ]
+        reskin = sum(reskin)
+    res += reskin
     powe[0] = powe[0].subs(Y2Fmab, res)
     return powe[0]
 
@@ -278,6 +298,11 @@ def CHSab(powe, comb, model):
            for i in comb
            ]
     res = sum(res)
+    reskin = 0
+    if model.kinmixing:
+        reskin = [model.Expand(((_Ckins, i), ('Hab', a, b))) for i in comb]
+        reskin = sum(reskin)
+    res+=reskin
     powe[0] = powe[0].subs(HSab, res)
     return powe[0]
 
@@ -312,6 +337,27 @@ def CHFab(powe, comb, model):
                          (_Ya, b, p2, p3), ([[(_Y, a, p3, p4), (_mfa, p4, p1)], [(_mf, p3, p4), (_Ya, a, p4, p1)]])))
         # Line 7
     )
+    reskin = 0
+    if model.kinmixing:
+        reskin = 2 * (
+              model.Expand2((([[(_Ckin, p1), (_Y, a, p1, p2)], [(_Y, a, p1, p2), (_Ckin, p2)]]),
+                                     (_Ya, b, p2, p3), (_mf, p3, p4), (_mfa, p4, p1)))
+            + model.Expand2((([[(_Ckin, p1), (_Y, b, p1, p2)], [(_Y, b, p1, p2), (_Ckin, p2)]]),
+                             (_Ya, a, p2, p3), (_mf, p3, p4), (_mfa, p4, p1)))
+            + model.Expand2((([[(_Ckin, p1), (_mf, p1, p2)], [(_mf, p1, p2), (_Ckin, p2)]]),
+                         (_mfa, p2, p3),([[(_Y, a, p3, p4), (_Ya, b, p4, p1)], [(_Y, b, p3, p4), (_Ya, a, p4, p1)]])))
+            + model.Expand2((([[(_Ckin, p1), (_Y, a, p1, p2)], [(_Y, a, p1, p2), (_Ckin, p2)]]),
+                         (_mfa, p2, p3),
+                         ([[(_Y, b, p3, p4), (_mfa, p4, p1)], [(_mf, p3, p4), (_Ya, b, p4, p1)]])))
+            + model.Expand2((([[(_Ckin, p1), (_mf, p1, p2)], [(_mf, p1, p2), (_Ckin, p2)]]), (_Ya, a, p2, p3),
+             ([[(_Y, b, p3, p4), (_mfa, p4, p1)], [(_mf, p3, p4), (_Ya, b, p4, p1)]])))
+            + model.Expand2((([[(_Ckin, p1), (_Y, b, p1, p2)], [(_Y, b, p1, p2), (_Ckin, p2)]]),
+                         (_mfa, p2, p3),
+                         ([[(_Y, a, p3, p4), (_mfa, p4, p1)], [(_mf, p3, p4), (_Ya, a, p4, p1)]])))  # Line 6
+            + model.Expand2((([[(_Ckin, p1), (_mf, p1, p2)], [(_mf, p1, p2), (_Ckin, p2)]]),
+                         (_Ya, b, p2, p3), ([[(_Y, a, p3, p4), (_mfa, p4, p1)], [(_mf, p3, p4), (_Ya, a, p4, p1)]])))
+        )
+    res += reskin
     powe[0] = powe[0].subs(HFab, res)
     return powe[0]
 
@@ -329,6 +375,15 @@ def CLSabg4(powe, comb, model):
            for i in comb
            ]
     res = sum(res)
+    reskin = 0
+    if model.kinmixing:
+        reskin = [
+            - Rational(10, 3) * kappa * model.Expand(((_SfCkins, i), (_ms, a, b)))
+            - Rational(11, 12) * model.Expand(((_SsCkins, i), (_ms, a, b)))
+            for i in comb
+        ]
+        reskin = sum(reskin)
+    res += reskin
     powe[0] = powe[0].subs(LSabg4, res)
     return powe[0]
 
@@ -340,6 +395,14 @@ def CLSSab(powe, comb, model):
            for i in comb
            ]
     res = sum(res)
+    reskin = 0
+    if model.kinmixing:
+        reskin = [
+            2 * model.Expand(((_G,gg1), (_Cs, gg1, i), (_Ckins, i), (_ms, a, b)))# 2* C Ckin
+            + model.Expand(((_Ckins, i), (_Ckins, i), (_ms, a, b)))#Ckin Ckin
+        ]
+        reskin = sum(reskin)
+    res += reskin
     powe[0] = powe[0].subs(LSSab, res)
     return powe[0]
 
@@ -348,6 +411,24 @@ def CAlab(powe, comb, model):
     """Calculates the term Alab Eq 90 before last line """
     a, b = comb
     res = 2 * model.Expand(((_G, gg1), (_G, gg2), (_ms, s1, s2), ('Theta4', gg1, gg2, s1, s2, a, b)))
+    reskin = 0
+    if model.kinmixing:
+        reskin = 2 * (
+            model.Expand(((_ms, s1, s2), ('Theta2g2kin', s1, a, s3, s4),
+                      ('Thetakin', s3, s2, s4, b)))
+        + model.Expand(((_ms, s1, s2), ('Theta2g2kin', s3, s4, s2, b),
+                        ('Thetakin', s1, s3, a, s4)))
+        + model.Expand(((_ms, s1, s2), ('Theta2g2kin', s1, s4, s3, b),
+                        ('Thetakin', s3, s2, a, s4)))
+        + model.Expand(((_ms, s1, s2), ('Theta2g2kin', s3, a, s2, s4),
+                        ('Thetakin', s1, s3, s4, b)))
+        # Terms C*C
+        + model.Expand(((_ms, s1, s2), ('Thetakin', s1, s3, a, s4),
+                        ('Thetakin', s3, s2, s4, b)))
+        + model.Expand(((_ms, s1, s2), ('Thetakin', s1, s3, s4, b),
+                        ('Thetakin', s3, s2, a, s4)))
+        )
+    res += reskin
     powe[0] = powe[0].subs(Alab, res)
     return powe[0]
 
@@ -356,6 +437,18 @@ def CAbarlab(powe, comb, model):
     """Calculates the term Alab Eq 90 before last line """
     a, b = comb
     res = 2 * model.Expand(((_G, gg1), (_G, gg2), (_ms, s1, s2), ('Theta4', gg1, gg2, a, s1, b, s2)))
+    reskin = 0
+    if model.kinmixing:
+        reskin = 2 * (
+            model.Expand(((_ms, s1, s2), ('Theta2g2kin', a, b, s3, s4), ('Thetakin', s3, s1, s4, s2)))
+            + model.Expand(((_ms, s1, s2), ('Theta2g2kin', s3, s4, s1, s2), ('Thetakin', a, s3, b, s4)))
+            + model.Expand(((_ms, s1, s2), ('Theta2g2kin', a, s4, s3, s2), ('Thetakin', s3, s1, b, s4)))
+            + model.Expand(((_ms, s1, s2), ('Theta2g2kin', s3, b, s1, s4), ('Thetakin', a, s3, s4, s2)))
+            # Terms C*C
+            + model.Expand(((_ms, s1, s2), ('Thetakin', a, s3, b, s4), ('Thetakin', s3, s1, s4, s2)))
+            + model.Expand(((_ms, s1, s2), ('Thetakin', a, s3, s4, s2), ('Thetakin', s3, s1, b, s4)))
+        )
+    res += reskin
     powe[0] = powe[0].subs(Abarlab, res)
     return powe[0]
 
@@ -363,36 +456,40 @@ def CAbarlab(powe, comb, model):
 def CBYabBbarYab(powe, comb, model):
     """Calculates the two terms BYab and BbarYab Eq 104 and 105"""
     a, b = comb
-    resBY = (
-        model.Expand((
+    res = (
+            model.Expand((
             (_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_Ta, gg3, p1, p2), (_Ta, gg4, p2, p3),
             (_mf, p3, p4), (_mfa, p4, p1)), MatStruc=[['a', 'b', 'a', 'b'], ['b', 'a', 'a', 'b']])
-        + model.Expand(((_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_mf, p1, p2), (_T, gg3, p2, p3),
+        +   model.Expand(((_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_mf, p1, p2), (_T, gg3, p2, p3),
                         (_T, gg4, p3, p4), (_mfa, p4, p1)), MatStruc=[['a', 'b', 'a', 'b'], ['b', 'a', 'a', 'b']])
-    )
-    resBYbar = -10 * (
-        model.Expand(((_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_Ta, gg3, p1, p2), (_mf, p2, p3),
+        -10 * (
+            model.Expand(((_G, gg1), (_G, gg2), (_Th, gg1, a, s1), (_Th, gg2, s1, b), (_Ta, gg3, p1, p2), (_mf, p2, p3),
                       (_Ta, gg4, p3, p4), (_mfa, p4, p1)), MatStruc=[['a', 'b', 'a', 'b'], ['b', 'a', 'a', 'b']])
+        )
     )
-    resFinal = resBYbar + resBY
-    resFinal = resBY
-    powe[0] = powe[0].subs(BYab, resFinal).subs(BbarYab, 0)
+    reskin = 0
+    if model.kinmixing:
+        reskin = (
+            2 * model.Expand((('Thetakin4W', a, p1, a, p1), (_mf, p1, p2), (_mfa, p2, p1)))
+            + model.Expand((('ThetakinWsWf', a, p1), (_Th, gg1, s1, b), (_Ta, gg1, p1, p2), (_mf, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+            + model.Expand((('ThetakinWsWf', a, p2), (_Th, gg1, s1, b), (_Ta, gg1, p1, p2), (_mf, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+            + model.Expand((('ThetakinWsWf', b, p1), (_Th, gg1, a, s1), (_Ta, gg1, p1, p2), (_mf, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+            + model.Expand((('ThetakinWsWf', b, p2), (_Th, gg1, a, s1), (_Ta, gg1, p1, p2), (_mf, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+            #Y T^A T^B
+            + 2 * model.Expand((('Thetakin4W', a, p1, a, p1), (_mf, p2, p1), (_mfa, p1, p2)))
+            + model.Expand((('ThetakinWsWf', a, p2), (_Th, gg1, s1, b), (_mf, p1, p2), (_T, gg1, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+            + model.Expand((('ThetakinWsWf', a, p3), (_Th, gg1, s1, b), (_mf, p1, p2), (_T, gg1, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+            + model.Expand((('ThetakinWsWf', b, p2), (_Th, gg1, a, s1), (_mf, p1, p2), (_T, gg1, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+            + model.Expand((('ThetakinWsWf', b, p3), (_Th, gg1, a, s1), (_mf, p1, p2), (_T, gg1, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+            - 10 *(
+                2 * model.Expand((('Thetakin4W', a, p1, a, p2), (_mf, p1, p2), (_mfa, p2, p1)))
+                + model.Expand((('ThetakinWsWf', a, p1), (_Th, gg1, s1, b), (_mf, p1, p2), (_T, gg1, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+                + model.Expand((('ThetakinWsWf', a, p2), (_Th, gg1, s1, b), (_T, gg1, p1, p2), (_mf, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(a,s1)
+                + model.Expand((('ThetakinWsWf', b, p1), (_Th, gg1, a, s1), (_mf, p1, p2), (_T, gg1, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+                + model.Expand((('ThetakinWsWf', b, p3), (_Th, gg1, a, s1), (_T, gg1, p1, p2), (_mf, p2, p3), (_mfa, p3, p1)),MatStruc=['a','a'])*model.deltatilde(s1,b)
+            )
+        )
+    res += reskin
+    powe[0] = powe[0].subs(BYab, res).subs(BbarYab, 0)
     return powe[0]
 
-# def CBYabBbarYab(powe,comb,model):
-#	"""Calculates the two terms BYab and BbarYab Eq 104 and 105"""
-#	a,b = comb
-#	resBY = (
-#	model.Expand(((_G,gg1),(_G,gg2),(_Th,gg1,a,s1),(_Th,gg2,s1,b),(_Ta,gg1,p1,p2),(_Ta,gg2,p2,p3),(_mf,p3,p4),(_mfa,p4,p1)),MatStruc=['a','b','a','b'])
-#	+ model.Expand(((_G,gg1),(_G,gg2),(_Th,gg1,a,s1),(_Th,gg2,s1,b),(_Ta,gg2,p1,p2),(_Ta,gg1,p2,p3),(_mf,p3,p4),(_mfa,p4,p1)),MatStruc=['b','a','a','b'])
-# + model.Expand(((_G,gg1),(_G,gg2),(_Th,gg1,a,s1),(_Th,gg2,s1,b),(_mf,p1,p2),(_T,gg1,p2,p3),(_T,gg2,p3,p4),(_mfa,p4,p1)),MatStruc=['a','b','a','b'])
-# + model.Expand(((_G,gg1),(_G,gg2),(_Th,gg1,a,s1),(_Th,gg2,s1,b),(_mf,p1,p2),(_T,gg2,p2,p3),(_T,gg1,p3,p4),(_mfa,p4,p1)),MatStruc=['b','a','a','b'])
-# )
-#	resBYbar = -10*( 
-#	model.Expand(((_G,gg1),(_G,gg2),(_Th,gg1,a,s1),(_Th,gg2,s1,b),(_Ta,gg1,p1,p2),(_mf,p2,p3),(_Ta,gg2,p3,p4),(_mfa,p4,p1)),MatStruc=['a','b','a','b'])
-#	+ model.Expand(((_G,gg1),(_G,gg2),(_Th,gg1,a,s1),(_Th,gg2,s1,b),(_Ta,gg2,p1,p2),(_mf,p2,p3),(_Ta,gg1,p3,p4),(_mfa,p4,p1)),MatStruc=['b','a','a','b'])
-# )
-#	resFinal = resBYbar + resBY 
-#	resFinal = resBY 
-#	powe[0] = powe[0].subs(BYab,resFinal).subs(BbarYab,0)
-#	return powe[0]
