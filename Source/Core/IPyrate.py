@@ -13,7 +13,6 @@ try:
     import rlcompleter
     from sympy import symbols,Symbol,Rational,sqrt,IndexedBase,Matrix
     import pickle
-    import pudb
 except:
     exit("Error while loading one of the modules: `cmd, os, readline, rlcompleter, pickle`")
 
