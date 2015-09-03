@@ -21,6 +21,7 @@ Source/GroupTheory/change_matrices.py
 Source/GroupTheory/contraction-15-15-15-s.py
 Source/GroupTheory/update-database.py
 Source/GroupTheory/.ipynb_checkpoints/
+Source/GroupTheory/combine-database.py
 *.DS_Store
 *.swp
 #logfiles

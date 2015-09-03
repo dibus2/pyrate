@@ -39,7 +39,7 @@ def ExportBetaFunction(model,FinalExpr,settings,StrucYuk):
         for iel,el in enumerate(ListSymbs) :
                 if len(reg.split('{(.*)}',str(el))) == 3 or len(reg.split('\\\(.*)',str(el))) == 3 :
                     #F: merging, online version:
-                        ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',str(el)))))
+                        ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',str(el))))).replace('_', '').replace('\\', '').replace('\\\\', '').replace(' ', '')
                         #ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
                         maps[el] = ListSymbs[iel]       
                 else :
@@ -341,7 +341,8 @@ def ToNumpy(func,xpr,Mat=False):
         pos0 = xpr.find('{}('.format(func)) + len(func)
         lstring = list(xpr)
         # and now find the matching round bracket
-        pos1 =  findclosingbracket(lstring,pos0+1)
+        p:q
+        os1 =  findclosingbracket(lstring,pos0+1)
         # change all the comas in between the two brackets
         while True : 
                 tpfind = xpr[pos0:].find(',')
@@ -361,10 +362,38 @@ def ToNumpy(func,xpr,Mat=False):
                                 xpr = xpr.replace('SScalarProd({}*{})'.format(src.group(1),src.group(2)),'np.trace(np.transpose({})*{})'.format(src.group(1),src.group(2)))
                         else :
                                 exit("error while translating the to numpy notation")
-                        return xpr
+                       :q return xpr
                 else :
                         return ''.join(lstring).replace(func,'',1)
 
+def ToNumpy(func, xpr, Mat=False):
+    pos0 = xpr.find('{}('.format(func)) + len(func)
+    lstring = list(xpr)
+    # and now find the matching round bracket
+    pos1 = findclosingbracket(lstring, pos0 + 1)
+    # change all the comas in between the two brackets
+    while True:
+        tpfind = xpr[pos0:].find(',')
+        pcoma = pos0 + tpfind if tpfind != -1 else len(lstring) - 1
+        if pcoma < pos1:
+            lstring[pcoma] = '*'
+            pos0 = pcoma + 1
+        else:
+            break
+    if not (Mat):
+        return ''.join(lstring).replace(func, 'np.{}'.format(func[1:]), 1)
+    else:
+        if func == 'SScalarProd':
+            xpr = ''.join(lstring)
+            src = reg.search('SScalarProd\(([^\*]*)\*([^\)]*)\)', xpr)
+            if src is not None:
+                xpr = xpr.replace('SScalarProd({}*{})'.format(src.group(1), src.group(2)),
+                                  'np.trace(np.transpose({})*{})'.format(src.group(1), src.group(2)))
+            else:
+                exit("error while translating the to numpy notation")
+            return xpr
+        else:
+            return ''.join(lstring).replace(func, '', 1)
 
 def TAdj(xpr) : 
         pos0 = xpr.find('Adj(')
@@ -375,7 +404,6 @@ def TAdj(xpr) :
         #add a bracket to close the additional one we introduced above
         lstring.insert(pos1+1,')')
         return ''.join(lstring)
-
 
 def RemoveIndices(xpr,el,Yuk=True):
         #The flag is here to deal with the MatMul 
@@ -409,34 +437,38 @@ def RemoveIndices(xpr,el,Yuk=True):
         return xpr
 
 
-def TranslateToNumerics(expression,ListSymbs,label,Ids,model,Mapping,Matrices=True,isScalar=False) : 
-	"""Implements all the modification to the expression to be evaluated numerically and return a string"""
-	#Use the ToMathematicaNotation to clean up the result a bit
-	StrXpr = ToMathematicaNotation(expression,model,FlagSquare=False)#to avoid the '('->'['
-	if not(isScalar) :
-		#StrXpr = StrXpr.replace('trace','{}*ttrace'.format(Ids[label])).replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','{}*SScalarProd'.format(Ids[label]))
-		StrXpr = StrXpr.replace('trace','ttrace').replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','SScalarProd')
-	else :
-		StrXpr = StrXpr.replace('trace','ttrace').replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','SScalarProd')
-	while 'ttrace(' in StrXpr	:
-		StrXpr = ToNumpy('ttrace',StrXpr)
-	while 'Adj(' in StrXpr :
-		StrXpr = TAdj(StrXpr)
-	#Gauge-Couplings,Quartic,Trilinear,scalar masses
-	for el in ListSymbs : 
-		StrXpr = StrXpr.replace(str(el),'y[{}]'.format(Mapping[el]))
-	#Now let's deal with the Yukawas and the indices 
-	if Matrices :#result in matrix form
-		#Remove all the indices
-		for el in model.ListYukawa :
-			#el =''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',el))))
-                        #F. changed to comply with the new detex functions
-			el =''.join(reg.split('\\\(.*)',''.join(reg.split('{|}|_',el))))
-			StrXpr = RemoveIndices(StrXpr,el,Yuk=True)
-		StrXpr = RemoveIndices(StrXpr,'MatMul',Yuk=False)
-		while 'matMul(' in StrXpr :
-			StrXpr = ToNumpy('matMul',StrXpr,Mat=True)#The Mat is used to remove the tag of the function like ScalarProd -> ''
-		while 'SScalarProd(' in StrXpr:
-			StrXpr = ToNumpy('SScalarProd',StrXpr,Mat=True)
-	return StrXpr
-
+def TranslateToNumerics(expression, ListSymbs, label, Ids, model, Mapping, Matrices=True, isScalar=False):
+    """Implements all the modification to the expression to be evaluated numerically and return a string"""
+    # Use the ToMathematicaNotation to clean up the result a bit
+    StrXpr = ToMathematicaNotation(expression, model, FlagSquare=False)  # to avoid the '('->'['
+    if not (isScalar):
+        # StrXpr = StrXpr.replace('trace','{}*ttrace'.format(Ids[label])).replace('conj','np.conjugate').replace('Tp','np.transpose').replace('ScalarProd','{}*SScalarProd'.format(Ids[label]))
+        StrXpr = StrXpr.replace('trace', 'ttrace').replace('conj', 'np.conjugate').replace('Tp',
+                                                                                           'np.transpose').replace(
+            'ScalarProd', 'SScalarProd')
+    else:
+        StrXpr = StrXpr.replace('trace', 'ttrace').replace('conj', 'np.conjugate').replace('Tp',
+                                                                                           'np.transpose').replace(
+            'ScalarProd', 'SScalarProd')
+    while 'ttrace(' in StrXpr:
+        StrXpr = ToNumpy('ttrace', StrXpr)
+    while 'Adj(' in StrXpr:
+        StrXpr = TAdj(StrXpr)
+    # Gauge-Couplings,Quartic,Trilinear,scalar masses
+    for el in ListSymbs:
+        StrXpr = StrXpr.replace(str(el), 'y[{}]'.format(Mapping[el]))
+    # Now let's deal with the Yukawas and the indices
+    if Matrices:  # result in matrix form
+        # Remove all the indices
+        for el in model.ListYukawa:
+            # el =''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',el))))
+            # F. changed to comply with the new detex functions
+            el = ''.join(reg.split('\\\(.*)', ''.join(reg.split('{|}|_', el))))
+            StrXpr = RemoveIndices(StrXpr, el, Yuk=True)
+        StrXpr = RemoveIndices(StrXpr, 'MatMul', Yuk=False)
+        while 'matMul(' in StrXpr:
+            StrXpr = ToNumpy('matMul', StrXpr,
+                             Mat=True)  # The Mat is used to remove the tag of the function like ScalarProd -> ''
+        while 'SScalarProd(' in StrXpr:
+            StrXpr = ToNumpy('SScalarProd', StrXpr, Mat=True)
+    return StrXpr

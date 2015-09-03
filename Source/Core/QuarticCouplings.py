@@ -17,7 +17,6 @@ def set_globalsLbd(model):
 		globals()[key] = val 
 
 def CompileQuartic(Translated,lbd,comb,model,Weyl,GutNorm):
-	#LH = model.LbdToCalculate[lbd][1]/model.LbdToCalculate[lbd][-1]
 	LH = model.LbdToCalculate[lbd][1]
 	FinalBeta = (sum([el[0] for el in Translated[lbd]]).doit()/LH).expand()
 	if Weyl : 
@@ -379,7 +378,6 @@ def CBYabcdBbarYabcd(powe,comb,model):
 		else : 
 			tot.append(calculated[key])
 	res = sum(tot)
-	res = res.doit()
 	tf = time.time()
 	powe[0] = powe[0].subs(BYabcd,res).subs(BbarYabcd,0)
 	return powe[0]
