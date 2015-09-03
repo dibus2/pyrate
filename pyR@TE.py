@@ -77,6 +77,8 @@ parser.add_argument('--FermionAnomalous', '-fera', dest='FermionAnomalous', acti
                     help='set the calculation of fermion anomalous dimensions to True')
 parser.add_argument('--SetGutNorm', '-gutn', dest='SetGutNorm', action='store_true', default=False,
                     help='set the normalization to gut normalization in case there is a U(1) gauge group, it normalizes g1 -> sqrt(3/5)*g\'')
+parser.add_argument('--KinMix', '-kin', dest='KinMix', action='store_true', default=True,
+                    help='Include the kinetic mixing terms if multiple U(1) gauge groups are present')
 
 # Collect the arguments
 args = parser.parse_args()
@@ -372,6 +374,11 @@ else:
         loggingCritical('**Warning** the `SetGutNorm` switch turned off because multiple U(1) gauge groups found',
                         verbose=RunSettings['vCritical'])
 
+    #Kin mixing
+    if not(RunSettings['KinMix']):
+        if model.kinmixing:
+            loggingInfo("Switching off the kinetic mixing",verbose=RunSettings['vInfo'])
+        model.kinmixing = False
     # add the element in ToOnly to Only
     # IF only is defined then skip the other terms
     trans = {'QuarticTerms': model.LbdToCalculate,
@@ -416,7 +423,6 @@ else:
     ListLagrangian = model.Potential.keys()
     StrucYuk = {}
     if RunSettings['Export']:
-        # TODO Add the Scalar Anomalous
         Check = all([True if RunSettings[Translation[el]] else False for el in ListLagrangian])
         Check = Check and RunSettings['Gauge-Couplings']
         if not (Check) and (not (RunSettings['All-Contributions'])) or RunSettings['Only'] != {}:
@@ -449,7 +455,6 @@ else:
     # Start the actual calculation of the RGEs
     loggingInfo("Starting the Calculation...\n", verbose=RunSettings['vInfo'])
     ToCalculate = []
-    # TODO Extend the list to all the contributions
     if RunSettings['All-Contributions']:
         strListLagrangian = '\n\t\t\t\tGauge-Couplings'
         for el in ListLagrangian:
@@ -490,9 +495,7 @@ else:
                 loggingCritical(
                     "\t\t**WARNING**, No Fermion Anomalous dimension found to calculate. Each anomalous is associated to a fermion mass term, make sure that the corresponding fermion mass terms are defined in the potential.",
                     verbose=True)
-                # TODO REMOVE
                 ToCalculate.append('FermionAnomalous')
-                model.FermionAnomalousToCalculate = {'test': []}
             else:
                 ToCalculate.append('FermionAnomalous')
                 loggingInfo("\t\t... with option --FermionAno", verbose=RunSettings['vInfo'])

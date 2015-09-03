@@ -88,7 +88,8 @@ class Model(object):
             for pp in self.Particles.values():
                 pp.W = self.UsectorMatrix.transpose() * pp.Q
 
-                #############################################################################
+
+        #############################################################################
         # DEF of the class to store the Yuk this is dynamic and hence needs to be here
         #############################################################################
         def constructor(self, *args):
@@ -2895,92 +2896,3 @@ class Index(object):
         self.grextind = 0
         self.grintind = 0
 
-        # def ExtractScalarAnomalous(self):
-        #	"""
-        #	Extract the various Scalar Anomalous dimesnsions to calculate:
-        #	1) create all the combinations
-        #	2) for each one of them find a non zero CGCs contraction
-        #	3) Store it and add it to the ToCalculate list
-        #	Note, that there is no notion of mixing here it is a simple calculation
-        #	"""
-        #	#generate the pairs of scalars for which to calculate the anomalous dimension
-        #	Pairs = itr.product(self.Scalars.keys(),self.Scalars.keys())
-        #	#Calculate the CGCs for each one of the pairs
-        #	FinalTerm = []
-        #	FinalSinglet = []
-        #	for pp in Pairs :
-        #		#Get te quantum numbers per group
-        #		#The switch allows to skip the norm determination in ExpandPotential
-        #		ExpandedTerm = self.ExpandPotential([[self.Particles[ipp] for ipp in pp]],2,'',True)
-        #		FullSinglet = {}
-        #		TempFinalTerm = {}
-        #		for ill,ll in enumerate(ExpandedTerm) :
-        #			ContractedParticles = {}
-        #			FullSinglet[ill] = False
-        #			for subll in ll :
-        #				Factor = []
-        #				for g in self.NonUGaugeGroups:
-        #					Qnbs = self.Scalars[pp[0]],self.Scalars[pp[1]]
-        #					self.GetContractedParticles(ContractedParticles,g[0],g[1],Qnbs)
-        #					#Get the contraction factor
-        #					if ContractedParticles[g[0]] != [] :
-        #						Factor.append(GetContractionFactor(ContractedParticles,[g[0],g[1]]))
-        #					else :
-        #						Factor.append((0,))#in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
-        #				if not(all([cc == (0,) for cc in Factor])) :
-        #					#For each group plug the indices in the CGCs
-        #					#The fact that the indices have been generated according to the ordering of self.NonUGaugeGroups and that it s the same for the Factor we know that the indices are in the same order
-        #					#TODO I AM HERE
-        #					indicesff = [0]*len(Factor)
-        #					propindices = [0]*len(Factor)
-        #					for idd,fac in enumerate(Factor) :
-        #						if fac != (0,) :
-        #							#replace i j is cosmetic
-        #							#NOTE the str in line 342 is a fix because in version 0.7.3 of sympy the method indices returns symbols
-        #							indicesff[idd] = tuple([str(part.indices[idd]).replace('j','i') for part in subll[0] if part.indices[idd] != 0])
-        #							propindices[idd] = [[part.indices[idd],getdimIrrep(self.Particles[str(part.args[0])].Qnb[self.NonUGaugeGroups[idd][0]],self.NonUGaugeGroups[idd][1])] for part in subll[0] if part.indices[idd] != 0]
-        #							Factor[idd] = FF(indicesff[idd],fac)
-        #						else :
-        #							#particles are not charged under this group
-        #							Factor[idd] = 1
-        #					#Get rid of the zero in propindices and indicesff if there any
-        #					indicesff = [xx2 for xx2 in indicesff if xx2 != 0]
-        #					propindices = [xx2 for xx2 in propindices if xx2 != 0]
-        #					Factor = evaluate_deltas((functools.reduce(operator.mul,Factor,1)*subll[1]).expand())
-        #					tempkey = subll[0]
-        #					TempFinalTerm[tempkey] = [subll[0],propindices,Factor]
-        #				else : #Full singlet
-        #					tempkey = subll[0]
-        #					TempFinalTerm[tempkey] = [subll[0],[],subll[1]]
-        #					FullSinglet[ill] = True
-        #		FullSingletcheck = all([lement == FullSinglet.values()[0] for lement in FullSinglet.values()[1:]])
-        #		if not(FullSinglet):
-        #			loggingCritical("Error, value for `FullSingletcheck` inconsistent, contact the author.")
-        #			exit()
-        #		FinalTerm.append(TempFinalTerm.values())
-        #		#Sanity check the FullSinglet values should all be the same either True or False
-        #		FinalSinglet.append(FullSinglet.values()[0])
-        #	#Oki for each one of the terms in FinalTerm we have to find a non zero combination of indices and calculate for it
-        #	FinalTerm = sum(FinalTerm,[])
-        #	Return = []
-        #	for ielem, elem in enumerate(FinalTerm) :
-        #		#dummy def for the re-use of existing functions
-        #		counter = 0
-        #		Factor = elem[-1]
-        #		STOP = False
-        #		if Factor != [] and not(FinalSinglet[ielem]):
-        #			#For each contraction we generate an iterator for the possible contraction
-        #			CombInd = itr.product(*[itr.product(*[range(1,x[1]+1) for idx,x in enumerate(element)]) for ielem,element in enumerate(elem[1])])
-        #			tempF,STOP,counter = self.GetCombInd(CombInd,STOP,elem,counter)
-        #			if tempF == [] :
-        #				LHfactor,outparticles = 0,[]
-        #			else :
-        #				LHfactor,outparticles = self.ConstructReturn(elem[0],tempF,elem,[],[])
-        #		elif Factor == [] or FullSinglet:
-        #			#full singlet
-        #			counter = 0
-        #			LHfactor = elem[-1]
-        #			outparticles = [[Symbol(str(ell.args[0]))] + len(self.NonUGaugeGroups)*[0]  for ell in elem[0]]
-        #			#fill out the dictionary
-        #		Return.append((elem[0], LHfactor,outparticles))
-        #	return Return
