@@ -26,3 +26,6 @@ Source/GroupTheory/combine-database.py
 *.swp
 #logfiles
 logFile*.log
+.idea
+.ipynb_checkpoints
+Source/GroupTheory/CGCs-su2-8.pickle
