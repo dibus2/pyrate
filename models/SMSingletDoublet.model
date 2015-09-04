@@ -55,7 +55,7 @@ ScalarMasses: {
  '\mu_1' : {Fields : [H*,H], Norm : 1},
  },
 FermionMasses:{
- '\mD': {Fields: [D,Dc], Norm: 1},
- '\mS': {Fields: [S,S], Norm: 1/2}
+ 'mD': {Fields: [D,Dc], Norm: 1},
+ 'mS': {Fields: [S,S], Norm: 1/2}
 }
 }

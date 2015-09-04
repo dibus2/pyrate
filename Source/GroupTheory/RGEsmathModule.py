@@ -1,231 +1,251 @@
 #!/usr/bin/env python 
 """We define mathematical functions and tools used for the different calculations."""
 from GroupDefinitions import *
+
+
 def Epsilon(lis):
-	"""wrapper for the Eijk function of sympy in order to have it work with a list of arg of arbitrary length"""
-	#contruct the string of indices
-	lst = ["'{}'".format(l) for l in lis]
-	#Construct a string of the code to execute
-	st = "Eijk("+','.join(lst)+")"
-	return eval(st)
+    """wrapper for the Eijk function of sympy in order to have it work with a list of arg of arbitrary length"""
+    # contruct the string of indices
+    lst = ["'{}'".format(l) for l in lis]
+    # Construct a string of the code to execute
+    st = "Eijk(" + ','.join(lst) + ")"
+    return eval(st)
 
 
 def derivnuc(xpr, field):
-	"""does the derivation of a single field"""
-	#get the indices and the name of the field by which we take the derivative
-	nm,ind = field.args[0],field.args[1:]
-	#we have to go through the term and find each term with the same field and for each of them take the derivative
-	xprargs = list(xpr.args)#In order to be able to modify it
-	Derivated = []
-	for xx in xprargs : 
-		if type(xx) == Indexed and xx.args[0]==field.args[0] :
-			assert len(field.args) == len(xx.args)
-			lcxprargs = copy.deepcopy(xprargs)
-			temp = [elem for elem in lcxprargs if elem != xx ]
-			Kr = [KroneckerDelta(ii,xx.indices[idi]) for idi,ii in enumerate(field.indices) if ii != 0 and xx.indices[idi] != 0 ]
-			temp = temp + Kr
-			Derivated.append(functools.reduce(operator.mul,temp,1))
-	return sum(Derivated)
+    """does the derivation of a single field"""
+    # get the indices and the name of the field by which we take the derivative
+    nm, ind = field.args[0], field.args[1:]
+    # we have to go through the term and find each term with the same field and for each of them take the derivative
+    xprargs = list(xpr.args)  # In order to be able to modify it
+    Derivated = []
+    for xx in xprargs:
+        if type(xx) == Indexed and xx.args[0] == field.args[0]:
+            assert len(field.args) == len(xx.args)
+            lcxprargs = copy.deepcopy(xprargs)
+            temp = [elem for elem in lcxprargs if elem != xx]
+            Kr = [KroneckerDelta(ii, xx.indices[idi]) for idi, ii in enumerate(field.indices) if
+                  ii != 0 and xx.indices[idi] != 0]
+            temp = temp + Kr
+            Derivated.append(functools.reduce(operator.mul, temp, 1))
+    return sum(Derivated)
 
-def derivTensor(xpr,fields):
-	""" This is a function that derives an expression containing tensors with indices"""
-	if type(xpr) == Add :
-		lxpr = xpr.args
-	else :
-		lxpr = (xpr,)
-	if type(fields) == Indexed :
-		fields = [fields]
-	Final = []#Will be summed
-	for eltoderive in lxpr : 
-		#Create a Buffer of terms and derive until it is empty
-		#The derivation is recursive
-		Derived = [eltoderive]
-		for ff in fields :
-			#This returns a sum of terms all of which have to be derive in turn
-			Derived = flatten(Derived)
-			TermToDerive = copy.deepcopy(Derived)
-			Derived = []
-			while TermToDerive != [] :
-				toderive = TermToDerive[0]
-				TermToDerive = TermToDerive[1:]
-				if toderive != 0 :
-					res = derivnuc(toderive,ff)
-					if type(res) == Add :
-						Derived.append(list(res.args))
-					else :
-						Derived.append([res])
-		Final.append(Derived)
-	Final = sum(flatten(Final))
-	if Final == 0 : 
-		return Integer(0)
-	else :
-		return Final
 
-def ispermutation(llist,perm):
-	lclist = [lll for lll in llist]
-	for ll in perm :
-		if ll in lclist :
-			lclist.remove(ll)
-		else :
-			return False
-	if lclist == [] :
-		return True
+def derivTensor(xpr, fields):
+    """ This is a function that derives an expression containing tensors with indices"""
+    if type(xpr) == Add:
+        lxpr = xpr.args
+    else:
+        lxpr = (xpr,)
+    if type(fields) == Indexed:
+        fields = [fields]
+    Final = []  # Will be summed
+    for eltoderive in lxpr:
+        # Create a Buffer of terms and derive until it is empty
+        # The derivation is recursive
+        Derived = [eltoderive]
+        for ff in fields:
+            # This returns a sum of terms all of which have to be derive in turn
+            Derived = flatten(Derived)
+            TermToDerive = copy.deepcopy(Derived)
+            Derived = []
+            while TermToDerive != []:
+                toderive = TermToDerive[0]
+                TermToDerive = TermToDerive[1:]
+                if toderive != 0:
+                    res = derivnuc(toderive, ff)
+                    if type(res) == Add:
+                        Derived.append(list(res.args))
+                    else:
+                        Derived.append([res])
+        Final.append(Derived)
+    Final = sum(flatten(Final))
+    if Final == 0:
+        return Integer(0)
+    else:
+        return Final
+
+
+def ispermutation(llist, perm):
+    lclist = [lll for lll in llist]
+    for ll in perm:
+        if ll in lclist:
+            lclist.remove(ll)
+        else:
+            return False
+    if lclist == []:
+        return True
+
 
 def removeperms(llist):
-	lclist = [lll for lll in llist]
-	for elem in lclist :
-		#get all the permutations of the term
-		perms = [el for el in lclist if ispermutation([xx.args[0] for xx in elem],[xx.args[0] for xx in el])]
-		for pp in perms[1:]: 
-			lclist.remove(pp)
-	return lclist
+    lclist = [lll for lll in llist]
+    for elem in lclist:
+        # get all the permutations of the term
+        perms = [el for el in lclist if ispermutation([xx.args[0] for xx in elem], [xx.args[0] for xx in el])]
+        for pp in perms[1:]:
+            lclist.remove(pp)
+    return lclist
 
 
 class MatM(Function):
+    is_commutative = False
 
-	is_commutative = False
-	def __init__(self,arg,*args):
-		Function.__init__(self)
-		if type(arg[0]) != MatM and type(arg[1]) != MatM : 
-			self.arg = arg
-			self.indices = args
-		elif type(arg[0]) == MatM and type(arg[1]) != MatM :
-			self.arg = arg[0].arg+(arg[1],)
-			self.indices = args
-		elif type(arg[0]) != MatM and type(arg[1]) == MatM : 
-			self.arg = (arg[0],)+ arg[1].arg
-			self.indices = args
+    def __init__(self, arg, *args):
+        Function.__init__(self)
+        if type(arg[0]) != MatM and type(arg[1]) != MatM:
+            self.arg = arg
+            self.indices = args
+        elif type(arg[0]) == MatM and type(arg[1]) != MatM:
+            self.arg = arg[0].arg + (arg[1],)
+            self.indices = args
+        elif type(arg[0]) != MatM and type(arg[1]) == MatM:
+            self.arg = (arg[0],) + arg[1].arg
+            self.indices = args
 
-	def update(self):
-		return MatM(self.arg,*self.indices)
+    def update(self):
+        return MatM(self.arg, *self.indices)
 
-	def transpose(self):
-		self.arg = self.arg[::-1]
-		self.arg = tuple([el.transpose() for el in self.arg])
-		return MatM(self.arg,*self.indices)
+    def transpose(self):
+        self.arg = self.arg[::-1]
+        self.arg = tuple([el.transpose() for el in self.arg])
+        return MatM(self.arg, *self.indices)
 
-class SP(Function) :
-	narg = 2
-	is_commutative = True
-	def __init__(self,arg1,arg2):
-		Function.__init__(self)
-		if type(arg1) == MatM and type(arg2) == MatM : 
-			self.arg = MatM(arg1.arg),MatM(arg2.arg)
-		elif type(arg1) == MatM and type(arg2) != MatM : 
-			self.arg = MatM(arg1.arg),arg2
-		elif type(arg1) != MatM and type(arg2) == MatM :
-			self.arg = arg1,MatM(arg2.arg)
-		else :
-			self.arg = arg1,arg2
-		self.indices = ()
 
-	def update(self) :
-		return SP(*self.arg)
+class SP(Function):
+    narg = 2
+    is_commutative = True
 
-class trace(Function) :
-	def __init__(self,*args) : 
-		Function.__init__(self)
-		if len(args) == 1 and type(args[0]) == MatM : 
-			self.arg = args[0].arg
-		else :
-			self.arg = args
-		self.is_trace = True
-		self.indices = ()
-	is_commutative = True
-	
-	def update(self):
-		return trace(*self.arg)
-	def conjugate(self):
-		return trace(*[el.conjugate() for el in self.arg])
-	def adjoint(self):
-		return trace(*[el.adjoint() for el in self.arg][::-1])
-	def transpose(self):
-		return trace(*[el.transpose() for el in self.arg][::-1])
+    def __init__(self, arg1, arg2):
+        Function.__init__(self)
+        if type(arg1) == MatM and type(arg2) == MatM:
+            self.arg = MatM(arg1.arg), MatM(arg2.arg)
+        elif type(arg1) == MatM and type(arg2) != MatM:
+            self.arg = MatM(arg1.arg), arg2
+        elif type(arg1) != MatM and type(arg2) == MatM:
+            self.arg = arg1, MatM(arg2.arg)
+        else:
+            self.arg = arg1, arg2
+        self.indices = ()
 
-class Tr(Function) :
-	def __init__(self,arguments) : 
-		Function.__init__(self)
-		self.arg = arguments
-		self.is_trace = True
-		self.indices = ()
-	narg = 1
-	is_commutative = True
+    def update(self):
+        return SP(*self.arg)
 
-	def conjugate(self):
-		return Tr(self.arg.conjugate())
-	def adjoint(self):
-		return Tr(self.arg.adjoint())
-	def transpose(self):
-		return Tr(self.arg.transpose())
 
-#We redefine the adjoint so that it can deal with the classes of Yukawas
+class trace(Function):
+    def __init__(self, *args):
+        Function.__init__(self)
+        if len(args) == 1 and type(args[0]) == MatM:
+            self.arg = args[0].arg
+        else:
+            self.arg = args
+        self.is_trace = True
+        self.indices = ()
+
+    is_commutative = True
+
+    def update(self):
+        return trace(*self.arg)
+
+    def conjugate(self):
+        return trace(*[el.conjugate() for el in self.arg])
+
+    def adjoint(self):
+        return trace(*[el.adjoint() for el in self.arg][::-1])
+
+    def transpose(self):
+        return trace(*[el.transpose() for el in self.arg][::-1])
+
+
+class Tr(Function):
+    def __init__(self, arguments):
+        Function.__init__(self)
+        self.arg = arguments
+        self.is_trace = True
+        self.indices = ()
+
+    narg = 1
+    is_commutative = True
+
+    def conjugate(self):
+        return Tr(self.arg.conjugate())
+
+    def adjoint(self):
+        return Tr(self.arg.adjoint())
+
+    def transpose(self):
+        return Tr(self.arg.transpose())
+
+
+# We redefine the adjoint so that it can deal with the classes of Yukawas
 class adjoint(Function):
-	"""
+    """
 	Conjugate transpose or Hermite conjugation.
 	"""
-	
-	nargs = 1
-	
-	@classmethod
-	def eval(cls, arg):
-		obj = arg._eval_adjoint()
-		if obj is not None:
-			 return obj
-		obj = arg._eval_transpose()
-		if obj is not None:
-			return conjugate(obj)
-	
-	def _eval_adjoint(self):
-		if hasattr(self.args[0],'yuk'):
-			return self.args[0].switchindices()
-		else :
-			return self.args[0]
-	
-	def _eval_conjugate(self):
-		return transpose(self.args[0])
-	
-	def _eval_derivative(self, x):
-		return adjoint(Derivative(self.args[0], x, **{'evaluate': True}))
-	
-	def _eval_transpose(self):
-		return conjugate(self.args[0])
-	
-	def _latex(self, printer, exp=None, *args):
-		arg = printer._print(self.args[0])
-		tex = r'%s^{\dag}' % arg
-		if exp:
-			tex = r'\left(%s\right)^{%s}' % (tex, printer._print(exp))
-		return tex
-	
-	def _pretty(self, printer, *args):
-		from sympy.printing.pretty.stringpict import prettyForm
-		pform = printer._print(self.args[0], *args)
-		if printer._use_unicode:
-			pform = pform**prettyForm(u'\u2020')
-		else :
-			pform = pform**prettyForm('+')
-		return pform
 
-	
+    nargs = 1
+
+    @classmethod
+    def eval(cls, arg):
+        obj = arg._eval_adjoint()
+        if obj is not None:
+            return obj
+        obj = arg._eval_transpose()
+        if obj is not None:
+            return conjugate(obj)
+
+    def _eval_adjoint(self):
+        if hasattr(self.args[0], 'yuk'):
+            return self.args[0].switchindices()
+        else:
+            return self.args[0]
+
+    def _eval_conjugate(self):
+        return transpose(self.args[0])
+
+    def _eval_derivative(self, x):
+        return adjoint(Derivative(self.args[0], x, **{'evaluate': True}))
+
+    def _eval_transpose(self):
+        return conjugate(self.args[0])
+
+    def _latex(self, printer, exp=None, *args):
+        arg = printer._print(self.args[0])
+        tex = r'%s^{\dag}' % arg
+        if exp:
+            tex = r'\left(%s\right)^{%s}' % (tex, printer._print(exp))
+        return tex
+
+    def _pretty(self, printer, *args):
+        from sympy.printing.pretty.stringpict import prettyForm
+        pform = printer._print(self.args[0], *args)
+        if printer._use_unicode:
+            pform = pform ** prettyForm(u'\u2020')
+        else:
+            pform = pform ** prettyForm('+')
+        return pform
+
+
 ########################################################################################################
-#Other functions 
+# Other functions
 ########################################################################################################
 
 def summatrix(llist):
-	if llist != []:
-		out = llist[0] 
-		for ll in llist[1:]: 
-			out += ll
-		return out
-	else :
-		return Integer(0)
+    if llist != []:
+        out = llist[0]
+        for ll in llist[1:]:
+            out += ll
+        return out
+    else:
+        return Integer(0)
 
-def DynkinIndex(Mod, x, ScalarsOrFermions) : 
-	"""Calculates the Dynkin Index for a given group in a given model and for the Scalar or Fermions representation."""
-	out = sum([x[1].S2(val.Qnb[x[0]])*multiplicity(x,part,val,Mod) 
-			for part,val in Mod.__getattribute__('{}'.format(ScalarsOrFermions)).items()
-			if val.Qnb[x[0]] != x[1].Dynksinglet])
-	return out
+
+def DynkinIndex(Mod, x, ScalarsOrFermions):
+    """Calculates the Dynkin Index for a given group in a given model and for the Scalar or Fermions representation."""
+    out = sum([x[1].S2(val.Qnb[x[0]]) * multiplicity(x, part, val, Mod)
+               for part, val in Mod.__getattribute__('{}'.format(ScalarsOrFermions)).items()
+               if val.Qnb[x[0]] != x[1].Dynksinglet])
+    return out
+
 
 def DynkinCasimir(Mod, x, ScalarsOrFermions):
 	"""Calculates the Dynkin times the Casimir for a given group in a given model and for either the scalar or Fermions representation."""
@@ -613,5 +633,6 @@ def analyseterm(term,structure,model) :
 	else :
 		loggingCritical("Error this is not implemented, contact the authors",verbose=True)
 		exit()
+
 
 

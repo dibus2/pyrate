@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python 
 try:
     import yaml
     import sys
@@ -79,6 +79,8 @@ parser.add_argument('--FermionAnomalous', '-fa', dest='FermionAnomalous', action
                     help='set the calculation of fermion anomalous dimensions to True')
 parser.add_argument('--SetGutNorm', '-gutn', dest='SetGutNorm', action='store_true', default=False,
                     help='set the normalization to gut normalization in case there is a U(1) gauge group, it normalizes g1 -> sqrt(3/5)*g\'')
+parser.add_argument('--KinMix', '-kin', dest='KinMix', action='store_false', default=True,
+                    help='Include the kinetic mixing terms if multiple U(1) gauge groups are present')
 
 # Collect the arguments
 args = parser.parse_args()
@@ -281,8 +283,8 @@ else:
                     else:
                         # It is a regular dictionary we have to check that the norm is understood correctly i.e.
                         # 1) Only one number and Fields is a simple list ->Ok
-                        #       2) Only one number and Fields is a list of lsit -> all the same norm
-                        #       3) List of numbers and Fields is a list of list -> Ok
+                        # 2) Only one number and Fields is a list of lsit -> all the same norm
+                        # 3) List of numbers and Fields is a list of list -> Ok
                         if 'Norm' in ll1:
                             if type(ll1['Fields'][0]) == list and (
                                             type(ll1['Norm']) == str or type(ll1['Norm']) == int):
@@ -367,8 +369,11 @@ else:
                 loggingCritical("Error, the Qnb entry must be a dictionary", versbose=RunSettings['vCritical'])
                 exit()
         loggingInfo("Translating the quantum numbers into Rational of Sympy... done", verbose=RunSettings['vDebug'])
-    model = Model(yamlSettings)
+
+    # Kin mixing
+    yamlSettings['KinMix']=RunSettings['KinMix']
     # Create the instance Model
+    model = Model(yamlSettings)
     loggingCritical(
         "Creating the instance of the Model: {}, {}, by {}...done".format(yamlSettings['Name'], yamlSettings['Date'],
                                                                           yamlSettings['Author']),
@@ -464,7 +469,7 @@ else:
             strListLagrangian += '\n\t\t\t\t' + str(el)
         loggingInfo("\t\t... with option --All-Contributions including{} ".format(strListLagrangian),
                     verbose=RunSettings['vInfo'])
-        ToCalculate = ['Gauge-Couplings'] + [Translation[el] for el in ListLagrangian]
+        ToCalculate = ['Gauge-Couplings'] + [Translation[el] for el in ListLagrangian] + ['ScalarAnomalous'] + ['FermionAnomalous']
     else:
         if RunSettings['Gauge-Couplings']:
             ToCalculate.append('Gauge-Couplings')
@@ -484,6 +489,25 @@ else:
         if RunSettings['Trilinear']:
             ToCalculate.append('Trilinear')
             loggingInfo("\t\t... with option --Trilinear", verbose=RunSettings['vInfo'])
+        if RunSettings['ScalarAnomalous']:
+            if model.ScalarAnomalousToCalculate == {}:
+                loggingCritical(
+                    "\t\t**WARNING**, No Scalar Anomalous dimension found to calculate. Each anomalous is associated to a scalar mass term, make sure that the corresponding scalar mass terms are defined in the potential.",
+                    verbose=True)
+            else:
+                ToCalculate.append('ScalarAnomalous')
+                loggingInfo("\t\t... with option --ScalarAno", verbose=RunSettings['vInfo'])
+        if RunSettings['FermionAnomalous']:
+            if model.FermionAnomalousToCalculate == {}:
+                loggingCritical(
+                    "\t\t**WARNING**, No Fermion Anomalous dimension found to calculate. Each anomalous is associated to a fermion mass term, make sure that the corresponding fermion mass terms are defined in the potential.",
+                    verbose=True)
+                ToCalculate.append('FermionAnomalous')
+            else:
+                ToCalculate.append('FermionAnomalous')
+                loggingInfo("\t\t... with option --FermionAno", verbose=RunSettings['vInfo'])
+
+
     # To store the Final Result
     FinalRGEdic = {}
     FinalRGE = []
@@ -534,7 +558,10 @@ else:
     for rge in FinalRGE:
         tp = {}
         for key, val in rge.items():
-            tp[key] = val.subs(Subs)
+            if key == 'abelian':
+                tp[key] = [el.subs(Subs) for el in val]
+            else:
+                tp[key] = val.subs(Subs)
         RGEs.append(copy.deepcopy(tp))
 
     # Importing the requesting modules
@@ -546,16 +573,18 @@ else:
     # LateX output
     #############
 
+    # protect the export with try statement so that if it crashes it can continue
+    
     try:
         if RunSettings['LatexOutput']:
             loggingInfo("\nWriting a latex file `{}` .".format(RunSettings['Results'] + '/' + RunSettings['LatexFile']),
                         verbose=RunSettings['vInfo'])
             # Call the writeLateX function
             writeLatexOutput(RunSettings, FinalRGE, model, ToCalculate)
-
     except:
         loggingCritical('"\nError in the LateX export, skipping. Contact the authors', verbose=True)
         pass
+
     ###################
     # Mathematica Output
     ###################
@@ -582,6 +611,7 @@ else:
         loggingCritical('"\nError in the Mathematica export, skipping. Contact the authors', verbose=True)
         pass
 
+
     ##############
     # Pickle Output
     ##############
@@ -594,6 +624,11 @@ else:
                                 verbose=RunSettings['vCritical'])
             try:
                 # create a string of the result
+                if 'abelian' in RGEs[0]:
+                    for iel, el in enumerate(flatten(model.UsectorMatrix)):
+                        RGEs[0][str(el)] = RGEs[0]['abelian'][iel]
+                    del (RGEs[0]['abelian'])
+
                 strres = [str(el).replace('Dagger', 'adjoint') for el in RGEs]
                 strsettings = ([str(el) for el in model.ListYukawa],
                                [str(el) for el in model.ListFM],

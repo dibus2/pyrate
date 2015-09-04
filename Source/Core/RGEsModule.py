@@ -1,16 +1,15 @@
-#!/usr/bin/env python 
-import re as regular #avoid the double definition of real part of sympy 
-from RGEsDefinition import *
-from ModelsClass import	Model,loggingInfo,loggingDebug,loggingCritical
-from RGEsmathModule import SimplifyTraces
-from Yukawas import *
-from QuarticCouplings import *
-from GaugeCouplings import *
-from ScalarMass import *
-from FermionMass import *
-from Trilinear import *
+#!/usr/bin/env python
+
+from ModelsClass import loggingInfo, loggingCritical
+from Yukawaskin import *
+from QuarticCouplingskin import *
+from GaugeCouplingskin import *
+from FermionMasskin import *
+from ScalarMasskin import *
+from Trilinearkin import *
 from ScalarAnomalous import *
 from FermionAnomalous import *
+
 
 def Translate(RGE, model, RunSettings):
 	"""Do the translation for a given RGE in a general g group into a product of semi simple groups."""
@@ -325,3 +324,4 @@ def Translate(RGE, model, RunSettings):
 				Translated[sc] = CompileFermionAnomalous(Translated,sc,comb,model,RunSettings['Weyl'],RunSettings['SetGutNorm'])
 				loggingInfo("\t\t\tCompiling the results for the Fermion anomalous dimension terms",verbose = RunSettings['vInfo'])
 	return Translated
+

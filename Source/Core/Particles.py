@@ -3,6 +3,7 @@ from sympy import Symbol,Rational,I,sqrt
 import sys
 sys.path.append('./GroupTheory')
 from Contraction import GetDynkinLabel,getdimIrrep
+from numpy import matrix as npa
 import copy
 class particle(object):
 
@@ -12,6 +13,10 @@ class particle(object):
 		else :
 			self._name = name
 		self.Qnb = self.getQnb(dic['Qnb'],Groups)
+		self.mapQ = {}
+		self.Q = self.buildupQ(Groups)
+		self.W = 0
+		self.lnQ = len(self.Q)
 		self.Gen = self.getGen(dic)
 		self.Cplx = False
 		self.FromCplx = FromCplx
@@ -26,6 +31,18 @@ class particle(object):
 			return Symbol(dic['Gen'])
 		except : 
 			return int(dic['Gen'])
+
+	def buildupQ(self,Groups):
+		"""Construct the W vector of charges under the U1 sector treated as a whole. New in version 2 """
+		out = []
+		ic = 0
+		for gg,val,U in Groups : 
+			if U : 
+				out.append(self.Qnb[gg])
+				self.mapQ[gg] = ic
+				ic+=1
+		return npa(out).transpose()
+
 	
 	def getQnb(self,dic,Groups) : 
 		"""Get the Qnbs of the particle from the dic. The only thing to do is to transform the DimR notation into DynkinLabels"""
@@ -40,9 +57,6 @@ class particle(object):
 				assert [el[2] for el in Groups if el[0] == key][0] #check that the group is U1 factor indeed
 			elif not([el[2] for el in Groups if el[0] == key][0]):
 				dic[key] = GetDynkinLabel([el[1]._absname for el in Groups if el[0] == key][0],val)
-		#add the dummy charge
-		if Groups[-1][0] == 'SUndum':
-			dic[Groups[-1][0]] = Groups[-1][1].Dynksinglet
 		return dic
 
 	def get_RangeIndices(self,Groups):

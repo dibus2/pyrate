@@ -1,10 +1,11 @@
 #!/usr/bin/env python 
 from RGEsDefinition import *
-from ModelsClass import	Model,loggingInfo,loggingDebug,loggingCritical
-from RGEsmathModule import DynkinIndex,DynkinCasimir,multiplicity,SimplifyTraces,DeterminOrdering,Tr
+from ModelsClass import Model, loggingInfo, loggingDebug, loggingCritical
+from RGEsmathModule import DynkinIndex, DynkinCasimir, multiplicity, SimplifyTraces, DeterminOrdering, Tr
+
 
 ###########################
-#Fermion Anomalous dimension
+# Fermion Anomalous dimension
 ###########################
 
 
@@ -104,11 +105,4 @@ def CFermionAnoIIg4(powe,comb,model):
         res = res.doit()
     powe[0] = powe[0].subs(FermionAnoIIg4,res)
     return powe[0]
-
-
-
-
-
-
-
 

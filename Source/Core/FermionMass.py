@@ -139,7 +139,7 @@ def CYukGaugeFermionMassIIg2(powe, comb, model):
                )
         + 5 * kappa * (model.Expand2(((_G, gg1), (_Y, s1, f1, f2), (_C, gg1, p1),
                                       ([[(_mf, p1, p2), (_Ya, s1, p2, p1)], [(_Y, s1, p1, p2), (_mfa, p2, p1)]])))
-					   # Line 13
+                       # Line 13
                        )
         + 6 * model.Expand(((_G, gg1), (_Cs, gg1, s1), (_Y, s1, f1, p1), (_mfa, p1, p2), (_Y, s1, p2, f2)),
                            dotrace=False)  # Line 14

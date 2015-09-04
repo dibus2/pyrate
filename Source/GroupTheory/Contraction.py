@@ -51,18 +51,17 @@ except ImportError:
         exit()
 localdir = os.path.realpath(os.path.dirname(__file__))
 loggingInfo('Loading the database...', verbose=True)
-fdb = open(localdir + '/CGCs-1.2.0-sparse.pickle', 'r')
 # fdb = open(localdir + '/CGCs-su2-8.pickle', 'r')
+fdb = open(localdir + '/CGCs-1.2.0-sparse.pickle', 'r')
 db = pickle.load(fdb)
 fdb.close()
-loggingInfo('\t\t...done', verbose=True)
 
 
 def GetContractionFactor(dic, Group, CGCs=0):
     """Seeks the contraction Factor for the contracted particles in dic under the name group.
 			Works with any number of fields, at least 2,3,4.
-                       F.: Modified February 22 2015 in order to deal with multiple singlets. Actually, this function
-                       is called on only one place."""
+            F.: Modified February 22 2015 in order to deal with multiple singlets. Actually, this function
+            is called on only one place."""
     # Translate the Qnb into Dynkin labels if given by their dim
     key = []
     for part in dic[Group[0]]:

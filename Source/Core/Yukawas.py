@@ -1,9 +1,9 @@
 #!/usr/bin/env python 
-import functools,operator,copy
-import re as regular #avoid the double definition of real part of sympy 
+import functools, operator, copy
+import re as regular  # avoid the double definition of real part of sympy
 from RGEsDefinition import *
-from ModelsClass import	Model,loggingInfo,loggingDebug,loggingCritical
-from RGEsmathModule import DynkinIndex,Epsilon,DeterminOrdering
+from ModelsClass import Model, loggingInfo, loggingDebug, loggingCritical
+from RGEsmathModule import DynkinIndex, Epsilon, DeterminOrdering
 
 
 ###########################################################################################################
@@ -57,6 +57,7 @@ def CYukGauge(powe,comb,model):
 ########
 ##2Loops
 ########
+<<<<<<< HEAD
 def CYukII(powe,comb,model):
 	"""Calculates Eq 36 lines 1 to 6"""
 	sc,f1,f2 = comb
@@ -133,3 +134,4 @@ def CYukGaugeIIg4(powe,comb,model):
 			)
 	powe[0] = powe[0].subs(YukGaugeIIg4,res)
 	return powe[0]
+
