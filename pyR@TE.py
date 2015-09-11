@@ -371,9 +371,11 @@ else:
         loggingInfo("Translating the quantum numbers into Rational of Sympy... done", verbose=RunSettings['vDebug'])
 
     # Kin mixing
-    yamlSettings['KinMix']=RunSettings['KinMix']
+    yamlSettings['KinMix'] = RunSettings['KinMix']
     # Create the instance Model
     model = Model(yamlSettings)
+    if model.kinmixing:
+        loggingInfo("Kinetic Mixing switch on, calculating kinetic mixing.",verbose=RunSettings['vInfo'])
     loggingCritical(
         "Creating the instance of the Model: {}, {}, by {}...done".format(yamlSettings['Name'], yamlSettings['Date'],
                                                                           yamlSettings['Author']),
