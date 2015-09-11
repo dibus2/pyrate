@@ -3,25 +3,28 @@ import functools,operator,copy
 import re as regular #avoid the double definition of real part of sympy 
 from RGEsDefinition import *
 from ModelsClass import	Model,loggingInfo,loggingDebug,loggingCritical
-from RGEsmathModule import DynkinIndex,DynkinCasimir,DeterminOrdering
+from RGEsmathModule import DynkinIndex,DynkinCasimir,DeterminOrdering,summatrix,multiplicityKin,multiplicity
+
 ################################################################################
-#Gauge Couplings ransformation rules 
+#Gauge Couplings transformation rules including kinetic mixing
 ################################################################################
-#update global variables 
 
 #powe 3
 def CompileGaugeCouplings(model,Translated,x,Weyl,GutNorm): 
-	FinalBeta = sum([el[0] for el in Translated[x]]).expand()
+	if not(x=='abelian') :
+		FinalBeta = sum([el[0] for el in Translated[x]]).expand()
+	else :
+		FinalBeta = summatrix([el[0] for el in Translated[x]]).expand()
 	if Weyl :
 		FinalBeta = FinalBeta.subs(kappa,Rational(1,2))
 	else :
 		FinalBeta = FinalBeta.subs(kappa,1)
+	if not(model.kinmixing):#I don't know how to do the normalization with multiple U1
+		if GutNorm and model.GetGroupFromName[x].U :
+			FinalBeta = sqrt(Rational(5,3))*FinalBeta.subs(model.UGaugeGroups[0][1].g,sqrt(Rational(3,5))*model.UGaugeGroups[0][1].g)
+		elif GutNorm :
+			FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g,sqrt(Rational(3,5))*model.UGaugeGroups[0][1].g)
 	FinalBeta = DeterminOrdering(model,FinalBeta)
-	if GutNorm:
-            FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g,sqrt(Rational(3,5))*model.UGaugeGroups[0][1].g)
-            if x == model.UGaugeGroups[0][0] : 
-                #divide by the overal constant
-                FinalBeta = FinalBeta/sqrt(Rational(3,5))
 	return FinalBeta
 
 def set_globals(model):
@@ -29,8 +32,15 @@ def set_globals(model):
 	for key,val in model.glob.items():
 		globals()[key] = val 
 
+def abeliansector1loop(model):
+	"""returns the 1-Loop contribution for the abelian sector when kinetic mixing is in"""
+	out = [Rational(4,3)*kappa*model.UsectorMatrix*summatrix([pp.W*pp.W.transpose()*multiplicityKin(pp,model) for pp in model.Fermions.values()]),Rational(1,6)*model.UsectorMatrix*summatrix([pp.W*pp.W.transpose()*multiplicityKin(pp,model) for pp in model.Scalars.values()])]
+	return 1/(4*pi)**2*(out[0]+out[1]).expand()
+
 def ApplyEq106(powe, Mod,x) :
-	"""Apply the transformation rule defined by Eq. 106"""
+	"""Apply the transformation rule defined by Eq. 106
+	No modification for the kinetic mixing which means that they must be 
+	multiplied directly by G^3"""
 	assert powe[1] == 3
 	if not(x[1].U) : 
 		return powe[0].subs([(C2(G),x[1].C2('G'))]) if powe[1] == 3 else powe[0]
@@ -38,13 +48,29 @@ def ApplyEq106(powe, Mod,x) :
 		"There is no Casimir for the adjoint for the U1 group"
 		return powe[0].subs([(C2(G),0)]) if powe[1] == 3 else powe[0]
 
-def ApplyEq107(powe, Mod, x) :
+def ApplyEq107(powe, Model, x) :
 	"""Apply the transformation rule defined by Eq. 107"""
 	assert powe[1] == 3
-	out = powe[0].subs([(S2(F),DynkinIndex(Mod, x,'Fermions')),(S2(S),DynkinIndex(Mod, x,'Scalars'))])
+	out = powe[0].subs([(S2(F),DynkinIndex(Model, x,'Fermions')),(S2(S),DynkinIndex(Model, x,'Scalars'))])
 	return out
 
 #power 5
+def abeliansector2loop(model):
+	"""Returns the g^5 contribution for the abelian sector, Eq.(14) of 1308.1674"""
+	out = [model.UsectorMatrix*summatrix([pp.W*pp.W.transpose()*multiplicityKin(pp,model)*(
+			sum([g.g**2*g.C2(pp.Qnb[name])for name,g,t in model.NonUGaugeGroups])+ (pp.W.transpose()*pp.W)[0]) 
+			for pp in Vals])
+			for Vals in [model.Fermions.values(),model.Scalars.values()]]
+	#coefficient from Eq.(30)
+	if out[0] != 0 :
+		res = 1/(4*pi)**4*(4*kappa*out[0])
+	if out[1] != 0 :
+		res += 1/(4*pi)**4*(2*out[1])
+	outY4F = -1/(4*pi)**4*2*kappa*model.UsectorMatrix*model.Expand((('WW_T',p1),(_Y,s1,p1,p2),(_Ya,s1,p2,p1)))
+	if outY4F !=0:
+		res += outY4F 
+	return res 
+
 def ApplyEq108(powe, Mod, x) :
 	"""Apply the transformation rule defined by Eq. 108."""
 	assert powe[1] == 5
@@ -63,11 +89,22 @@ def ApplyEq109(powe, Mod, x) :
 	else :
 		return powe[0].subs([(C2(G)*S2(F),0),(C2(G)*S2(S),0)])
 
-def ApplyEq110(powe, Mod, x) :
+def ApplyEq110(powe, model, x) :
 	"""Apply the transformation rule defined by Eq. 110."""
 	assert powe[1] == 5
-	return powe[0].expand().subs([(x[1].g**5*C2(F)*S2(F),DynkinCasimir(Mod, x, 'Fermions')),(x[1].g**5*C2(S)*S2(S),DynkinCasimir(Mod, x, 'Scalars'))])
-
+	if model.kinmixing :
+		#if kinetic mixing apply Eq. 16 of FS
+		powe[0] =  powe[0].expand().subs([(x[1].g**5*C2(F)*S2(F),x[1].g**3*sum([
+			x[1].S2(pp.Qnb[x[0]])*multiplicity(x,'',pp,model)*(sum(
+				[g.g**2*g.C2(pp.Qnb[name])for name,g,t in model.NonUGaugeGroups])+(pp.W.transpose()*pp.W)[0])for pp in model.Fermions.values()])),
+			#and the scalars identical 
+			(x[1].g**5*C2(S)*S2(S),x[1].g**3*sum([
+				x[1].S2(pp.Qnb[x[0]])*multiplicity(x,'',pp,model)*(sum(
+				[g.g**2*g.C2(pp.Qnb[name])for name,g,t in model.NonUGaugeGroups])+(pp.W.transpose()*pp.W)[0])for pp in model.Scalars.values()]))])
+		return powe[0]
+	else :
+		powe[0] = powe[0].expand().subs([(x[1].g**5*C2(F)*S2(F),DynkinCasimir(model, x, 'Fermions')),(x[1].g**5*C2(S)*S2(S),DynkinCasimir(model, x, 'Scalars'))])
+	return powe[0]
 
 def Y4F(powe, model, x):
 	"""Calculates the yukawa term in the gauge coupling, i.e. Y4(F)."""
@@ -75,5 +112,6 @@ def Y4F(powe, model, x):
 	# Expand the product 1/d*C2(i)*Y(z,i,j)*Ydagger(z,j,i) z among higgs fields and i,j among fermions
 	res = Rational(1,x[1].d)*model.Expand(((_C,x[0],p1),(_Y,s1,p1,p2),(_Ya,s1,p2,p1)))
 	return powe[0].expand().subs(Y4(F),res)
+
 
 
