@@ -80,7 +80,7 @@ parser.add_argument('--FermionAnomalous', '-fa', dest='FermionAnomalous', action
 parser.add_argument('--SetGutNorm', '-gutn', dest='SetGutNorm', action='store_true', default=False,
                     help='set the normalization to gut normalization in case there is a U(1) gauge group, it normalizes g1 -> sqrt(3/5)*g\'')
 parser.add_argument('--KinMix', '-kin', dest='KinMix', action='store_false', default=True,
-                    help='Include the kinetic mixing terms if multiple U(1) gauge groups are present')
+                    help='Switch off the kinetic mixing terms if multiple U(1) gauge groups are present.')
 
 # Collect the arguments
 args = parser.parse_args()
