@@ -18,7 +18,7 @@ import pudb
 # <codecell>
 
 #open the file as a string do the replacement un put it back before loading it
-f = open('CGCssu28.m','r')
+f = open('CGCsnewsu4compute.m','r')
 dic = f.readlines()
 f.close()
 #
@@ -112,6 +112,7 @@ tp = {}
 #			db[group]['Quartic'][kk] = Quarticelem[ikk] 
 tp = {}
 tpbar = {}
+pudb.set_trace()
 if 'SU2' in db['DynkinToDim']:
     for key,val in db['DynkinToDim']['SU2'].items():
         tp[(key,)] = val
@@ -339,13 +340,13 @@ subprocess.call(["rm","CGCsnew.py"])
 
  #<codecell>
 
-f = open('CGCsnewsu2.pickle','w')
+f = open('CGCsnewsu4compute.pickle','w')
 pickle.dump(db,f)
 f.close()
 
 # <codecell>
 
-g = open('CGCsnewsu2.pickle','r')
+g = open('CGCsnewsu4compute.pickle','r')
 data = pickle.load(g)
 g.close()
 

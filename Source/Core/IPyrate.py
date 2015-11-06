@@ -13,6 +13,7 @@ try:
     import rlcompleter
     from sympy import symbols,Symbol,Rational,sqrt,IndexedBase,Matrix
     import pickle
+    import pudb
 except:
     exit("Error while loading one of the modules: `cmd, os, readline, rlcompleter, pickle`")
 
@@ -84,7 +85,7 @@ class Idbquerry(cmd.Cmd):
     last_output = ''
     a,b,c,d = map(IndexedBase,['a','b','c','d'])
 
-    intro = "=========================================================================================================\n\t\t Interactive PyR@TE: mode to querry the database.\n\t\t The database is built on Susyno v2. April 15th.\n\t\t IMPORTANT: All the results are therefore bounded by the implicit definitions of Susyno\n\t\t to which we refer the user for further information. \n\t\t Florian Lyonnet: flyonnet@smu.edu 2015\n=========================================================================================================\n"
+    intro = "=========================================================================================================\n\t\t Interactive PyR@TE: mode to querry the database.\n\t\t The database is built on Susyno v3.4. November 6th.\n\t\t IMPORTANT: All the results are therefore bounded by the implicit definitions of Susyno\n\t\t to which we refer the user for further information. \n\t\t Florian Lyonnet: flyonnet@smu.edu 2015\n=========================================================================================================\n"
 
     def cmdloop(self, intro=None):
         try :
@@ -93,7 +94,8 @@ class Idbquerry(cmd.Cmd):
             #load the database
             print("loading database of CGCs...")
             localdir = os.path.realpath(os.path.dirname(__file__))
-            fdb = open(localdir+'/../GroupTheory/CGCs-1.2.0-sparse.pickle','r')
+            fdb = open(localdir+'/../GroupTheory/CGCs-1.2.1-sparse.pickle','r')
+            #fdb = open(localdir+'/../GroupTheory/CGCslast-v34.pickle','r')
             self.db = pickle.load(fdb)
             fdb.close()
             self.extractinfo()
