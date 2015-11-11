@@ -1,4 +1,4 @@
-November 6th:
+November 11th:
 Modified the database to adopt Susyno v3.4. This means that some of the
 invariants have changed and one should check using the interactive mode -idb
 that they match the desired ones.
