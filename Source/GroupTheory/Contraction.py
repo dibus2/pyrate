@@ -10,7 +10,6 @@ try :
 	import copy
 	from itertools import permutations,combinations
 	import os
-        import pudb
 except ImportError :
 	loggingCritical("Error while loading modules")
 try :
@@ -45,8 +44,7 @@ localdir = os.path.realpath(os.path.dirname(__file__))
 #fdb = open(localdir+'/CGCs.pickle','r')
 loggingInfo('Loading the database...',verbose=True)
 #fdb = open(localdir+'/CGCs-1.2.0.pickle','r')
-#fdb = open(localdir+'/CGCs-1.2.0-sparse.pickle','r')
-fdb = open(localdir+'/CGCs-su2-8.pickle','r')
+fdb = open(localdir+'/CGCs-1.2.1-sparse.pickle','r')
 db = pickle.load(fdb)
 fdb.close()
 loggingInfo('\t\t...done',verbose=True)

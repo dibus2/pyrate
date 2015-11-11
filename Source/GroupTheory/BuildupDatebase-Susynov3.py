@@ -18,7 +18,8 @@ import pudb
 # <codecell>
 
 #open the file as a string do the replacement un put it back before loading it
-f = open('CGCssu28.m','r')
+f = open('CGCsnewsu2v34.m','r')
+#f = open('CGCsnewsu2compute.m','r')
 dic = f.readlines()
 f.close()
 #
@@ -79,7 +80,6 @@ f.close()
 
 from sympy import sqrt,Rational,I,Matrix
 from CGCsnew import db
-
 # <codecell>
 
 #Now we can play around with the databased and polish the resul
@@ -332,12 +332,32 @@ for group,val in db.items():
 		db[group]['HBAmat'] = copy.deepcopy(NewAHBmatrix[group])
 		db[group]['Struc'] = copy.deepcopy(structures[group])
 
-
+Groups = ['SU2','SU3','SU4','SU5','SU6']
+p,q = Wild('p'),Wild('q')
+for gg in Groups:
+    if gg in db:
+        for key,val in db[gg].items():
+            if key in ['Bilinear','Trilinear','Quartic']:
+                for ivs,invs in val.items():
+                    notlist = False 
+                    if type(invs[0]) == list:
+                        toloop = invs
+                    else :
+                        notlist = True
+                        toloop = [invs]
+                    for iv,inv in enumerate(toloop):
+                        if not(type(inv[0][-1]) == int):
+                            temp = inv[0][-1].match(sqrt(p)*q)
+                            if not(temp is None) : 
+                                if notlist:
+                                    db[gg][key][ivs] = [tuple(list(ell)[:-1]+[ell[-1]/(sqrt(temp[p])*temp[q])]) for ell in inv]
+                                else :
+                                    db[gg][key][ivs][iv] = [tuple(list(ell)[:-1]+[ell[-1]/(sqrt(temp[p])*temp[q])]) for ell in inv]
 
 
 subprocess.call(["rm","CGCsnew.py"])
 
- #<codecell>
+#<codecell>
 
 f = open('CGCsnewsu2.pickle','w')
 pickle.dump(db,f)
@@ -346,6 +366,7 @@ f.close()
 # <codecell>
 
 g = open('CGCsnewsu2.pickle','r')
+#g = open('CGCsnewsu2compute.pickle','r')
 data = pickle.load(g)
 g.close()
 

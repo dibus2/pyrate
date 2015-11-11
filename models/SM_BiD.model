@@ -42,7 +42,7 @@ Yukawas:{
  'Y_{l}': {Fields: [H,LL,LR], Norm: 1} 
  },
 QuarticTerms: {
- 'lambda_1' : {Fields : [H,H*,H,H*], Norm : 1/2}
+ 'lambda_1' : {Fields : [H,H*,H,H*], Norm : 1/2, CGCs: {SU2L: [1]}}
  },
 ScalarMasses: {
  '\mu_1' : {Fields : [H*,H], Norm : 1}
