@@ -1,5 +1,6 @@
 #!/usr/bin/env python 
 try:
+    import pudb
     import yaml
     import sys
     import argparse
@@ -14,7 +15,7 @@ except:
 welcomemessage = """\n\n\n\n\t\t==================================================================================\n
 \t\t\t\tPyR@TE version 2.0.0  released  ???\n
 \t\t\tF. Lyonnet, I. Schienbein,\n
-\t\t\t(version 1: F.Staub, A.Wingerter)
+\t\t\tand F.Staub, A.Wingerter (version 1)
 \t\t\tplease cite arxiv 1309.7030 and arxiv 16XX.XXX
 \t\t==================================================================================\n
 """
@@ -69,7 +70,7 @@ parser.add_argument('--Export', '-e', dest='Export', action='store_true', defaul
                     help='Set if a python function is created to evaluate the beta function')
 parser.add_argument('--Export-file', '-ef', dest='ExportFile', action='store', default='BetaFunction.py',
                     help='Set the name of the output python file')
-parser.add_argument('--Only', '-onl', dest='Only', action='store', default={},
+parser.add_argument('--Only', '-onl', dest='Only', action='store', default=[],
                     help='Set a dictionary of terms you want to calculate: "QuarticTerms,Yukawas,TrilearTerms,FermionMasses,ScalarMasses". E.g. "{\'QuarticTerms\': [\'\lambda_1\',\'\lambda_2\']}". Note that if passed in the command line the whole argument must be a string')
 parser.add_argument('--Skip', '-sk', dest='Skip', action='store', default='',
                     help='Set the different terms to neglect in the calculation. E.g. ["CAabcd","CL2abcd"]. The list of terms that can be neglected are listed in Source/Core/RGEsDefinition.py')
@@ -400,7 +401,8 @@ else:
              'ScalarAnomalous': model.ScalarAnomalousToCalculate,
              'FermionAnomalous': model.FermionAnomalousToCalculate
              }
-    if RunSettings['Only'] != {}:
+
+    if RunSettings['Only'] != []:
         if type(RunSettings['Only']) == str:
             try:
                 RunSettings['Only'] = eval(RunSettings['Only'])
@@ -408,25 +410,17 @@ else:
                 loggingInfo(
                     'WARNING: wrong format for the `Only` switch, take care of putting the `"` correctly, ignoring it',
                     verbose=True)
-                RunSettings['Only'] = {}
-        for keyonly, valonly in RunSettings['Only'].items():
-            if type(valonly) != list:
-                loggingCritical("Error, wrong format type for `{}` should be a list".format(valonly),
-                                verbose=RunSettings['vCritical'])
-                exit()
-            if keyonly in trans:
-                todelete = []
-                for xelem in trans[keyonly]:
-                    if not (xelem in valonly):
-                        todelete.append(xelem)
-                for xelem in todelete:
-                    trans[keyonly].__delitem__(xelem)
-                    loggingDebug("Removing {} from {} following `Only` settings".format(xelem, keyonly),
-                                 verbose=RunSettings['vDebug'])
-            else:
-                loggingInfo(
-                    "Warning wrong key value `{}` in `Only` settings. Allowed: `{}`".format(valonly, trans.keys()),
-                    verbose=True)
+                RunSettings['Only'] = []
+        todelete = []
+        for valonly in RunSettings['Only']:
+           for key,val in trans.items():
+               if valonly in val.keys():
+                   # we have identified which kind of coupling it is
+                   for vv in val.keys():
+                       if vv != valonly:
+                           trans[key].__delitem__(vv)
+                           loggingDebug("\tIgnoring `{}` from `{}` according to `Only` settings".format(vv,key),verbose=True)
+
 
     # Check which terms are in the Lagrangian and if the corresponding rges have been calculated
     Translation = {'Yukawas': 'Yukawas', 'QuarticTerms': 'Quartic-Couplings', 'ScalarMasses': 'ScalarMass',
@@ -437,7 +431,7 @@ else:
         Check = all(
             [True if RunSettings[Translation[el]] else False for el in ListLagrangian if model.Potential[el] != {}])
         Check = Check and RunSettings['Gauge-Couplings']
-        if not (Check) and (not (RunSettings['All-Contributions'])) or RunSettings['Only'] != {}:
+        if not (Check) and (not (RunSettings['All-Contributions'])) or RunSettings['Only'] != []:
             loggingCritical(
                 "\n**WARNING** : options --Export cannot be carried out because all the required terms have not been set to True or Only is being used.\n Please use the --All-Contributions switch or set all the terms to True.\n",
                 verbose=RunSettings['vCritical'])
