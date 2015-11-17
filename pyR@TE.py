@@ -13,7 +13,9 @@ except:
 
 welcomemessage = """\n\n\n\n\t\t==================================================================================\n
 \t\t\t\tPyR@TE version 2.0.0  released  ???\n
-\t\t\tF. Lyonnet, I. Schienbein, F.Staub, A.Wingerter, arxiv 1309.7030
+\t\t\tF. Lyonnet, I. Schienbein,\n
+\t\t\t(version 1: F.Staub, A.Wingerter)
+\t\t\tplease cite arxiv 1309.7030 and arxiv 16XX.XXX
 \t\t==================================================================================\n
 """
 print(welcomemessage)
@@ -74,11 +76,11 @@ parser.add_argument('--Skip', '-sk', dest='Skip', action='store', default='',
 parser.add_argument('--interactive-db', '-idb', dest='interactivedb', action='store_true', default=False,
                     help='Starts the interactive database mode. Allows one to check what are the CGCs implemented for a given contraction and more (Casimir, Dynkin,...)')
 parser.add_argument('--ScalarAnomalous', '-sa', dest='ScalarAnomalous', action='store_true', default=False,
-                    help='set the calculation of scalar anomalous dimensions to True')
+                    help='Set the calculation of scalar anomalous dimensions to True')
 parser.add_argument('--FermionAnomalous', '-fa', dest='FermionAnomalous', action='store_true', default=False,
-                    help='set the calculation of fermion anomalous dimensions to True')
+                    help='Set the calculation of fermion anomalous dimensions to True')
 parser.add_argument('--SetGutNorm', '-gutn', dest='SetGutNorm', action='store_true', default=False,
-                    help='set the normalization to gut normalization in case there is a U(1) gauge group, it normalizes g1 -> sqrt(3/5)*g\'')
+                    help='Set the normalization to gut normalization in case there is a U(1) gauge group, it normalizes g1 -> sqrt(3/5)*g\'')
 parser.add_argument('--KinMix', '-kin', dest='KinMix', action='store_false', default=True,
                     help='Switch off the kinetic mixing terms if multiple U(1) gauge groups are present.')
 
