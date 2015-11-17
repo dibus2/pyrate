@@ -1,7 +1,8 @@
-September 3th:
-Merging online and master
+November 11th:
 
-
+Modified the database to adopt Susyno v3.4. This means that some of the
+invariants have changed and one should check using the interactive mode -idb
+that they match the desired ones.
 
 August 20th:
 Corrected a bug in the naming of the output. No impact on the results.

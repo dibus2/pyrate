@@ -51,8 +51,6 @@ except ImportError:
         exit()
 localdir = os.path.realpath(os.path.dirname(__file__))
 loggingInfo('Loading the database...', verbose=True)
-# fdb = open(localdir + '/CGCs-su2-8.pickle', 'r')
-#fdb = open(localdir + '/CGCs-1.2.0-sparse.pickle', 'r')
 fdb = open(localdir + '/CGCsnew-1.2.1-sparse.pickle', 'r')
 db = pickle.load(fdb)
 fdb.close()
