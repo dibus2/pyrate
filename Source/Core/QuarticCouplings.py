@@ -3,6 +3,7 @@ import time
 
 from RGEsDefinition import *
 from RGEsmathModule import SimplifyTraces, DeterminOrdering
+import pudb
 
 
 ##################################################################################
@@ -325,7 +326,8 @@ def CY2Flabcd(powe, comb, model):
         reskin = [model.Expand((('Y2FabSkin', i, i), (_L, sc1, sc2, sc3, sc4)))
                   for i in [sc1, sc2, sc3, sc4]
                   ]
-    reskin = sum(reskin)
+        if reskin != []:
+            reskin = sum(reskin)
     if reskin != 0:
         reskin = reskin.doit()
     res += reskin
