@@ -1,3 +1,6 @@
+November 24 th:
+change numpy version checking to accomodate 10...
+
 November 11th:
 Modified the database to adopt Susyno v3.4. This means that some of the
 invariants have changed and one should check using the interactive mode -idb
