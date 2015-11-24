@@ -693,13 +693,13 @@ class Model(object):
                                             self.Combination[term][el].append((mixwith, res))
                                             break
                                         self.Combination[term][el].append((mixwith, res))
-                                if all(Valid) and Valid != []:
-                                    Found = True
-                                    STOP2 = True
-                                    LastRun = False
-                                    LHfactor, outparticles = self.ConstructReturn(el, tempF, Return[el][counter],
-                                                                                  Return, ReturnToCalc)
-                                    ReturnToCalc[el] = Return[el][counter][0], LHfactor, outparticles
+                                    if all(Valid) and Valid != []:
+                                        Found = True
+                                        STOP2 = True
+                                        LastRun = False
+                                        LHfactor, outparticles = self.ConstructReturn(el, tempF, Return[el][counter],
+                                                                                      Return, ReturnToCalc)
+                                        ReturnToCalc[el] = Return[el][counter][0], LHfactor, outparticles
                 except IOError:
                     exit("error while disentengling should not get there, contact the authors")
                     pass
