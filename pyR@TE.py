@@ -327,7 +327,10 @@ else:
                     if type(qnb) == list:  # given in terms of the Dynkin label translate it into tuple
                         yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = tuple(qnb)
                     else:
-                        yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = Rational(qnb)
+                        try:
+                            yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = Rational(qnb)
+                        except ValueError as err:
+                            yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = eval(qnb)
                     loggingInfo("Fermion {} with Qnb {} under {}".format(key, qnb, GaugeGroup))
             except ValueError as err:
                 loggingCritical(

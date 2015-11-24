@@ -31,8 +31,8 @@ RealScalars: {
 CplxScalars: {
   H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, U1BL: 0, SU2L: 2, SU3c: 1}},
   H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: -1/2,U1BL: 0, SU2L: -2, SU3c: 1}},
-  S*: {RealFields: [s1,-I*s2], Norm: 1/Sqrt(2), Qnb : {U1: 0, U1BL: 2, SU2L: 1, SU3c: 1}},
-  S: {RealFields: [s1,I*s2], Norm: 1/Sqrt(2), Qnb : {U1: 0, U1BL: -2, SU2L: 1, SU3c: 1}}
+  S*: {RealFields: [s1,-I*s2], Norm: 1/Sqrt(2), Qnb : {U1: 0, U1BL: -2, SU2L: 1, SU3c: 1}},
+  S: {RealFields: [s1,I*s2], Norm: 1/Sqrt(2), Qnb : {U1: 0, U1BL: 2, SU2L: 1, SU3c: 1}}
 }
 
 Potential: {
@@ -43,10 +43,10 @@ Potential: {
  
 Yukawas:{
   'Y_{u}': {Fields: [Qbar,uR,H*], Norm: 1},
-  'Y_{d}': {Fields: [Qbar,dR,H], Norm: 1},
-  'Y_{e}': {Fields: [Lbar,eR,H], Norm: 1},
-  'Y_{l}': {Fields: [Lbar,nuR,H*], Norm: 1},
-  'Y_{H}': {Fields: [nuR,nuR,S*], Norm: 1}
+  #'Y_{d}': {Fields: [Qbar,dR,H], Norm: 1},
+  #'Y_{e}': {Fields: [Lbar,eR,H], Norm: 1},
+  'Y_{nu}': {Fields: [Lbar,nuR,H*], Norm: 1},
+  'Y_{H}': {Fields: [nuR,nuR,S], Norm: 1}
  },
 QuarticTerms: {
  '\lambda_1' : {Fields : [H,H*,H,H*], Norm : 1, 'CGCs': {'SU2L': [1]}},
