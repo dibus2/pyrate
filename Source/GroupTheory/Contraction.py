@@ -16,7 +16,8 @@ try :
 	Version = False
 	import numpy as np
 	vers = np.__version__.split('.')
-	if int(vers[-2]) < 5 or (int(vers[-2]) == 5 and int(vers[-1]) < 1):
+        if int(vers[0]) < 1 or (int(vers[0]) >= 1 and int(vers[1]) >= 5):
+	#if int(vers[]) < 5 or (int(vers[-2]) == 5 and int(vers[-1]) < 1):
 		Version = True
 		raise ImportError
 except ImportError :
