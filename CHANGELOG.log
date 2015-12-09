@@ -1,3 +1,7 @@
+Decemeber 9th:
+bug Fixed in the Determin Order function when dealing with vector Yukawa. No
+impact on the results.
+
 November 24 th:
 change numpy version checking to accomodate 10...
 
