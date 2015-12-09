@@ -408,6 +408,8 @@ def DeterminOrdering(model,Final):
 										if len(Indices[-1]) >= 2 and Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
 											Indices[-1] = Indices[-1][0],Symbol(str(Indices[-1][1]).split('_')[0]+'1_f')
 										Term = model.Classes[str(Term[0])](*Indices[-1]).transpose()
+                                                                        elif len(Indices) == 1 and 'f' in str(Indices[0][0]):#F. This case was introduced on December 9th 2015 after bug report by Eliel.
+                                                                            Term = model.Classes[str(Term[0])](str(Indices[0][0]).split('_')[0])
 									else :
 										if Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
 											Indices[-1] = Indices[-1][0],Symbol(str(Indices[-1][1]).split('_')[0]+'1_f')
