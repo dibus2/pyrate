@@ -396,9 +396,9 @@ def DeterminOrdering(model,Final):
 						#breaking conditions for in and out terms
 						if len(Term) == 1 :
 							#Reconstruct the skip terms
-							skip = [model.Classes[str(el[0])](el[1]) if str(el[0]) in model.Classes and el[1] != () else 
+							skip = [model.Classes[str(el[0])](el[1]) if str(el[0]) in model.Classes and el[1] != () and len(el[1]) == 2 else (model.Classes[str(el[0])](el[1][0]) if str(el[0]) in model.Classes and el[1] != () and len(el[1]) == 1 else 
 									(Symbol(str(el[0].args[0]),commutative=True).conjugate() if type(el[0]) == conjugate and el[1] == () else (
-										Symbol(str(el[0]),commutative=True) if str(el[0]) in model.Classes and el[1] == () else el[0] )) for el in skip]
+										Symbol(str(el[0]),commutative=True) if str(el[0]) in model.Classes and el[1] == () else el[0] ))) for el in skip]
 							#In case Term is a Yukawa it is necessarily the last one of skip
 							if str(Term[0]) in model.Classes :
 								if (len(Indices) == 1 and Indices[0] == ()) or Indices == [] :
