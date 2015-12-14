@@ -120,7 +120,7 @@ def ToMathematicaNotation(vall, model, FlagSquare=True):
             ll.append(''.join(reg.split('\\\(.*)', ''.join(reg.split('{(.*)}', el)))))
         else:
             ll.append(el)
-    ll = [el.replace('_', '').replace('\\', '').replace('\\\\', '').replace(' ', '') for el in ll]
+    ll = [el.replace('_', '').replace('\\', '').replace('\\\\', '').replace('^','').replace(' ', '') for el in ll]
     Replace = [(el, ll[iel]) for iel, el in enumerate(symbs)]
     for rep in Replace:
         vall = vall.replace(*rep)

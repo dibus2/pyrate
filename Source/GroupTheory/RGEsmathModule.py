@@ -404,7 +404,6 @@ def DeterminOrdering(model,Final):
 								if (len(Indices) == 1 and Indices[0] == ()) or Indices == [] :
 									Term = Symbol(str(Term[0]),commutative=True)
 								elif Indices != [] :
-                                                                        pudb.set_trace()
 									if len(Indices) == 1 and skip != [] and type(skip[0]) == MatM:
 										if len(Indices[-1]) >= 2 and Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
 											Indices[-1] = Indices[-1][0],Symbol(str(Indices[-1][1]).split('_')[0]+'1_f')

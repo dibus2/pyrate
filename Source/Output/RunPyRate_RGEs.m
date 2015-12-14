@@ -26,6 +26,8 @@ pos=Position[DimensionParameter,x][[1,1]];
 Return[DimensionParameter[[pos]][[2]]];
 ];
 
+TransposeCheck[x_]:= If[Length[Dimension[x]]==1,x,Transpose[x]];
+TraceCheck[x_]:=If[Length[Dimension[x]]==1,x,Trace[x]];
 
 (* Translating parameters  so that they can be used with NDSolve *)
 (* g1 -> g1[t], ..., Yd -> {{Yd[1,1][t],0,0},{0,Yd[2,2][t],0},{0,0,Yd[3,3]}}, .. *)
@@ -56,8 +58,8 @@ AllParameters=DeleteCases[Flatten[AllParameters],0];
 
 
 (* Some rules to expand the matrix manipulations *)
-subExpandRGEs = {trace[a__]:>Tr[Dot[a]],ScalarProd->Dot, MatMul->Dot,Adj[x_]:>Transpose[Conjugate[x]],Tp[x_]:>Transpose[x], conj->Conjugate};
-
+subExpandRGEs = {trace[a__]:>TraceCheck[Dot[a]],ScalarProd->Dot, MatMul->Dot,Adj[x_]:>TransposeCheck[Conjugate[x]],Tp[x_]:>TransposeCheck[x], conj->Conjugate};
+subExpandRGEs2 = Dot->Times (*multiply any remaining vector product*)
 (* Preparing Equations*)
 AllEquations={};
 For[i=1,i<=Length[AllRGEs],
@@ -68,7 +70,7 @@ sub=Table[list[[j]]->ToExpression["i"<>ToString[j]],{j,1,Length[list]}];,
 sub={};
 ];
 (* temporary, modified version of the beta-function *)
-temp=Log[10] *(AllRGEs[[i,2]] /. subParameters//. subExpandRGEs //. sub );
+temp=Log[10] *((AllRGEs[[i,2]] /. subParameters//. subExpandRGEs //. sub )/.subExpandRGEs2);
 (*temp=Log[10] *(AllRGEs[[i,2]] /. subParameters//. subExpandRGEs //. sub /. pi -> 1. Pi);*)
 dim=getDimPar[AllRGEs[[i,1]] /. A_[b___]->A];
 (* check for the dimension of the parameter and add a beta-function for each entry *)
