@@ -236,7 +236,7 @@ def multiplicity(x,part,val,Mod) :
 			if Mod.GetGroupFromName[group].name != x[0]
 				and not(Mod.GetGroupFromName[group].U)]
 	Multiplicity = [el if el != 0 else 1 for el in Multiplicity]#when the dim is zero i.e. singlet the multiplicity should be one
-	out = val.Gen*functools.reduce(operator.mul,Multiplicity)
+	out = val.Gen*functools.reduce(operator.mul,Multiplicity,1)
 	return out
 
 def SimplifyTraces(expression,Mod) : 
