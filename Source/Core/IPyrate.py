@@ -249,13 +249,13 @@ class Idbquerry(cmd.Cmd):
         return self.complete_generic(text, line, begidx, endidx, 'DimToDynkin', dim=True)
 
     def do_AdjR(self, line):
-        return self.do_generic_onearg(line, 'Adj')
+        return self.do_generic_onearg(line, 'adjoint')
 
     def complete_AdjR(self, text, line, begidx, endidx):
         return self.complete_onearg(text, line, begidx, endidx, 'Adj')
 
     def do_FondR(self, line):
-        return self.do_generic_onearg(line, 'Fond')
+        return self.do_generic_onearg(line, 'fond')
 
     def complete_FondR(self, text, line, begidx, endidx):
         return self.complete_onearg(text, line, begidx, endidx, 'Fond')
@@ -304,10 +304,16 @@ class Idbquerry(cmd.Cmd):
             elif len(args) > 1:
                 raise IdbquerryWrongFormat(onlygauge=True)
             else:
-                if args[0] in self.db:
-                    print(list(self.db[args[0]][function]))
+                if not self.is_in_db([args[0], function]):
+                    try:
+                        lie = LieAlgebra(CartanMatrix("SU", int(args[0][-1])))
+                    except ValueError:
+                        exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
+                    res = eval('tuple(lie.{}.tolist()[0])'.format(function))
+                    self._add_to_db([args[0], function], res)
+                    print(res)
                 else:
-                    raise IdbquerryMissingArgument('gauge')
+                    print(list(self.db[args[0]][function]))
         except (IdbquerryWrongFormat, IdbquerryMissingArgument):
             pass
 
@@ -446,15 +452,22 @@ class Idbquerry(cmd.Cmd):
 
     def _add_to_db(self, attributes, res):
         # add a given result to the database this way
-        assert len(attributes) == 3
         self._tosave = True
-        if attributes[0] in self.db:
-            if attributes[1] in self.db[attributes[0]]:
-                self.db[attributes[0]][attributes[1]][attributes[2]] = res
+        if len(attributes) == 3:
+            if attributes[0] in self.db:
+                if attributes[1] in self.db[attributes[0]]:
+                    self.db[attributes[0]][attributes[1]][attributes[2]] = res
+                else:
+                    self.db[attributes[0]][attributes[1]] = {attributes[2]: res}
             else:
-                self.db[attributes[0]][attributes[1]] = {attributes[2]: res}
+                self.db[attributes[0]] = {attributes[1]: {attributes[2]: res}}
+        elif len(attributes) == 2:
+            if not attributes[0] in self.db:
+                self.db[attributes[0]] = {attributes[1]: res}
+            else:
+                self.db[attributes[0]][attributes[1]] = res
         else:
-            self.db[attributes[0]] = {attributes[1]: {attributes[2]: res}}
+            exit("Error in updating the db")
 
 
 
