@@ -10,6 +10,7 @@ try:
     import os
     from sys import exit
     import sys
+
     sys.path.insert(0, '/Applications/HEPtools/sympy-0.7.6')
     import readline
     import rlcompleter
@@ -17,6 +18,7 @@ try:
     import pickle
     import pudb
     import os
+
     sys.path.append('./../../../PyLie/git/')
     from PyLie import *
     import gzip
@@ -288,7 +290,7 @@ class Idbquerry(cmd.Cmd):
         return completions
 
     def do_Matrices(self, line):
-        mats = self.do_generic(line, 'Matrices', toreturn=True)
+        mats = self.do_generic(line, 'repMatrices', toreturn=True)
         print("Sparse matrices, showing non zero components:\n")
         print(mats)
         # print("{}".format("\n\n".join([str(Matrix(el)) for el in mats['mat']])))
@@ -368,15 +370,22 @@ class Idbquerry(cmd.Cmd):
                             except ValueError:
                                 exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
                             # call the proper method from PyLie
-                            res = eval('lie.{}({})'.format(function, irrep))
+                            res = eval('lie.{}({})'.format(function, list(irrep)))
+                            if function == 'repMatrices':
+                                res = self._build_sparse_matrices(res)
                             self._add_to_db([group, function, irrep], res)
                             if not toreturn:
-                                print(res)
+                                if not function == 'repMatrices':
+                                    print(res)
+                                else:
+                                    print(res[0])
                             else:
-                                return res
+                                if not function == 'repMatrices':
+                                    return res
+                                else:
+                                    return res[0]
                         else:
                             # PyLie does not have a good implementation of the DimToDynkin therefore we will put it in the db directly
-                            pudb.set_trace()
                             if function == 'DimToDynkin':
                                 try:
                                     lie = LieAlgebra(CartanMatrix("SU", int(group[-1])))
@@ -456,11 +465,23 @@ class Idbquerry(cmd.Cmd):
         if len(attributes) == 3:
             if attributes[0] in self.db:
                 if attributes[1] in self.db[attributes[0]]:
-                    self.db[attributes[0]][attributes[1]][attributes[2]] = res
+                    if attributes[1] == 'repMatrices':
+                        self.db[attributes[0]][attributes[1]][attributes[2]] = res[0]
+                        self.db[attributes[0]]['HBmat'][attributes[2]] = res[1]
+                    else:
+                        self.db[attributes[0]][attributes[1]][attributes[2]] = res
                 else:
-                    self.db[attributes[0]][attributes[1]] = {attributes[2]: res}
+                    if attributes[1] == 'repMatrices':
+                        self.db[attributes[0]][attributes[1]] = {attributes[2]: res[0]}
+                        self.db[attributes[0]]['HBmat'] = {attributes[2]: res[1]}
+                    else:
+                        self.db[attributes[0]][attributes[1]] = {attributes[2]: res}
             else:
-                self.db[attributes[0]] = {attributes[1]: {attributes[2]: res}}
+                if attributes[1] == 'repMatrices':
+                    self.db[attributes[0]] = {attributes[1]: {attributes[2]: res}}
+                    self.db[attributes[0]]['HBmat'] = {attributes[2]: res}
+                else:
+                    self.db[attributes[0]] = {attributes[1]: {attributes[2]: res}}
         elif len(attributes) == 2:
             if not attributes[0] in self.db:
                 self.db[attributes[0]] = {attributes[1]: res}
@@ -469,9 +490,48 @@ class Idbquerry(cmd.Cmd):
         else:
             exit("Error in updating the db")
 
+    def _build_sparse_matrices(self, res):
+        sparse = []
+        tp = {}
+        shp = res[0].shape
+        tp[(0, 0)] = {'mat': [], 'shape': shp}
+        tp[(0, 1)] = {'mat': [], 'shape': shp}
+        tp[(1, 0)] = {'mat': [], 'shape': shp}
+        tp[(1, 1)] = {'mat': [], 'shape': shp}
+        for mat in res:
+            # Construct the matrix
+            tp[(0, 0)]['mat'].append(Rational(1, 2) * (Matrix(mat) - Matrix(mat).conjugate()))
+            tp[(0, 1)]['mat'].append(Rational(1, 2) * I * (Matrix(mat) + Matrix(mat).conjugate()))
+            tp[(1, 0)]['mat'].append(-Rational(1, 2) * I * (Matrix(mat) + Matrix(mat).conjugate()))
+            tp[(1, 1)]['mat'].append(Rational(1, 2) * (Matrix(mat) - Matrix(mat).conjugate()))
 
+            for akey, aval in tp.items():
+                tp[akey]['mat'][-1] = tuple(aval['mat'][-1])
+        # reorganize the matrices we want in [(0,0)] all the matrices
+        tp[(0, 0)]['mat'], tp[(0, 1)]['mat'], tp[(1, 0)]['mat'], tp[(1, 1)]['mat'] = tuple(tp[(0, 0)]['mat']), tuple(
+            tp[(0, 1)]['mat']), tuple(tp[(1, 0)]['mat']), tuple(tp[(1, 1)]['mat'])
+        # Now let's transform them to sparse matrices
+        for struc, vstruc in tp.items():
+            AllMat = []
+            for matrix in vstruc['mat']:
+                tempMat = []
+                tpmatrix = np.array(matrix).reshape((vstruc['shape'][0], vstruc['shape'][1]))
+                for line in range(vstruc['shape'][0]):
+                    for col in range(vstruc['shape'][1]):
+                        if tpmatrix[line][col] != 0:
+                            tempMat.append((line, col, tpmatrix[line][col]))
+                AllMat.append(tuple(tempMat))
+            tp[struc] = cp.deepcopy(tuple(AllMat))
 
-
+        for matrix in res:
+            tempMat = []
+            for line in range(matrix.shape[0]):
+                for col in range(matrix.shape[1]):
+                    if matrix[line, col] != 0:
+                        tempMat.append((line, col, matrix[line, col]))
+            sparse.append(tuple(tempMat))
+        res = cp.deepcopy(tuple(sparse)), tp
+        return res
 
 
 if __name__ == '__main__':
