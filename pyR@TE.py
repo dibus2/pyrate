@@ -161,7 +161,6 @@ else:
 # Interrogate the database
 if 'interactivedb' in RunSettings and RunSettings['interactivedb']:
     from IPyrate import *
-
     Idbquerry().cmdloop()
     loggingInfo("\nExiting the interactive mode.", verbose=True)
     exit()
