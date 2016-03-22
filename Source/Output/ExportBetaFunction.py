@@ -21,8 +21,8 @@ def ExportBetaFunction(model, FinalExpr, settings, StrucYuk):
     date = "{}-{}-{}\t {}:{}:{}".format(date[0], date[1], date[2], date[3], date[4], date[5])
     CodeStr = '\"\"\"\nThis Code is generated automatically by pyR@TE, {} for the model : {}\n\"\"\"\n'.format(
         date, model._Name)
-    CodeStr += "from __future__ import division\nimport numpy as np\ndef beta_function_{}(t,y,Assumptions={{'two-loop': False,'diag': True}}):\n\t#The Assumption can be used to incorporate some switch in the calculation\n".format(
-        model._Name)
+    CodeStr += "from __future__ import division\nimport numpy as np\ndef beta_function_{}(t,y,Assumptions={{'two-loop':False,'diag': True}}):\n\t#The Assumption can be used to incorporate some switch in the calculation\n".format(
+        model._Name.replace('-',''))
     # We need an identity for each yukawa in principle because they could have different shape
     CodeStr += "\tkappa = 1./(16*np.pi**2)\n"
     # Simplify the keys of StrucYuk
@@ -46,6 +46,7 @@ def ExportBetaFunction(model, FinalExpr, settings, StrucYuk):
                                                                                                          '').replace(
                 '\\', '').replace('\\\\', '').replace(' ', '')
             # ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
+            ListSymbs[iel] = ''.join(reg.split('\\\(.*)', ''.join(reg.split('{|}|_', str(el))))).replace('_', '').replace('\\', '').replace('\\\\', '').replace('^','').replace(' ', '')
             maps[el] = ListSymbs[iel]
         else:
             maps[el] = el
@@ -181,7 +182,7 @@ def ExportBetaFunction(model, FinalExpr, settings, StrucYuk):
     CodeStr += "\n\n\n\n#rge = RGE(beta_function_{},{},labels={}).\n".format(model._Name, NbRGEs, TagsFull)
     # Check that there are no points and that it ends with a .py
     if settings['ExportFile'] == 'BetaFunction.py':
-        settings['ExportFile'] = 'BetaFunction{}.py'.format(model._Name)
+        settings['ExportFile'] = 'BetaFunction{}.py'.format(model._Name.replace('-',''))
     spltName = settings['ExportFile'].split('.')
     if len(spltName) > 2:
         Name = spltName[0]
@@ -210,7 +211,7 @@ def ExportBetaFunction(model, FinalExpr, settings, StrucYuk):
     CodeStrI += "#!/usr/bin/env python\nimport sys\n#This line should be modified if you move the result file\nsys.path.append('{}')\n#Same as above.The RGEsclass.py should be accessible\nsys.path.append('{}')\ntry :\n\tfrom RGEclass import *\nexcept ImportError :\n\texit('RGEclass.py not found.')\ntry :\n\timport scipy.interpolate as scp\nexcept ImportError :\n\texit('error while loading scipy')\nfrom {} import *\n".format(
         settings['Results'], '{}/Source/Output'.format(cwd), Name.split('.')[0])
     CodeStrI += "#In Order to use your result you have to create an instance of the RGE class following this\nrge = RGE(beta_function_{},{},labels={})\n#Note here that the labels are just used to label the results but should match the order in which the RGEs are solved.\n".format(
-        model._Name, NbRGEs, TagsFull)
+        model._Name.replace('-',''), NbRGEs, TagsFull)
     CodeStrI += "\"\"\"\nOne can access the physical parameters as the top mass, the up quark yukawas, Z mass ...\nSince they are all attributes of the class object we have just created. The list is the following :\n\tPi = np.pi\n\talpha = 1./128.91\n\talphaS = 0.1184\n\tsinthetasq = 0.2316 #Sin squared\n\tMz = 91.1876 #in GeV\n\tMw = 80.399 # in GeV\n\tGf = 1.16637e-5 #in GeV ^-2\n\tCF = 4./3. #Casimir of the SU3 color\n\tNc = 3.\n\tQtop = 2./3.#top quark chargs\n\tvev = 246.22 # From (sqrt(2)Gf)^-1/2\n\tMt = 173.3 # the pole mass of the top\n\tU = [2.4e-3,1.27,165.3308]#mu,mc,mt (MSbar)mt=(Mt/(1+4alphas/3Pi))\n\tD = [4.75e-3,104e-3,4.19]#md,ms,mb\n\tL = [0.511e-3,105.66e-3,1.777]\n\tyU = [sqrt(2)/self.vev * el for el in self.U]\n\tyD = [sqrt(2)/self.vev * el for el in self.D]\n\tyL = [sqrt(2)/self.vev * el for el in self.L] \n\tg10 = sqrt(4*self.Pi * self.alpha)/sqrt(1-self.sinthetasq)#Initial value\n\tg20 = sqrt(4*self.Pi * self.alpha)/sqrt(self.sinthetasq)#Initial value\n\tg30 =  sqrt(4*self.Pi * self.alphaS)#Initial value\n\n\nTo modify one of them one would do :\n\"\"\"\nrge.Mt = 171.0\n"
     CodeStrI += "#Now one should specify the initial values for the {0} parameters of the rges\n########################\n#USER INPUT REQUIRED HERE\n########################\nY0 = [0.0]*{0}\n#assign this list to the initial values of the rges\nrge.Y0 = Y0".format(
         NbRGEs)

@@ -1,3 +1,13 @@
+March 3rd:
+Fixed a bug pointed out by Kevin Max when no fermions are specified in the model file
+
+Decemeber 9th:
+bug Fixed in the Determin Order function when dealing with vector Yukawa. No
+impact on the results.
+
+November 24 th:
+change numpy version checking to accomodate 10...
+
 November 11th:
 
 Modified the database to adopt Susyno v3.4. This means that some of the

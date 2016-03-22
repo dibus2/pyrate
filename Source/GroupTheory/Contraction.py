@@ -4,51 +4,43 @@ Defines the function needed to do the contraction of different fields"""
 from Logging import *
 
 try:
-    import pickle
-    import time
-    import re as reg
-    import functools, operator
-    import copy
-    from itertools import permutations, combinations
-    import os
+	import pickle
+	import time
+	import re as reg
+	import functools,operator
+	import copy
+	from itertools import permutations,combinations
+	import os
 except ImportError:
-    loggingCritical("Error while loading modules")
+	loggingCritical("Error while loading modules")
 try:
-    Version = False
-    import numpy as np
-
-    vers = np.__version__.split('.')
-    if vers[-2] < '5' or (vers[-2] == '5' and vers[-1] < 1):
-        Version = True
-        raise ImportError
+	Version = False
+	import numpy as np
+	vers = np.__version__.split('.')
+        if int(vers[0]) < 1 or not(int(vers[0]) >= 1 and int(vers[1]) >= 5):
+		Version = True
+		raise ImportError
 except ImportError:
-    if Version:
-        loggingCritical("\tnumpy version not compatible please get at least 1.5.1 you have {}.".format('.'.join(vers)),
-                        verbose=True)
-        exit()
-    else:
-        loggingCritical("\tError while loading numpy. Check the manual for required modules.", verbose=True)
-        exit()
+	if Version :
+		loggingCritical("\tnumpy version not compatible please get at least 1.5.1 you have {}.".format('.'.join(vers)),verbose=True)
+		exit()
+	else :
+		loggingCritical("\tError while loading numpy. Check the manual for required modules.",verbose=True)
+		exit()
 try:
-    Version = False
-    from sympy import Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, Matrix, MatrixSymbol, \
-        KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
-        __version__, Mod
-    from sympy.physics.secondquant import evaluate_deltas
-    from sympy.matrices.matrices import MutableMatrix as tMM
-
-    if __version__ != '0.7.2' and __version__ != '0.7.3':
-        Version = True
-        raise ImportError
+	Version = False
+	from sympy import Wild,Symbol,Function,symbols,pi,Rational,zeros,I,sqrt,eye,Matrix,MatrixSymbol,KroneckerDelta,flatten,pprint,IndexedBase,Idx,Integer,Add,Mul,Indexed,Sum,conjugate,adjoint,__version__,Mod
+	from sympy.physics.secondquant import evaluate_deltas
+	if __version__ != '0.7.2' and __version__ != '0.7.3' :
+		Version = True
+		raise ImportError
 except ImportError:
-    if Version:
-        loggingCritical(
-            "\tsympy version incompatible : {}, please get 0.7.2 (recommended) or 0.7.3 .".format(__version__),
-            verbose=True)
-        exit()
-    else:
-        loggingCritical("\tError while loading sympy. Check the manual for required modules.", verbose=True)
-        exit()
+	if Version:
+		loggingCritical("\tsympy version incompatible : {}, please get 0.7.2 (recommended) or 0.7.3 .".format(__version__),verbose=True)
+		exit()
+	else:
+		loggingCritical("\tError while loading sympy. Check the manual for required modules.",verbose=True)
+		exit()
 localdir = os.path.realpath(os.path.dirname(__file__))
 loggingInfo('Loading the database...', verbose=True)
 fdb = open(localdir + '/CGCs-1.2.1-sparse.pickle', 'r')

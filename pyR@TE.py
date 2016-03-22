@@ -16,7 +16,6 @@ welcomemessage = """\n\n\n\n\t\t================================================
 \t\t\t\tPyR@TE version 2.0.0  released  ???\n
 \t\t\tF. Lyonnet, I. Schienbein,\n
 \t\t\tand F.Staub, A.Wingerter (version 1)
-\t\t\tplease cite arxiv 1309.7030 and arxiv 16XX.XXX
 \t\t==================================================================================\n
 """
 print(welcomemessage)

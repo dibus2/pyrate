@@ -120,7 +120,7 @@ def ToMathematicaNotation(vall, model, FlagSquare=True):
             ll.append(''.join(reg.split('\\\(.*)', ''.join(reg.split('{(.*)}', el)))))
         else:
             ll.append(el)
-    ll = [el.replace('_', '').replace('\\', '').replace('\\\\', '').replace(' ', '') for el in ll]
+    ll = [el.replace('_', '').replace('\\', '').replace('\\\\', '').replace('^','').replace(' ', '') for el in ll]
     Replace = [(el, ll[iel]) for iel, el in enumerate(symbs)]
     for rep in Replace:
         vall = vall.replace(*rep)
@@ -173,9 +173,9 @@ def TranslateToMathematica(xpr, fname, tag, model):
             else:
                 Dimension.append("{{{},{{}}}}".format(lltp.replace('_', '').replace('\\', '')))
         else:  # lambdas and so on
-            Return.append("{{{},{}}}".format(lltp.replace('_', '').replace('\\', ''),
+            Return.append("{{{},{}}}".format(lltp.replace('_', '').replace('\\', '').replace('^',''),
                                              str(vall).replace('**', '^').replace('_', '').replace('\\', '')))
-            Dimension.append("{{{},{{}}}}".format(lltp.replace('_', '').replace('\\', '')))
+            Dimension.append("{{{},{{}}}}".format(lltp.replace('_', '').replace('\\', '').replace('^','')))
     f = open('{}'.format(fname), 'w')
     date = time.localtime()
     date = "{}-{}-{}\t {}:{}:{}".format(date[0], date[1], date[2], date[3], date[4], date[5])

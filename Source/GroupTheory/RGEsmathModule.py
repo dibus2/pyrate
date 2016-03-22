@@ -265,7 +265,7 @@ def multiplicity(x,part,val,Mod) :
 			if Mod.GetGroupFromName[group].name != x[0]
 				and not(Mod.GetGroupFromName[group].U)]
 	Multiplicity = [el if el != 0 else 1 for el in Multiplicity]#when the dim is zero i.e. singlet the multiplicity should be one
-	out = val.Gen*functools.reduce(operator.mul,Multiplicity)
+	out = val.Gen*functools.reduce(operator.mul,Multiplicity,1)
 	return out
 
 def multiplicityKin(pp,model):
@@ -450,9 +450,9 @@ def determinordering(model,Final):
 						#breaking conditions for in and out terms
 						if len(Term) == 1 :
 							#Reconstruct the skip terms
-							skip = [model.Classes[str(el[0])](el[1]) if str(el[0]) in model.Classes and el[1] != () else 
+							skip = [model.Classes[str(el[0])](el[1]) if str(el[0]) in model.Classes and el[1] != () and len(el[1]) == 2 else (model.Classes[str(el[0])](el[1][0]) if str(el[0]) in model.Classes and el[1] != () and len(el[1]) == 1 else 
 									(Symbol(str(el[0].args[0]),commutative=True).conjugate() if type(el[0]) == conjugate and el[1] == () else (
-										Symbol(str(el[0]),commutative=True) if str(el[0]) in model.Classes and el[1] == () else el[0] )) for el in skip]
+										Symbol(str(el[0]),commutative=True) if str(el[0]) in model.Classes and el[1] == () else el[0] ))) for el in skip]
 							#In case Term is a Yukawa it is necessarily the last one of skip
 							if str(Term[0]) in model.Classes :
 								if (len(Indices) == 1 and Indices[0] == ()) or Indices == [] :
@@ -463,7 +463,12 @@ def determinordering(model,Final):
 											Indices[-1] = Indices[-1][0],Symbol(str(Indices[-1][1]).split('_')[0]+'1_f')
 										Term = model.Classes[str(Term[0])](*Indices[-1]).transpose()
 									else :
-										if len(Indices[-1]) >= 2 and Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
+#<<<<<<< HEAD
+#										if len(Indices[-1]) >= 2 and Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
+#=======
+#Let's keep the version from 1.2.7_beta
+										if len(Indices[-1])==2 and Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
+#>>>>>>> online
 											Indices[-1] = Indices[-1][0],Symbol(str(Indices[-1][1]).split('_')[0]+'1_f')
 										Term = model.Classes[str(Term[0])](*Indices[-1])
 								else :
