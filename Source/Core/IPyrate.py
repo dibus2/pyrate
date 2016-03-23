@@ -295,6 +295,9 @@ class Idbquerry(cmd.Cmd):
         print(mats)
         # print("{}".format("\n\n".join([str(Matrix(el)) for el in mats['mat']])))
 
+    def do_Struc(self, line):
+        return self.do_generic(line, '')
+
     def complete_Matrices(self, text, line, begidx, endidx):
         return self.complete_generic(text, line, begidx, endidx, 'Matrices')
 
@@ -331,6 +334,7 @@ class Idbquerry(cmd.Cmd):
         return completions
 
     def do_generic(self, line, function, istuple=True, toreturn=False):
+        pudb.set_trace()
         args = line.split(' ')
         if len(args) > 2:
             toremove = [(el + args[iel + 1], el, args[iel + 1], iel) for iel, el in enumerate(args) if el[-1] == ',']
