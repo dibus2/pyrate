@@ -4,51 +4,62 @@ Defines the function needed to do the contraction of different fields"""
 from Logging import *
 
 try:
-	import pickle
-	import time
-	import re as reg
-	import functools,operator
-	import copy
-	from itertools import permutations,combinations
-	import os
+    import pickle
+    import time
+    import re as reg
+    import functools, operator
+    import copy
+    from itertools import permutations, combinations
+    import os, gzip
 except ImportError:
-	loggingCritical("Error while loading modules")
+    loggingCritical("Error while loading modules")
 try:
-	Version = False
-	import numpy as np
-	vers = np.__version__.split('.')
-        if int(vers[0]) < 1 or not(int(vers[0]) >= 1 and int(vers[1]) >= 5):
-		Version = True
-		raise ImportError
+    Version = False
+    import numpy as np
+
+    vers = np.__version__.split('.')
+    if int(vers[0]) < 1 or not (int(vers[0]) >= 1 and int(vers[1]) >= 5):
+        Version = True
+        raise ImportError
 except ImportError:
-	if Version :
-		loggingCritical("\tnumpy version not compatible please get at least 1.5.1 you have {}.".format('.'.join(vers)),verbose=True)
-		exit()
-	else :
-		loggingCritical("\tError while loading numpy. Check the manual for required modules.",verbose=True)
-		exit()
-try:
-	Version = False
-	from sympy import Wild,Symbol,Function,symbols,pi,Rational,zeros,I,sqrt,eye,Matrix,MatrixSymbol,KroneckerDelta,flatten,pprint,IndexedBase,Idx,Integer,Add,Mul,Indexed,Sum,conjugate,adjoint,__version__,Mod
-	from sympy.physics.secondquant import evaluate_deltas
-	if __version__ != '0.7.2' and __version__ != '0.7.3' :
-		Version = True
-		raise ImportError
-except ImportError:
-	if Version:
-		loggingCritical("\tsympy version incompatible : {}, please get 0.7.2 (recommended) or 0.7.3 .".format(__version__),verbose=True)
-		exit()
-	else:
-		loggingCritical("\tError while loading sympy. Check the manual for required modules.",verbose=True)
-		exit()
-localdir = os.path.realpath(os.path.dirname(__file__))
-loggingInfo('Loading the database...', verbose=True)
-fdb = open(localdir + '/CGCs-1.2.1-sparse.pickle', 'r')
-db = pickle.load(fdb)
-fdb.close()
+    if Version:
+        loggingCritical("\tnumpy version not compatible please get at least 1.5.1 you have {}.".format('.'.join(vers)),
+                        verbose=True)
+        exit()
+    else:
+        loggingCritical("\tError while loading numpy. Check the manual for required modules.", verbose=True)
+        exit()
+# try:
+#    Version = False
+#    from sympy import Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, Matrix, MatrixSymbol, \
+#        KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
+#        __version__, Mod
+#    from sympy.physics.secondquant import evaluate_deltas
+#
+#    if __version__ != '0.7.2' and __version__ != '0.7.3':
+#        Version = True
+#        raise ImportError
+# except ImportError:
+#    if Version:
+#        loggingCritical(
+#            "\tsympy version incompatible : {}, please get 0.7.2 (recommended) or 0.7.3 .".format(__version__),
+#            verbose=True)
+#        exit()
+#    else:
+#        loggingCritical("\tError while loading sympy. Check the manual for required modules.", verbose=True)
+#        exit()
+
+# I am gonna use the interactive to access the database and populate it at the same time
+from IPyrate import *
+
+# create the interactive object to access the data base
+idb = Idbquerry(noprint=True)
 
 
-def GetContractionFactor(dic, Group, CGCs=0):
+# Now one just need to wrap all the functions from Idbquerry into here
+
+
+def GetContractionFactor(dic, Group, idb, CGCs=0):
     """Seeks the contraction Factor for the contracted particles in dic under the name group.
 			Works with any number of fields, at least 2,3,4.
             F.: Modified February 22 2015 in order to deal with multiple singlets. Actually, this function
@@ -65,38 +76,32 @@ def GetContractionFactor(dic, Group, CGCs=0):
                 dic[Group[0]]), verbose=True)
         exit()
     Factor = 0
-    if tuple(key) in db[Group[1]._absname][Match[len(key)]]:
-        # F. Check wether it is a list of list
-        if type(db[Group[1]._absname][Match[len(key)]][tuple(key)][0]) == tuple:
-            if CGCs != 0:
-                loggingCritical("WARNING: `CGCs` specified for an invariant which is unique, ignored!", verbose=True)
-                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
-            else:
-                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)]
+    # This part is much simplified now since the interactive to the databas deals with all the error handling
+    try:
+        Factor = idb.do_Invariants(idb.toline([Group[1]._absname, key]), tensor=True)
+        if Factor == []:
+            loggingCritical("The term {} {} is not a singlet.".format(key, Group[1]._absname), verbose=True)
+            pudb.set_trace()
+            exit()
+        if CGCs != 0:
+            Factor = Factor[CGCs - 1]
         else:
-            if CGCs == 0:
-                loggingCritical(
-                    "WARNING, `CGCs` not specified for the invariant `{}` under {} which has several possible contractions to gauge singlet, using the first one! Please use the interactive mode (started via the option -idb to make sure it is the CGC you want to use.".format(
-                        key, Group[1]._absname), verbose=True)
-                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)][0]
-            else:
-                Factor = db[Group[1]._absname][Match[len(key)]][tuple(key)][CGCs - 1]
-    else:
+            Factor = Factor[0]
+    except:
         loggingCritical(
-            "The contraction factor for {} {} is not in the db, calculation not implemented yet or the term is not a singlet.".format(
+            "The contraction factor for {} {} could not be calculated, contact the authors.".format(
                 key, Group[1]._absname), verbose=True)
         exit()
-    # We can create the Function that takes i,j,k,... indices and return the correct contraction factor
-    return tuple(Factor)  # return the function
+    return tuple(Factor)
 
 
-def GetDynkinLabel(name, DimR):
+def GetDynkinLabel(name, DimR, idb):
     """Return the Dynkin notation of the irrep of name of dim DimR"""
     # Get the list of possible irrep with this dimension
     try:
-        Irreps = db[name]['DimToDynkin'][int(DimR)]
+        Irreps = idb.do_GetDynk(idb.toline([name, int(DimR)]))
     except KeyError:
-        loggingCritical("Error while reading in the databased, {},{} is not in the databased.".format(name, DimR),
+        loggingCritical("Error while determining the dynkin label of {},{}.".format(name, DimR),
                         verbose=True)
         exit()
     if type(Irreps) == list:
@@ -109,9 +114,12 @@ def GetDynkinLabel(name, DimR):
         return Irreps
 
 
-def getdimIrrep(irrep, grp):
+def getdimIrrep(irrep, grp, idb):
     """returns the dim of the given irrep of the groupname"""
-    dim = db[grp._absname]['DynkinToDim'][irrep]
+    if grp._absname == 'SU2':
+        if type(irrep[-1]) == bool:
+            irrep = irrep[:-1]
+    dim = idb.do_DimR(idb.toline([grp._absname, list(irrep)]))
     return dim
 
 
@@ -181,8 +189,8 @@ class FF(Function):
     @classmethod
     def eval(cls, args, contraction):
         """
-			implement generic Factor function
-			"""
+        implement generic Factor function
+        """
         if all([el.is_integer for el in args]):
             Components = [el[:-1] for el in contraction]
             Idx = [iel for iel, el in enumerate(Components) if el == args]
@@ -195,7 +203,8 @@ class FF(Function):
 
 class FactorFunction(object):
     """create a class to store the function
-	that calculates the contraction factors"""
+    that calculates the contraction factors
+    """
 
     def __init__(self, contraction, Kr=1, indices=[]):
         self.contraction = tuple(contraction)

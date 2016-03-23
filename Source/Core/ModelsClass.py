@@ -55,6 +55,8 @@ class Model(object):
         self.ListTri = []
         self.ToOnly = {}
         self.Combination = {}
+        # declare an interactive db access object
+        self.idb = Idbquerry(noprint=True)
         # Validate the entries
         loggingInfo("Validating the model...", verbose=True)
         self.ValidateSettings(Settings)
@@ -192,30 +194,30 @@ class Model(object):
                 self.Fermions = value
                 # Create the particle and store it in Fermions
                 for part, val in value.items():
-                    self.Fermions[part] = particle(part, val, self.GaugeGroups)
+                    self.Fermions[part] = particle(part, val, self.GaugeGroups, self.idb)
             elif key == 'RealScalars':
                 # Copy the particles in the class
                 for part, qnb in value.items():
                     Qnb = {'Gen': 1, 'Qnb': qnb}
-                    self.Scalars[part] = particle(part, Qnb, self.GaugeGroups)
+                    self.Scalars[part] = particle(part, Qnb, self.GaugeGroups, self.idb)
             elif key == 'Potential':
                 self.Potential = value
         # Now that the Real Scalars have been created we can create the Cplx one associated
         if 'CplxScalars' in Settings:
             for part, setts in Settings['CplxScalars'].items():
                 setts['Norm'] = self.translatenorm(setts['Norm'])
-                self.CplxScalars[part] = higgsField(part, setts, self.GaugeGroups)
+                self.CplxScalars[part] = higgsField(part, setts, self.GaugeGroups, self.idb)
                 # declare the real degress of freedom associated to the complex ones
                 if not (str(self.CplxScalars[part].RealPart) in self.Scalars):
                     self.Scalars[str(self.CplxScalars[part].RealPart)] = particle(self.CplxScalars[part].RealPart,
                                                                                   {'Gen': 1,
                                                                                    'Qnb': self.CplxScalars[part].Qnb},
-                                                                                  self.GaugeGroups, FromCplx=True)
+                                                                                  self.GaugeGroups, self.idb, FromCplx=True)
                 if not (str(self.CplxScalars[part].CplxPart) in self.Scalars):
                     self.Scalars[str(self.CplxScalars[part].CplxPart)] = particle(self.CplxScalars[part].CplxPart,
                                                                                   {'Gen': 1,
                                                                                    'Qnb': self.CplxScalars[part].Qnb},
-                                                                                  self.GaugeGroups, FromCplx=True)
+                                                                                  self.GaugeGroups, self.idb, FromCplx=True)
         self.Particles.update(self.Fermions)
         self.Particles.update(self.Scalars)
         self.Particles.update(self.CplxScalars)
@@ -254,7 +256,7 @@ class Model(object):
             if group == 'U1':
                 self.GaugeGroups.append([GroupName, U1(GroupName), True])
             elif group.split('U')[0] == 'S':  # it a SUn group factor
-                self.GaugeGroups.append([GroupName, SUn(int(group.split('U')[1]), '{}'.format(GroupName)), False])
+                self.GaugeGroups.append([GroupName, SUn(int(group.split('U')[1]),'{}'.format(GroupName),  self.idb), False])
                 # add the dim so that we know over which indices to sum later on
                 self.IndGaugeGroups.append(self.GaugeGroups[-1][1].N)
             else:
@@ -466,7 +468,7 @@ class Model(object):
                                     exit()
                                 else:
                                     tpCGCs = val['CGCs'][g[0]][ill]
-                            Factor.append(GetContractionFactor(ContractedParticles, [g[0], g[1]], CGCs=tpCGCs))
+                            Factor.append(GetContractionFactor(ContractedParticles, [g[0], g[1]], self.idb, CGCs=tpCGCs))
                         else:
                             Factor.append((0,))  # in Order to keep the length of Factor equals to teh length of self.NonUGaugeGroups
                             # Save Factor for normalizing the CGCs
@@ -483,7 +485,7 @@ class Model(object):
                                                         part.indices[idd] != 0])
                                 propindices[idd] = [[part.indices[idd], getdimIrrep(
                                     self.Particles[str(part.args[0])].Qnb[self.NonUGaugeGroups[idd][0]],
-                                    self.NonUGaugeGroups[idd][1])] for part in subll[0] if part.indices[idd] != 0]
+                                    self.NonUGaugeGroups[idd][1], self.idb)] for part in subll[0] if part.indices[idd] != 0]
                                 Factor[idd] = FF(indicesff[idd], fac)
                             else:
                                 # particles are not charged under this group

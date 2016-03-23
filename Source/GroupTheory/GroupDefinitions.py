@@ -8,7 +8,8 @@ m, n, o, p, q, r, s, t, u, v = map(Wild, ['m', 'n', 'o', 'p', 'q', 'r', 's', 't'
 class SUn(object):
     """Dynamical SU(N) class"""
 
-    def __init__(self, N, name):
+    def __init__(self, N, name, idb):
+        self.idb = idb  # This is the interactive db access object
         self.name = name
         self._absname = 'SU{}'.format(N)
         self.Algebra = 'A'
@@ -19,13 +20,9 @@ class SUn(object):
         self.singlet = '1'
         self.Dynksinglet = tuple((self.N - 1) * [0])
         # Repr of the algebra or the fundamental
-        self.Matrices = db[self._absname]['Matrices']
-        self.HBMat = db[self._absname]['HBmat']
-        self.Fond = db[self._absname]['Fond']
-        self.Adj = db[self._absname]['Adj']
-        # depricated: sparse matrices used -> calculated in the db
-        # self.fabc = self.GetStructureConstants(check=True)
-        self.fabc = db[self._absname]['Struc']
+        self.Fond = self.idb.do_FondR(self.idb.toline([self._absname]))
+        self.Adj = self.idb.do_AdjR(self.idb.toline([self._absname]))
+        self.fabc = self.idb.do_Struc(self.idb.toline([self._absname]))
         # transformation
         self.fabc = (tuple(flatten(self.fabc)), self.fabc.shape)
         # Convert the  matrices into tuples that can be passed to the symbolic functions
