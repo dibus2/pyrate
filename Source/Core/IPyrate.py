@@ -296,7 +296,7 @@ class Idbquerry(cmd.Cmd):
         # print("{}".format("\n\n".join([str(Matrix(el)) for el in mats['mat']])))
 
     def do_Struc(self, line):
-        return self.do_generic(line, '')
+        return self.do_generic_onearg(line, 'struc')
 
     def complete_Matrices(self, text, line, begidx, endidx):
         return self.complete_generic(text, line, begidx, endidx, 'Matrices')
@@ -314,11 +314,17 @@ class Idbquerry(cmd.Cmd):
                         lie = LieAlgebra(CartanMatrix("SU", int(args[0][-1])))
                     except ValueError:
                         exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
-                    res = eval('tuple(lie.{}.tolist()[0])'.format(function))
+                    if function == 'struc':
+                        res = eval('lie.{}'.format(function))
+                    else:
+                        res = eval('tuple(lie.{}.tolist()[0])'.format(function))
                     self._add_to_db([args[0], function], res)
                     print(res)
                 else:
-                    print(list(self.db[args[0]][function]))
+                    if function == 'struc':
+                        print(self.db[args[0]][function])
+                    else:
+                        print(list(self.db[args[0]][function]))
         except (IdbquerryWrongFormat, IdbquerryMissingArgument):
             pass
 
