@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from Contraction import *
+import pudb
 
 """ In this file we define all the symbols and conS*nstants of the groups that are used i.e. SU(N) U(1)"""
 m, n, o, p, q, r, s, t, u, v = map(Wild, ['m', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v'])
@@ -61,13 +62,15 @@ class SUn(object):
 
     def C2(self, irrep):
         """ Casimir for the different irepp of SU(N)
-				G stands for the adjoint given by the structure constants."""
+			G stands for the adjoint given by the structure constants.
+		"""
         if irrep == self.Dynksinglet:
             return 0
         elif irrep != 'G':
-            return db[self._absname]['Casimir'][irrep]
+            pudb.set_trace()
+            return self.idb.do_Casimir(self.idb.toline([self._absname, irrep]))
         elif irrep == 'G':
-            return db[self._absname]['Casimir'][self.Adj]
+            return self.idb.do_Casimir(self.idb.toline([self._absname, self.Adj]))
         else:
             loggingCritical("Error: no such irrep {}".format(irrep), verbose=True)
 
@@ -77,8 +80,12 @@ class SUn(object):
         if irrep == self.Dynksinglet:
             return 0
         elif irrep != 'G':
+            pudb.set_trace()
+            return self.idb.do_Dynkin(self.idb.toline([self._absname, irrep]))
             return db[self._absname]['Dynkin'][irrep]
         elif irrep == 'G':
+            pudb.set_trace()
+            return self.idb.do_Dynkin(self.idb.toline([self._absname, self.Adj]))
             return db[self._absname]['Dynkin'][self.Adj]
         else:
             loggingCritical("Error: no such irrep {}".format(irrep), verbose=True)
@@ -89,35 +96,6 @@ class SUn(object):
             out += el
         return out
 
-
-# def GetStructureConstants(self,check=False):
-#		W = MatrixSymbol('W',self.d,1)
-#		V = MatrixSymbol('V',self.d,1)
-#		Vec1 = self.sumperso([W[i,0]*Matrix(self.Matrices1[self.Fond]['mat'][i]) for i in range(self.d)])
-#		Vec2 = self.sumperso([V[i,0]*Matrix(self.Matrices1[self.Fond]['mat'][i]) for i in range(self.d)])
-#		ResTrace =[sum([
-#			-2*(Matrix(self.Matrices1[self.Fond]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(self.Matrices1[self.Fond]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j]
-#			for j in range(self.N)
-#			for k in range(self.N)
-#			for l in range(self.N)
-#			for m in range(self.N)
-#			if (Matrix(self.Matrices1[self.Fond]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(self.Matrices1[self.Fond]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j] != 0])
-#			for i in range(self.d)]
-#		Structures = [[[I*(el.diff(W[i,0])).diff(V[j,0]) for i in range(self.d)] for j in range(self.d)]for el in ResTrace]
-#		Structures = np.array(Structures).reshape(self.d,self.d,self.d)
-#		if check :
-#			Check = [Matrix(self.Matrices1[self.Fond]['mat'][i])*Matrix(self.Matrices1[self.Fond]['mat'][j]) - Matrix(self.Matrices1[self.Fond]['mat'][j])*Matrix(self.Matrices1[self.Fond]['mat'][i]) + self.sumperso([I*Structures[i,j,k]*Matrix(self.Matrices1[self.Fond]['mat'][k])
-#					for k in range(self.d)])
-#					for i in range(self.d)
-#					for j in range(self.d)
-#					]
-#			Check = all([el == zeros((self.N,self.N)) for el in Check])
-#			if Check:
-#				return Structures
-#			else : 
-#				print "ERROR while determining the structure constants"
-#		else :
-#			return Structures
 
 class U1(object):
     """Defines the U1 group class.

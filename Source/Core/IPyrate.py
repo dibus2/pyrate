@@ -10,11 +10,14 @@ try:
     import os
     from sys import exit
     import sys
-
-    sys.path.insert(0, '/Applications/HEPtools/sympy-0.7.6')
     import readline
     import rlcompleter
-    from sympy import symbols, Symbol, Rational, sqrt, IndexedBase, Matrix
+    sys.path.insert(0, '/Applications/HEPtools/sympy-0.7.6')
+    from sympy import symbols, Symbol, Rational, sqrt, IndexedBase, Matrix, \
+    Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, Matrix, MatrixSymbol, \
+    KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
+    __version__, Mod
+    from sympy.physics.secondquant import evaluate_deltas
     import pickle
     import pudb
     import os
@@ -104,24 +107,30 @@ class Idbquerry(cmd.Cmd):
 
     intro = "=========================================================================================================\n\t\t Interactive PyR@TE: mode to querry the database.\n\t\t The database is built on Susyno v3.4 November 6th.\n\t\t IMPORTANT: All the results are therefore bounded by the implicit definitions of Susyno\n\t\t to which we refer the user for further information. \n\t\t Florian Lyonnet: flyonnet@smu.edu 2015\n=========================================================================================================\n"
 
-    def cmdloop(self, intro=None):
+    def __init__(self, noprint=False):
+        cmd.Cmd.__init__(self)
         try:
+            self.noprint = noprint
             # welcome message
-            print(self.intro)
-            # load the database
-            print("loading database of CGCs...")
+            if not noprint:
+                print(self.intro)
+                # load the database
+                print("loading database of CGCs...")
             self.localdir = os.path.realpath(os.path.dirname(__file__))
             with gzip.open(self.localdir + '/../GroupTheory/CGCs.pklz', 'rb') as fdb:
                 self.db = pickle.load(fdb)
             fdb.close()
             self.extractinfo()
-            print('db version: {}'.format(self.db['date']))
-            print("done!")
+            if not noprint:
+                print('db version: {}'.format(self.db['date']))
+                print("done!")
             self.convert = {2: 'Bilinear', 3: 'Trilinear', 4: 'Quartic'}
             self._tosave = False
             # Let's create the list for the autocompletion
         except:
             exit("Error while loading the database")
+
+    def cmdloop(self, intro=None):
         return cmd.Cmd.cmdloop(self, '')
 
     def do_exit(self, line):
@@ -155,7 +164,7 @@ class Idbquerry(cmd.Cmd):
         print(output)
         self.last_output = output
 
-    def do_Invariants(self, line):
+    def do_Invariants(self, line, tensor=False):
         # returns the invariant for the given contraction and gauge group
         ls = line.split(' ')
         if len(ls) > 2:
@@ -193,10 +202,23 @@ class Idbquerry(cmd.Cmd):
                         invs, conjs = self._split_inputs(ls[1])
                         res = lie.invariants(invs, conj=conjs, pyrate_normalization=True, returnTensor=True)
                         self._add_to_db([ls[0], self.convert[whichinvariant], ls[1]], res)
-                        print(self.construct_contraction(res, whichinvariant))
+                        if not self.noprint:
+                            print(self.construct_contraction(res, whichinvariant))
+                        else:
+                            if not tensor:
+                                return self.construct_contraction(res, whichinvariant)
+                            else:
+                                return res
                     else:
-                        print(self.construct_contraction(self.db[ls[0]][self.convert[whichinvariant]][ls[1]],
+                        if not self.noprint:
+                            print(self.construct_contraction(self.db[ls[0]][self.convert[whichinvariant]][ls[1]],
                                                          whichinvariant))
+                        else:
+                            if not tensor:
+                                return self.construct_contraction(self.db[ls[0]][self.convert[whichinvariant]][ls[1]],
+                                                         whichinvariant)
+                            else:
+                                return self.db[ls[0]][self.convert[whichinvariant]][ls[1]]
 
             except (IdbquerryMissingArgument, IdbquerryWrongFormatMultipleIrreps, IdbquerryWrongFormatNbArg,
                     IdbquerryUnkownContraction, IdbquerryInconsistentIrreps):
@@ -227,13 +249,14 @@ class Idbquerry(cmd.Cmd):
         return Contraction
 
     def do_Dynkin(self, line):
-        return self.do_generic(line, 'dynkinIndex')
+        return self.do_generic(self._filter_su2_irrep(line), 'dynkinIndex')
 
     def complete_Dynkin(self, text, line, begidx, endidx):
         return self.complete_generic(text, line, begidx, endidx, 'Dynkin')
 
     def do_Casimir(self, line):
-        return self.do_generic(line, 'casimir')
+        # I need to protect these against calls with conjugated SU2 irrep e.g. [2,True]
+        return self.do_generic(self._filter_su2_irrep(line), 'casimir')
 
     def complete_Casimir(self, text, line, begidx, endidx):
         return self.complete_generic(text, line, begidx, endidx, 'Casimir')
@@ -290,13 +313,11 @@ class Idbquerry(cmd.Cmd):
         return completions
 
     def do_Matrices(self, line):
-        mats = self.do_generic(line, 'repMatrices', toreturn=True)
         print("Sparse matrices, showing non zero components:\n")
-        print(mats)
-        # print("{}".format("\n\n".join([str(Matrix(el)) for el in mats['mat']])))
+        self.do_generic(line, 'repMatrices')
 
     def do_Struc(self, line):
-        return self.do_generic_onearg(line, 'struc')
+        return self.do_generic_onearg(line, '_get_struct()')
 
     def complete_Matrices(self, text, line, begidx, endidx):
         return self.complete_generic(text, line, begidx, endidx, 'Matrices')
@@ -314,17 +335,26 @@ class Idbquerry(cmd.Cmd):
                         lie = LieAlgebra(CartanMatrix("SU", int(args[0][-1])))
                     except ValueError:
                         exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
-                    if function == 'struc':
+                    if function == '_get_struct()':
                         res = eval('lie.{}'.format(function))
                     else:
                         res = eval('tuple(lie.{}.tolist()[0])'.format(function))
                     self._add_to_db([args[0], function], res)
-                    print(res)
-                else:
-                    if function == 'struc':
-                        print(self.db[args[0]][function])
+                    if not self.noprint:
+                        print(res)
                     else:
-                        print(list(self.db[args[0]][function]))
+                        return res
+                else:
+                    if function == '_get_struct()':
+                        if not self.noprint:
+                            print(self.db[args[0]][function])
+                        else:
+                            return self.db[args[0]][function]
+                    else:
+                        if not self.noprint:
+                            print(list(self.db[args[0]][function]))
+                        else:
+                            return list(self.db[args[0]][function])
         except (IdbquerryWrongFormat, IdbquerryMissingArgument):
             pass
 
@@ -339,8 +369,7 @@ class Idbquerry(cmd.Cmd):
             completions = self.gaugegroupimplemented
         return completions
 
-    def do_generic(self, line, function, istuple=True, toreturn=False):
-        pudb.set_trace()
+    def do_generic(self, line, function, istuple=True):
         args = line.split(' ')
         if len(args) > 2:
             toremove = [(el + args[iel + 1], el, args[iel + 1], iel) for iel, el in enumerate(args) if el[-1] == ',']
@@ -384,7 +413,7 @@ class Idbquerry(cmd.Cmd):
                             if function == 'repMatrices':
                                 res = self._build_sparse_matrices(res)
                             self._add_to_db([group, function, irrep], res)
-                            if not toreturn:
+                            if not self.noprint:
                                 if not function == 'repMatrices':
                                     print(res)
                                 else:
@@ -403,26 +432,27 @@ class Idbquerry(cmd.Cmd):
                                     exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
                                 # get all the irreps with dim <=
                                 sign_irrep = sign(irrep)
-                                res = [el for el in lie.repsUpToDimN(abs(irrep)) if lie.dimR(el) == abs(irrep)]
+                                res = sorted([el for el in lie.repsUpToDimN(abs(irrep)) if lie.dimR(el) == abs(irrep)])
                                 if res:
                                     if group != 'SU2':
-                                        # TODO THERE IS A BUG IN THE SORTNIG OF REPSUPTODIMN FOR SU3 [1,1] e.g.
                                         if len(res) == 2:
                                             res = tuple(res[0]) if sign_irrep < 0 else tuple(res[1])
+                                        elif len(res) == 1:
+                                            res = tuple(res[0])
                                         else:
-                                            res = tuple(res[0])  # For the adjoint for instance
+                                            pass  # multiple answers
                                     else:
                                         res = tuple(res[0]) if sign_irrep > 0 else (res[0][0], True)
                                 else:
                                     res = []
                                 self._add_to_db([group, function, irrep], res)
-                                if not toreturn:
+                                if not self.noprint:
                                     print(res)
                                 else:
                                     return res
                     else:
                         res = self.db[group][function][irrep]
-                        if not toreturn:
+                        if not self.noprint:
                             print(res)
                         else:
                             return res
@@ -542,6 +572,18 @@ class Idbquerry(cmd.Cmd):
             sparse.append(tuple(tempMat))
         res = cp.deepcopy(tuple(sparse)), tp
         return res
+
+    def toline(self, atttributes):
+        return ' '.join([str(el) for el in atttributes]).replace('(', '[').replace(')', ']')
+
+    def _filter_su2_irrep(self, line):
+        if 'SU2' in line:
+            ls = line.split(' ')
+            if 'True' in ls[-1]:
+                line = ' '.join([ls[0], ls[1].replace('True', '')])
+            if 'False' in ls[-1]:
+                line = ' '.join([ls[0], ls[1].replace('False', '')])
+        return line
 
 
 if __name__ == '__main__':

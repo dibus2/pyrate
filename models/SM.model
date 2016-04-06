@@ -44,7 +44,7 @@ Yukawas:{
   'Y_{e}': {Fields: [Lbar,eR,H], Norm: 1}
  },
 QuarticTerms: {
- '\Lambda_1' : {Fields : [H,H*,H,H*], Norm : 1/2, CGCs: {SU2L: 1}},
+ '\Lambda_1' : {Fields : [H,H*,H,H*], Norm : 1/2, CGCs: {SU2L: 2}},
  },
 ScalarMasses: {
  '\mu_1' : {Fields : [H*,H], Norm : 1}
