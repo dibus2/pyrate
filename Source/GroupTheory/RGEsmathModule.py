@@ -329,7 +329,6 @@ def SimplifyTraces(expression,Mod) :
 
 def DeterminOrdering(model, Final):
 	"""Wrapper to include the kinetic mixing case"""
-	pudb.set_trace()
 	if type(Final) != Add and type(Final) != tMM:
 		Final = [[Final]]
 	elif type(Final) == tMM : 

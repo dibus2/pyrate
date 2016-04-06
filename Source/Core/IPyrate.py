@@ -17,11 +17,12 @@ try:
     Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, MatrixSymbol, \
     KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
     __version__, Mod
+    from sympy import MutableMatrix as tMM
     from sympy.physics.secondquant import evaluate_deltas
     import pickle
-    import pudb
     import os
 
+    import pudb
     sys.path.append('./../../../PyLie/git/')
     from PyLie import *
     import gzip
