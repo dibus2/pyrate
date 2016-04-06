@@ -4,6 +4,7 @@ Defines the function needed to do the contraction of different fields"""
 from Logging import *
 
 import pudb
+
 try:
     import pickle
     import time
@@ -61,12 +62,15 @@ idb = Idbquerry(noprint=True)
 
 
 def GetContractionFactor(dic, Group, idb, CGCs=0):
-    """Seeks the contraction Factor for the contracted particles in dic under the name group.
-			Works with any number of fields, at least 2,3,4.
-            F.: Modified February 22 2015 in order to deal with multiple singlets. Actually, this function
-            is called on only one place."""
+    """
+    Seeks the contraction Factor for the contracted particles in dic under the name group.
+	works with any number of fields, at least 2,3,4.
+    F.: Modified February 22 2015 in order to deal with multiple singlets. Actually, this function
+    is called on only one place.
+    """
     # Translate the Qnb into Dynkin labels if given by their dim
     key = []
+    pudb.set_trace()
     for part in dic[Group[0]]:
         key.append(part.Qnb[Group[0]])
     # Get the Factor from the databased
@@ -161,14 +165,6 @@ class Ts(Function):
     is_commutative = True
 
     @classmethod
-    # for the sparse matrices
-    #	def eval(cls,A,mats,f1,f2):
-    #		if type(A) != Symbol and type(f1) != Symbol and type(f2) != Symbol :
-    #			#reconstruct the matrix
-    #			mat = mats[0][A]
-    #			dim = mats[-1]
-    #			mat = np.array(mat).reshape(dim)
-    #			return mat[f1-1,f2-1]
     def eval(cls, A, mats, f1, f2):
         if type(A) != Symbol and type(f1) != Symbol and type(f2) != Symbol:
             # reconstruct the matrix
