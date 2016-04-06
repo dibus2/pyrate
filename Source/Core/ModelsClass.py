@@ -10,6 +10,7 @@ try:
 except ImportError:
     loggingCritical("Error while loading modules", verbose=True)
 
+
 class Model(object):
     """Takes the Settings read from the YAML file and eventually filtered in RGEs.py and construct the class Model out of it incorporating the groups"""
 
@@ -54,6 +55,7 @@ class Model(object):
         self.ListTri = []
         self.ToOnly = {}
         self.Combination = {}
+        # declare an interactive db access object
         self.idb = Idbquerry(noprint=True)
         # Validate the entries
         loggingInfo("Validating the model...", verbose=True)
