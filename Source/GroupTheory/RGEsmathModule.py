@@ -260,7 +260,7 @@ def DynkinCasimir(Mod, x, ScalarsOrFermions):
 def multiplicity(x,part,val,Mod) :
 	"""Calculate the degeneracy."""
 	#We get rid of the - signs for the bar representations and take the quantum numbers of all the groups but the one under which we calculate the RGE and the U1 factors
-	Multiplicity = [getdimIrrep(charge,Mod.GetGroupFromName[group])
+	Multiplicity = [getdimIrrep(charge,Mod.GetGroupFromName[group], Mod.idb)
 			for group,charge in val.Qnb.items()
 			if Mod.GetGroupFromName[group].name != x[0]
 				and not(Mod.GetGroupFromName[group].U)]
@@ -270,7 +270,7 @@ def multiplicity(x,part,val,Mod) :
 
 def multiplicityKin(pp,model):
 	"""returns the multiplicity of pp for the abelian sector"""
-	out = [getdimIrrep(pp.Qnb[name],g)
+	out = [getdimIrrep(pp.Qnb[name],g, model.idb)
 			for name,g,t in model.NonUGaugeGroups]
 	out = [el if el != 0 else 1 for el in out ]
 	out = functools.reduce(operator.mul,out,1)*pp.Gen
@@ -327,9 +327,10 @@ def SimplifyTraces(expression,Mod) :
 
 
 
-def DeterminOrdering(model,Final):
+def DeterminOrdering(model, Final):
 	"""Wrapper to include the kinetic mixing case"""
-	if type(Final) != Add and type(Final) != tMM: 
+	pudb.set_trace()
+	if type(Final) != Add and type(Final) != tMM:
 		Final = [[Final]]
 	elif type(Final) == tMM : 
 		Final = [el.args for el in Final]
@@ -337,14 +338,14 @@ def DeterminOrdering(model,Final):
 		Final = [Final.args]
 	OrderedTerm = []
 	for term in Final:
-		OrderedTerm.append(determinordering(model,term))
+		OrderedTerm.append(determinordering(model, term))
 	if len(OrderedTerm) == 1 : 
 		OrderedTerm = OrderedTerm[0]
 	return OrderedTerm
 	
 
 
-def determinordering(model,Final):
+def determinordering(model, Final):
 	"""Determin the ordering of the Structure"""
 	OrderedTerm  = []	
 	for term in Final :

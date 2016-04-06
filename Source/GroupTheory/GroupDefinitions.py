@@ -80,9 +80,7 @@ class SUn(object):
         if irrep == self.Dynksinglet:
             return 0
         elif irrep != 'G':
-            pudb.set_trace()
             return self.idb.do_Dynkin(self.idb.toline([self._absname, irrep]))
-            return db[self._absname]['Dynkin'][irrep]
         elif irrep == 'G':
             pudb.set_trace()
             return self.idb.do_Dynkin(self.idb.toline([self._absname, self.Adj]))

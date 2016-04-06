@@ -14,7 +14,7 @@ try:
     import rlcompleter
     sys.path.insert(0, '/Applications/HEPtools/sympy-0.7.6')
     from sympy import symbols, Symbol, Rational, sqrt, IndexedBase, Matrix, \
-    Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, Matrix, MatrixSymbol, \
+    Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, MatrixSymbol, \
     KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
     __version__, Mod
     from sympy.physics.secondquant import evaluate_deltas
@@ -580,9 +580,11 @@ class Idbquerry(cmd.Cmd):
         if 'SU2' in line:
             ls = line.split(' ')
             if 'True' in ls[-1]:
-                line = ' '.join([ls[0], ls[1].replace('True', '')])
+                ls[-1] = ls[-1].replace('True', '')
+                line = ' '.join(ls)
             if 'False' in ls[-1]:
-                line = ' '.join([ls[0], ls[1].replace('False', '')])
+                ls[-1] = ls[-1].replace('False', '')
+                line = ' '.join(ls)
         return line
 
 
