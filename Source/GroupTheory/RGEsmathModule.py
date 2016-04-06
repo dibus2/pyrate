@@ -307,7 +307,7 @@ def SimplifyTraces(expression,Mod) :
 				out.append(Matrices[0])
 				Matrices = out[:]
 			elif hasattr(Matrices[0],'Symb') and CListYuk.index(str(Matrices[0].Symb)) == minIndexIn : 
-				out = functools.reduce(operator.mul,Matrices)
+				out = functools.reduce(operator.mul,Matrices,1)
 				break
 			else :
 				out = Matrices[1::]
