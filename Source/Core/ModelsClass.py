@@ -93,6 +93,12 @@ class Model(object):
         if self.kinmixing and not(Settings['KinMix']):
             self.kinmixing = False
 
+        # Update the database
+        try:
+            self.idb._update_db()
+        except:
+            loggingCritical("Error while updating the db!", verbose=True)
+
         #############################################################################
         # DEF of the class to store the Yuk this is dynamic and hence needs to be here
         #############################################################################

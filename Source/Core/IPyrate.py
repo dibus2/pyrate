@@ -22,7 +22,6 @@ try:
     import pickle
     import os
 
-    import pudb
     sys.path.append('./../../../PyLie/git/')
     from PyLie import *
     import gzip
