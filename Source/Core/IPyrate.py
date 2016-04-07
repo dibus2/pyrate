@@ -119,7 +119,14 @@ class Idbquerry(cmd.Cmd):
     last_output = ''
     a, b, c, d = map(IndexedBase, ['a', 'b', 'c', 'd'])
 
-    intro = "=========================================================================================================\n\t\t Interactive PyR@TE: mode to querry the database.\n\t\t The database is built on Susyno v3.4 November 6th.\n\t\t IMPORTANT: All the results are therefore bounded by the implicit definitions of Susyno\n\t\t to which we refer the user for further information. \n\t\t Florian Lyonnet: flyonnet@smu.edu 2015\n=========================================================================================================\n"
+    intro =  """
+                                              ___      _    _
+                                             | _ \_  _| |  (_)___
+                                             |  _/ || | |__| / -_)
+                                             |_|  \_, |____|_\___|
+                                                  |__/
+        \n\n\n"""
+    intro += "\t==============================================================================================\n\t\tPyLie: Python and Lie Algebra. PyLie had been written specifically for PyR@TE.\n\t\tIt is a python re-write of the relevant Mathematica routines of Susyno v3.4.\n\t\tFlorian Lyonnet: flyonnet@smu.edu 2015\n\t==============================================================================================\n"
 
     def __init__(self, noprint=False):
         cmd.Cmd.__init__(self)
