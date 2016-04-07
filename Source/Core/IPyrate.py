@@ -2,7 +2,8 @@
 F. February 17th 2015.
 This is the first implementation of the interactive database querry for PyR@TE.
 It allows one to check efficiently what is implemented what is not and how to specify which contraction it wants.
-
+F. April 2016: The interactive module has been merged with the main code of PyR@TE to access the group theory information
+directly from PyLie.
 """
 
 try:
@@ -12,21 +13,34 @@ try:
     import sys
     import readline
     import rlcompleter
-    sys.path.insert(0, '/Applications/HEPtools/sympy-0.7.6')
-    from sympy import symbols, Symbol, Rational, sqrt, IndexedBase, Matrix, \
-    Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, MatrixSymbol, \
-    KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
-    __version__, Mod
-    from sympy import MutableMatrix as tMM
-    from sympy.physics.secondquant import evaluate_deltas
     import pickle
     import os
-
+    # TODO bring PyLie inside PyR@TE
     sys.path.append('./../../../PyLie/git/')
     from PyLie import *
     import gzip
 except:
     exit("Error while loading one of the modules: `cmd, os, readline, rlcompleter, pickle, gzip, PyLie`")
+try:
+    sys.path.insert(0, '/Applications/HEPtools/sympy-0.7.6')
+    from sympy import symbols, Symbol, Rational, sqrt, IndexedBase, Matrix, \
+        Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, MatrixSymbol, \
+        KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
+        __version__, Mod
+    from sympy import MutableMatrix as tMM
+    from sympy.physics.secondquant import evaluate_deltas
+    if __version__ != '0.7.6':
+        Version = True
+        raise ImportError
+except ImportError:
+    if Version:
+        loggingCritical(
+            "\tsympy version incompatible : {}, please get 0.7.6.".format(__version__),
+            verbose=True)
+        exit()
+    else:
+        loggingCritical("\tError while loading sympy. Check the manual for required modules.", verbose=True)
+        exit()
 
 
 class IdbquerryMissingArgument(Warning):
