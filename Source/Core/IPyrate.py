@@ -313,9 +313,13 @@ class Idbquerry(cmd.Cmd):
             completions = self.gaugegroupimplemented
         return completions
 
-    def do_Matrices(self, line):
-        print("Sparse matrices, showing non zero components:\n")
-        self.do_generic(line, 'repMatrices')
+    def do_Matrices(self, line, HB=False):
+        if not self.noprint:
+            print("Sparse matrices, showing non zero components:\n")
+        if type(line) == tuple and len(line) == 2:  # allows using conjugated irreps with SU2
+            return self.do_generic(line[0], 'repMatrices', conjugate_matrix=line[-1], HB=HB)
+        else:
+            return self.do_generic(line, 'repMatrices', HB=HB)
 
     def do_Struc(self, line):
         return self.do_generic_onearg(line, '_get_struct()')
@@ -370,7 +374,7 @@ class Idbquerry(cmd.Cmd):
             completions = self.gaugegroupimplemented
         return completions
 
-    def do_generic(self, line, function, istuple=True):
+    def do_generic(self, line, function, istuple=True, conjugate_matrix=None, HB=False):
         args = line.split(' ')
         if len(args) > 2:
             toremove = [(el + args[iel + 1], el, args[iel + 1], iel) for iel, el in enumerate(args) if el[-1] == ',']
@@ -412,18 +416,28 @@ class Idbquerry(cmd.Cmd):
                             # call the proper method from PyLie
                             res = eval('lie.{}({})'.format(function, list(irrep)))
                             if function == 'repMatrices':
+                                if conjugate_matrix is not None:
+                                    if conjugate_matrix:
+                                        res = [el.conjugate() for el in res]
+                                    irrep = (irrep[0], conjugate_matrix)
                                 res = self._build_sparse_matrices(res)
                             self._add_to_db([group, function, irrep], res)
                             if not self.noprint:
                                 if not function == 'repMatrices':
                                     print(res)
                                 else:
-                                    print(res[0])
+                                    if not HB:
+                                        print(res[0])
+                                    else:
+                                        print(res[1])
                             else:
                                 if not function == 'repMatrices':
                                     return res
                                 else:
-                                    return res[0]
+                                    if not HB:
+                                        return res[0]
+                                    else:
+                                        return res[1]
                         else:
                             # PyLie does not have a good implementation of the DimToDynkin therefore we will put it in the db directly
                             if function == 'DimToDynkin':
@@ -577,16 +591,26 @@ class Idbquerry(cmd.Cmd):
     def toline(self, atttributes):
         return ' '.join([str(el) for el in atttributes]).replace('(', '[').replace(')', ']')
 
-    def _filter_su2_irrep(self, line):
+    def _filter_su2_irrep(self, line, domatrices=False):
         if 'SU2' in line:
             ls = line.split(' ')
             if 'True' in ls[-1]:
                 ls[-1] = ls[-1].replace('True', '')
                 line = ' '.join(ls)
+                if domatrices:
+                    return line, True
+                else:
+                    return line
             if 'False' in ls[-1]:
                 ls[-1] = ls[-1].replace('False', '')
                 line = ' '.join(ls)
-        return line
+                if domatrices:
+                    return line, False
+                else:
+                    return line
+            return line
+        else:
+            return line
 
 
 if __name__ == '__main__':

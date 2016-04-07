@@ -38,13 +38,21 @@ class SUn(object):
         # The assertion here is that ferm1 and ferm2 are two different components of the same particle
         if not (HB):
             assert ferm1 == ferm2
-            mat = self.Matrices[ferm1]
-        # F.sparse	        mat = (mat['mat'],mat['shape'])
+            pudb.set_trace()
+            mat = self.idb.do_Matrices(
+                self.idb._filter_su2_irrep(
+                    self.idb.toline([self._absname, ferm1[1]]), domatrices=True
+                ), HB=False
+            )
+
         else:
             assert ferm1[1] == ferm2[1]  # i.e. same representation
             # read the sequence i.e. PiPi PiSig SigPi
-            mat = self.HBMat[ferm1[1]][(ferm1[0], ferm2[0])]
-        # F.sparse		mat = (mat['mat'],mat['shape'])
+            mat = self.idb.do_Matrices(
+                self.idb._filter_su2_irrep(
+                    self.idb.toline([self._absname, ferm1[1]]), domatrices=True
+                ), HB=True
+            )[(ferm1[0], ferm2[0])]
         return mat
 
     def OuterMatrixProduct(self, M1, M2):
@@ -61,13 +69,13 @@ class SUn(object):
         return self.N ** 2 - 1
 
     def C2(self, irrep):
-        """ Casimir for the different irepp of SU(N)
-			G stands for the adjoint given by the structure constants.
-		"""
+        """
+        Casimir for the different irepp of SU(N)
+        G stands for the adjoint given by the structure constants.
+        """
         if irrep == self.Dynksinglet:
             return 0
         elif irrep != 'G':
-            pudb.set_trace()
             return self.idb.do_Casimir(self.idb.toline([self._absname, irrep]))
         elif irrep == 'G':
             return self.idb.do_Casimir(self.idb.toline([self._absname, self.Adj]))
@@ -82,9 +90,7 @@ class SUn(object):
         elif irrep != 'G':
             return self.idb.do_Dynkin(self.idb.toline([self._absname, irrep]))
         elif irrep == 'G':
-            pudb.set_trace()
             return self.idb.do_Dynkin(self.idb.toline([self._absname, self.Adj]))
-            return db[self._absname]['Dynkin'][self.Adj]
         else:
             loggingCritical("Error: no such irrep {}".format(irrep), verbose=True)
 
@@ -96,8 +102,10 @@ class SUn(object):
 
 
 class U1(object):
-    """Defines the U1 group class.
-		The Casimir operator of the U1 Group is given by the hypercharge squared over 4. Y**2/4"""
+    """
+    Defines the U1 group class.
+    The Casimir operator of the U1 Group is given by the hypercharge squared over 4. Y**2/4
+    """
 
     def __init__(self, name):
         self.d = 1

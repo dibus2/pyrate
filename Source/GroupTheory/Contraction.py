@@ -70,7 +70,6 @@ def GetContractionFactor(dic, Group, idb, CGCs=0):
     """
     # Translate the Qnb into Dynkin labels if given by their dim
     key = []
-    pudb.set_trace()
     for part in dic[Group[0]]:
         key.append(part.Qnb[Group[0]])
     # Get the Factor from the databased
@@ -86,7 +85,6 @@ def GetContractionFactor(dic, Group, idb, CGCs=0):
         Factor = idb.do_Invariants(idb.toline([Group[1]._absname, key]), tensor=True)
         if Factor == []:
             loggingCritical("The term {} {} is not a singlet.".format(key, Group[1]._absname), verbose=True)
-            pudb.set_trace()
             exit()
         if CGCs != 0:
             Factor = Factor[CGCs - 1]
@@ -125,6 +123,8 @@ def getdimIrrep(irrep, grp, idb):
         if type(irrep[-1]) == bool:
             irrep = irrep[:-1]
     dim = idb.do_DimR(idb.toline([grp._absname, list(irrep)]))
+    if dim == 1:
+        dim -= 1
     return dim
 
 
