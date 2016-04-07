@@ -5,6 +5,7 @@ It allows one to check efficiently what is implemented what is not and how to sp
 F. April 2016: The interactive module has been merged with the main code of PyR@TE to access the group theory information
 directly from PyLie.
 """
+import pudb
 
 try:
     import cmd
