@@ -17,7 +17,7 @@ try:
     import pickle
     import os
     # TODO bring PyLie inside PyR@TE
-    sys.path.append('./../../../PyLie/git/')
+    sys.path.append('/Users/florian/Documents/work/Projects/PyLie/git/')
     from PyLie import *
     import gzip
 except:
