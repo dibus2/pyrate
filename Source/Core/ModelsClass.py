@@ -1,4 +1,5 @@
 import sys
+import pudb
 sys.path.append('./Source/GroupTheory')
 from GroupDefinitions import *
 from RGEsmathModule import *
@@ -2671,7 +2672,11 @@ class Model(object):
                 + self.Expand(((_Th, g1, sc1, s2), (_Th, g1, s1, sc4), (_Th, g2, s1, sc3), (_Th, g2, sc2, s2)), Layer=1,
                               MatStruc=['A', 'A', 'B', 'B']))
             if res != 0:
+                start = time.time()
                 res = res.doit()
+                end = time.time() - start
+                print(end)
+                pudb.set_trace()
             self.InvariantResults[key] = res
         return res
 
