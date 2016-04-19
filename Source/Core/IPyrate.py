@@ -23,14 +23,17 @@ try:
 except:
     exit("Error while loading one of the modules: `cmd, os, readline, rlcompleter, pickle, gzip, PyLie`")
 try:
-    sys.path.insert(0, '/Applications/HEPtools/sympy-0.7.6')
+    #sys.path.insert(0, '/Applications/HEPtools/sympy-0.7.6')
+    sys.path.insert(0, '/Applications/HEPtools/sympy-1.0')
+
     from sympy import symbols, Symbol, Rational, sqrt, IndexedBase, Matrix, \
         Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, MatrixSymbol, \
         KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
         __version__, Mod
     from sympy import MutableMatrix as tMM
     from sympy.physics.secondquant import evaluate_deltas
-    if __version__ != '0.7.6':
+    #if __version__ != '0.7.6':
+    if __version__ != '1.0':
         Version = True
         raise ImportError
 except ImportError:
