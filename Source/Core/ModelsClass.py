@@ -1260,8 +1260,6 @@ class Model(object):
                 argsum = [str(ll) for ll in listsum]
                 if argsum != []:
                     Out = eval("Sum(Out," + ','.join(argsum) + ")")
-                    if Out != 0:
-                        Out = Out.doit()
                 FinalTerm.append(Out)
         FinalTerm = sum(FinalTerm)
         return FinalTerm
@@ -1618,8 +1616,6 @@ class Model(object):
                                 Out[iel] = Out[iel].doit()
                     else:
                         Out = eval("Sum(Out," + ','.join(argsum) + ")")
-                        if Out != 0:
-                            Out = Out.doit()
                 FinalTerm.append(Out)
         if FinalTerm != [] and type(FinalTerm[0]) == tMM:
             FinalTerm = summatrix(FinalTerm)
