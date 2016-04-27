@@ -1,4 +1,5 @@
 import sys
+import time
 import pudb
 sys.path.append('./Source/GroupTheory')
 from GroupDefinitions import *
@@ -2563,7 +2564,6 @@ class Model(object):
         key = tuple(['Habc'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
-            loggingInfo("reading Habcd")
         else:
             sc1, sc2, sc3 = self.getparts(parts, indices)
             res = [Rational(1, 2) * (
@@ -2584,14 +2584,14 @@ class Model(object):
         key = tuple(['Habcd'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
-            loggingInfo("reading Habcd")
         else:
             sc1, sc2, sc3, sc4 = self.getparts(parts, indices)
+            pudb.set_trace()
             res = [Rational(1, 4) * (
                 self.Expand((('Chain4Y', a, b, c, d, p1, p1)))
             )
                    for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
-                   ]
+                  ]
             res = sum(res)
             if res.subs(Tr(0), 0) != 0:
                 res = res.doit()
@@ -2671,12 +2671,6 @@ class Model(object):
                             MatStruc=['A', 'A', 'B', 'B'])
                 + self.Expand(((_Th, g1, sc1, s2), (_Th, g1, s1, sc4), (_Th, g2, s1, sc3), (_Th, g2, sc2, s2)), Layer=1,
                               MatStruc=['A', 'A', 'B', 'B']))
-            if res != 0:
-                start = time.time()
-                res = res.doit()
-                end = time.time() - start
-                print(end)
-                pudb.set_trace()
             self.InvariantResults[key] = res
         return res
 
@@ -2716,7 +2710,6 @@ class Model(object):
             ['Chain3Ya'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
-            loggingInfo("reading chain3Y")
         else:
             sc1, sc2, sc3, f1, f2 = self.getparts(parts, indices)
             if not (adj):
@@ -2733,6 +2726,7 @@ class Model(object):
         """Calculates a Chain of four Yukawas"""
         key = tuple(['Chain4Y'] + parts + flatten(indices)) if not (adj) else tuple(['Chain4Ya'] + flatten(indices))
         if key in self.InvariantResults:
+            print("Reading")
             res = self.InvariantResults[key]
         else:
             sc1, sc2, sc3, sc4, f1, f2 = self.getparts(parts, indices)

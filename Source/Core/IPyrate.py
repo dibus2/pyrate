@@ -5,7 +5,6 @@ It allows one to check efficiently what is implemented what is not and how to sp
 F. April 2016: The interactive module has been merged with the main code of PyR@TE to access the group theory information
 directly from PyLie.
 """
-import pudb
 
 try:
     import cmd
@@ -30,9 +29,20 @@ try:
         Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, MatrixSymbol, \
         KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
         __version__, Mod
+
     from sympy import MutableMatrix as tMM
     from sympy.physics.secondquant import evaluate_deltas
-    #if __version__ != '0.7.6':
+    #######
+    # Shadowing of the piecewise mechanism of sympy that makes the code way too slow
+    import sympy.concrete.expr_with_limits
+    import sympy.concrete.delta
+
+    def mypiecewise_fold(exp) :
+        return exp
+    sympy.concrete.expr_with_limits.piecewise_fold = mypiecewise_fold
+    sympy.concrete.delta.piecewise_fold = mypiecewise_fold
+    #######
+
     if __version__ != '1.0':
         Version = True
         raise ImportError
