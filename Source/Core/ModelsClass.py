@@ -134,6 +134,15 @@ class Model(object):
         if 'ScalarMasses' in self.Potential:
             self.Potential['ScalarMasses'], self.ScMToCalculate, self.ListScM = self.ExtractTerm('ScalarMasses')
             self.ScalarAnomalousToCalculate = copy.deepcopy(self.ScMToCalculate)
+            #modify the name for the output
+            for sc in self.ScalarAnomalousToCalculate.keys():
+                ind = [ix for ix, xx in enumerate(sc) if xx != '\\']
+                if ind != []:
+                    ind = ind[0]
+                scnew = sc[:ind] + r'gamma_{{{}}}'.format(sc[ind:])
+                self.ScalarAnomalousToCalculate[scnew] = self.ScalarAnomalousToCalculate[sc]
+                del self.ScalarAnomalousToCalculate[sc]
+
         ###Extract the Fermion mass terms
         if 'FermionMasses' in self.Potential:
             self.Potential['FermionMasses'], self.FMToCalculate, self.ListFM = self.ExtractTerm('FermionMasses')
