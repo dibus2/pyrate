@@ -50,7 +50,6 @@ def CL2abcd(powe, comb, model):
     """Calculate the L2abcd term"""
     assert powe[1] == 0
     sc1, sc2, sc3, sc4 = comb
-    pudb.set_trace()
     res = [Rational(1, 8) * model.Expand(((_L, a, b, s1, s2), (_L, s1, s2, c, d)))
            for (a, b, c, d) in list(permutations([sc1, sc2, sc3, sc4], 4))
            ]

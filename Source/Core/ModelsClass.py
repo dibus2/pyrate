@@ -2586,7 +2586,6 @@ class Model(object):
             res = self.InvariantResults[key]
         else:
             sc1, sc2, sc3, sc4 = self.getparts(parts, indices)
-            pudb.set_trace()
             res = [Rational(1, 4) * (
                 self.Expand((('Chain4Y', a, b, c, d, p1, p1)))
             )
