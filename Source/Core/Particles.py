@@ -1,4 +1,5 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
+import pudb
 from sympy import Symbol, Rational, I, sqrt
 import sys
 
@@ -60,6 +61,8 @@ class particle(object):
                 assert [el[2] for el in Groups if el[0] == key][0]  # check that the group is U1 factor indeed
             elif not ([el[2] for el in Groups if el[0] == key][0]):
                 dic[key] = GetDynkinLabel([el[1]._absname for el in Groups if el[0] == key][0], val, self.idb)
+        if Groups[-1][0] == 'SUndum':
+            dic[Groups[-1][0]] = Groups[-1][1].Dynksinglet
         return dic
 
     def get_RangeIndices(self, Groups):

@@ -290,6 +290,14 @@ class Model(object):
                 self.UsectorMatrix.append(g.g)
             self.GaugeGroupsName.append(name)
             self.GetGroupFromName[name] = g
+        if self.NonUGaugeGroups == []:
+            name, g, t = 'SUndum', SUn(2,'SUndum',self.idb), False
+            self.NonUGaugeGroups.append([name, g, t])
+            self.NonUGroupName.append(name)
+            self.GaugeGroups.append([name, g, t])
+            self.GaugeGroupsName.append(name)
+            self.GetGroupFromName[name] = g
+
 
     def translatenorm(self, normdic):
         """Translate the norm of a given field"""
