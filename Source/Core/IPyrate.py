@@ -460,7 +460,6 @@ class Idbquerry(cmd.Cmd):
                                     if conjugate_matrix:
                                         res = [el.conjugate() for el in res]
                                     irrep = (irrep[0], conjugate_matrix)
-                                    print(irrep)
                                 res = self._build_sparse_matrices(res)
                             self._add_to_db([group, function, irrep], res)
                             if not self.noprint:
