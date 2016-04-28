@@ -639,7 +639,7 @@ else:
                                [str(el) for el in model.Particles.keys()],
                                [str(el) + '_f' for el in model.Particles.keys()],
                                [str(el) + '1_f' for el in model.Particles.keys()],  # for the indices of the generations
-                               ['xi']
+                               ['xi', 'g_SUndum']
                                )
                 # Fix for the Sudummy gauge group
                 if 'SUndum' in strsettings[-4]:
