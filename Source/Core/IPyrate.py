@@ -348,6 +348,8 @@ class Idbquerry(cmd.Cmd):
         return completions
 
     def do_Matrices(self, line, HB=False):
+        if 'SU2' in line:
+            line = self._filter_su2_irrep(line, domatrices=True)
         if not self.noprint:
             print("Sparse matrices, showing non zero components:\n")
         if type(line) == tuple and len(line) == 2:  # allows using conjugated irreps with SU2
@@ -437,7 +439,11 @@ class Idbquerry(cmd.Cmd):
                 if istuple:
                     irrep = tuple(irrep)
                 if group and irrep:
-                    if not self.is_in_db([group, function, irrep]):
+                    if conjugate_matrix is not None:
+                        irrep_tag = (irrep[0], conjugate_matrix)
+                    else:
+                        irrep_tag = irrep
+                    if not self.is_in_db([group, function, irrep_tag]):
                         # use PyLie to calculate the corresponding result
                         assert 'SU' in group
                         if istuple:
@@ -454,6 +460,7 @@ class Idbquerry(cmd.Cmd):
                                     if conjugate_matrix:
                                         res = [el.conjugate() for el in res]
                                     irrep = (irrep[0], conjugate_matrix)
+                                    print(irrep)
                                 res = self._build_sparse_matrices(res)
                             self._add_to_db([group, function, irrep], res)
                             if not self.noprint:
@@ -500,7 +507,13 @@ class Idbquerry(cmd.Cmd):
                                 else:
                                     return res
                     else:
-                        res = self.db[group][function][irrep]
+                        if function == 'repMatrices':
+                            if not HB:
+                                res = self.db[group][function][irrep]
+                            else:
+                                res = self.db[group]['HBmat'][irrep]
+                        else:
+                            res = self.db[group][function][irrep]
                         if not self.noprint:
                             print(res)
                         else:
@@ -567,8 +580,8 @@ class Idbquerry(cmd.Cmd):
                         self.db[attributes[0]][attributes[1]] = {attributes[2]: res}
             else:
                 if attributes[1] == 'repMatrices':
-                    self.db[attributes[0]] = {attributes[1]: {attributes[2]: res}}
-                    self.db[attributes[0]]['HBmat'] = {attributes[2]: res}
+                    self.db[attributes[0]] = {attributes[1]: {attributes[2]: res[0]}}
+                    self.db[attributes[0]]['HBmat'] = {attributes[2]: res[1]}
                 else:
                     self.db[attributes[0]] = {attributes[1]: {attributes[2]: res}}
         elif len(attributes) == 2:
@@ -638,10 +651,7 @@ class Idbquerry(cmd.Cmd):
             if 'False' in ls[-1]:
                 ls[-1] = ls[-1].replace('False', '')
                 line = ' '.join(ls)
-                if domatrices:
-                    return line, False
-                else:
-                    return line
+                return line
             return line
         else:
             return line

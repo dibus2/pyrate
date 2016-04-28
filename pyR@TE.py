@@ -668,6 +668,7 @@ else:
     except:
         loggingCritical('"\nError in the numerical export, skipping. Contact the authors', verbose=True)
         pass
+    model.idb._update_db()
     loggingCritical('End of the run.', verbose=RunSettings['vCritical'])
     # mv the logging into results
     os.system('mv {} {}'.format(RunSettings['LogFile'], RunSettings['Results']))

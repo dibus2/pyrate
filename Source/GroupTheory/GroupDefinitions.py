@@ -38,7 +38,6 @@ class SUn(object):
         # The assertion here is that ferm1 and ferm2 are two different components of the same particle
         if not (HB):
             assert ferm1 == ferm2
-            pudb.set_trace()
             mat = self.idb.do_Matrices(
                 self.idb._filter_su2_irrep(
                     self.idb.toline([self._absname, ferm1[1]]), domatrices=True
