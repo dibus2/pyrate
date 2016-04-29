@@ -9,9 +9,9 @@ try:
     import os
 
     wd = os.getcwd()
-    sys.path.append(wd + '/Source/Output')
-    sys.path.append(wd + '/Source/GroupTheory/')
-    sys.path.append(wd + '/Source/Core')
+    sys.path.append(wd + '/src/Output')
+    sys.path.append(wd + '/src/GroupTheory/')
+    sys.path.append(wd + '/src/Core')
     import string
     import time as tm
     import re as r

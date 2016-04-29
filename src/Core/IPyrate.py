@@ -7,6 +7,7 @@ directly from PyLie.
 """
 
 try:
+    import pudb
     import cmd
     import os
     from sys import exit
@@ -15,16 +16,13 @@ try:
     import rlcompleter
     import pickle
     import os
-    # TODO bring PyLie inside PyR@TE
-    sys.path.append('/Users/florian/Documents/work/Projects/PyLie/git/')
+    from Logging import *
+    sys.path.append('src/pylie')
     from PyLie import *
     import gzip
 except:
     exit("Error while loading one of the modules: `cmd, os, readline, rlcompleter, pickle, gzip, PyLie`")
 try:
-    #sys.path.insert(0, '/Applications/HEPtools/sympy-0.7.6')
-    sys.path.insert(0, '/Applications/HEPtools/sympy-1.0')
-
     from sympy import symbols, Symbol, Rational, sqrt, IndexedBase, Matrix, \
         Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, MatrixSymbol, \
         KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
@@ -37,25 +35,23 @@ try:
     import sympy.concrete.expr_with_limits
     import sympy.concrete.delta
 
-    def mypiecewise_fold(exp) :
+    def mypiecewise_fold(exp):
         return exp
     sympy.concrete.expr_with_limits.piecewise_fold = mypiecewise_fold
     sympy.concrete.delta.piecewise_fold = mypiecewise_fold
     #######
-
     if __version__ != '1.0':
         Version = True
         raise ImportError
 except ImportError:
     if Version:
         loggingCritical(
-            "\tsympy version incompatible : {}, please get 0.7.6.".format(__version__),
+            "\tsympy version incompatible : {}, please get 1.0.0".format(__version__),
             verbose=True)
         exit()
     else:
         loggingCritical("\tError while loading sympy. Check the manual for required modules.", verbose=True)
         exit()
-
 
 class IdbquerryMissingArgument(Warning):
     """

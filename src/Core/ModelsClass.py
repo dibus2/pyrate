@@ -1,7 +1,7 @@
 import sys
 import time
 import pudb
-sys.path.append('./Source/GroupTheory')
+sys.path.append('./src/GroupTheory')
 from GroupDefinitions import *
 from RGEsmathModule import *
 from Particles import *

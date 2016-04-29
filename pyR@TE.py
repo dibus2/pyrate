@@ -6,9 +6,8 @@ try:
     import argparse
     import os
     import time
-
     wd = os.getcwd()
-    sys.path.append(wd + '/Source/Core')
+    sys.path.append(wd + '/src/Core')
 except:
     exit("Error while importing one of the modules `sys,os,argparse,yaml`")
 
@@ -72,7 +71,7 @@ parser.add_argument('--Export-file', '-ef', dest='ExportFile', action='store', d
 parser.add_argument('--Only', '-onl', dest='Only', action='store', default=[],
                     help='Set a dictionary of terms you want to calculate: "QuarticTerms,Yukawas,TrilearTerms,FermionMasses,ScalarMasses". E.g. "{\'QuarticTerms\': [\'\lambda_1\',\'\lambda_2\']}". Note that if passed in the command line the whole argument must be a string')
 parser.add_argument('--Skip', '-sk', dest='Skip', action='store', default='',
-                    help='Set the different terms to neglect in the calculation. E.g. ["CAabcd","CL2abcd"]. The list of terms that can be neglected are listed in Source/Core/RGEsDefinition.py')
+                    help='Set the different terms to neglect in the calculation. E.g. ["CAabcd","CL2abcd"]. The list of terms that can be neglected are listed in src/Core/RGEsDefinition.py')
 parser.add_argument('--interactive-db', '-idb', dest='interactivedb', action='store_true', default=False,
                     help='Starts the interactive database mode. Allows one to check what are the CGCs implemented for a given contraction and more (Casimir, Dynkin,...)')
 parser.add_argument('--ScalarAnomalous', '-sa', dest='ScalarAnomalous', action='store_true', default=False,
@@ -123,8 +122,7 @@ else:
             pass
 try:
     import copy
-
-    sys.path.append(wd + '/Source/Output')
+    sys.path.append(wd + '/src/Output')
 except ImportError:
     exit("Error while importing the modules")
 from Logging import *
