@@ -149,5 +149,5 @@ def Y4F(powe, model, x):
     """Calculates the yukawa term in the gauge coupling, i.e. Y4(F)."""
     assert powe[1] == 3
     # Expand the product 1/d*C2(i)*Y(z,i,j)*Ydagger(z,j,i) z among higgs fields and i,j among fermions
-    res = Rational(1, x[1].d) * model.Expand(((_C, x[0], p1), (_Y, s1, p1, p2), (_Ya, s1, p2, p1)))
+    res = Rational(1, x[1].dimAdj) * model.Expand(((_C, x[0], p1), (_Y, s1, p1, p2), (_Ya, s1, p2, p1)))
     return powe[0].expand().subs(Y4(F), res)

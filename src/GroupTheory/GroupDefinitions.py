@@ -18,9 +18,8 @@ class SUn(object):
         # Repr of the algebra or the fundamental
         self.Fond = self.idb.do_FondR(self.idb.toline([self._absname]))
         self.Adj = self.idb.do_AdjR(self.idb.toline([self._absname]))
-        self.dimAdj = self.idb.do_DimAdj(self._absname)
         # dim of the adjoint
-        self.d = self.CompDimAdj()
+        self.dimAdj = self.idb.do_DimAdj(self._absname)
         self.g = symbols('g_{}'.format(self.name))
         self.singlet = '1'
         self.Dynksinglet = tuple((self.N - 1) * [0])
@@ -120,7 +119,7 @@ class U1(object):
     """
 
     def __init__(self, name):
-        self.d = 1
+        self.dimAdj = 1
         self.name = name
         if name != "U1":
             self.g = symbols('g_{}'.format(self.name))
