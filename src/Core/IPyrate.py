@@ -394,7 +394,7 @@ class Idbquerry(cmd.Cmd):
                     else:
                         return res
                 else:
-                    if function == '_get_struct()':
+                    if function in ['_get_struct()', 'dimAdj']:
                         if not self.noprint:
                             print(self.db[args[0]][function])
                         else:
@@ -420,6 +420,8 @@ class Idbquerry(cmd.Cmd):
 
     def do_generic(self, line, function, istuple=True, conjugate_matrix=None, HB=False):
         args = line.split(' ')
+        if len(args) > 2 and function in ['dimR', 'casimir', 'dynkinIndex']:
+            args = [args[0]] + [''.join(args[1:])]
         if len(args) > 2:
             toremove = [(el + args[iel + 1], el, args[iel + 1], iel) for iel, el in enumerate(args) if el[-1] == ',']
             for ll in toremove:
@@ -432,7 +434,7 @@ class Idbquerry(cmd.Cmd):
         else:
             tocheck = int
         try:
-            if not (type(eval(line.split(' ')[-1])) == tocheck):
+            if not (type(eval(args[-1])) == tocheck):
                 raise IdbquerryWrongFormat(istuple)
         except IdbquerryWrongFormat:
             return

@@ -1,0 +1,39 @@
+# YAML 1.1
+---
+Author: Florian Lyonnet
+Date: 29.04.2016
+Name: SO10
+Groups: {'SO10': SO10}
+
+##############################
+#Fermions assumed weyl spinors
+##############################
+Fermions: {
+  Psi : {Gen: 3, Qnb:{SO10: 16}},
+}
+
+#############
+#Real Scalars
+#############
+
+RealScalars: {
+}
+
+##########################################################################
+#Complex Scalars : have to be expressed in terms of Real Scalars see above
+##########################################################################
+
+CplxScalars: {
+  H: {RealFields: [Pi,I*Sigma], Norm: 1, Qnb : {SO10: 10}},
+  H*: {RealFields: [Pi,-I*Sigma], Norm: 1, Qnb : {SO10: -10}},
+  Delta: {RealFields: [PiD, I*SigD], Norm: 1, Qnb: {SO10: 126}},
+  Delta*: {RealFields: [PiD, -I*SigD], Norm: 1, Qnb: {SO10: -126}}
+}
+
+Potential: {
+
+#######################################
+# All particles must be defined above !
+#######################################
+#
+}
