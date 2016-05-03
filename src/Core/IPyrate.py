@@ -313,6 +313,9 @@ class Idbquerry(cmd.Cmd):
     def do_FondR(self, line):
         return self.do_generic_onearg(line, 'fond')
 
+    def do_DimAdj(self, line):
+        return self.do_generic_onearg(line, 'dimAdj')
+
     def complete_FondR(self, text, line, begidx, endidx):
         return self.complete_onearg(text, line, begidx, endidx, 'Fond')
 
@@ -368,11 +371,20 @@ class Idbquerry(cmd.Cmd):
                 raise IdbquerryWrongFormat(onlygauge=True)
             else:
                 if not self.is_in_db([args[0], function]):
-                    try:
-                        lie = LieAlgebra(CartanMatrix("SU", int(args[0][-1])))
-                    except ValueError:
-                        exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
-                    if function == '_get_struct()':
+                    # TODO REDO THAT USING THE DECLARE A LGEBREA METHOD
+                    if 'SU' in args[0]:
+                        try:
+                            lie = LieAlgebra(CartanMatrix("SU", int(args[0][2:])))
+                        except ValueError:
+                            exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
+                    elif 'SO' in args[0]:
+                        try:
+                            lie = LieAlgebra(CartanMatrix("SO", int(args[0][2:])))
+                        except ValueError:
+                            exit("Error in creating the SO(n) gauge group.")
+                    else:
+                        exit("Gauge group not implemented.")
+                    if function == '_get_struct()' or function == 'dimAdj':
                         res = eval('lie.{}'.format(function))
                     else:
                         res = eval('tuple(lie.{}.tolist()[0])'.format(function))
@@ -441,14 +453,8 @@ class Idbquerry(cmd.Cmd):
                         irrep_tag = irrep
                     if not self.is_in_db([group, function, irrep_tag]):
                         # use PyLie to calculate the corresponding result
-                        assert 'SU' in group
                         if istuple:
-                            if not len(irrep) == int(group[-1]) - 1:
-                                raise IdbquerryInconsistentIrreps()
-                            try:
-                                lie = LieAlgebra(CartanMatrix("SU", int(group[-1])))
-                            except ValueError:
-                                exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
+                            lie = self._declare_algebra(group, irrep=irrep)
                             # call the proper method from PyLie
                             res = eval('lie.{}({})'.format(function, list(irrep)))
                             if function == 'repMatrices':
@@ -477,10 +483,7 @@ class Idbquerry(cmd.Cmd):
                         else:
                             # PyLie does not have a good implementation of the DimToDynkin therefore we will put it in the db directly
                             if function == 'DimToDynkin':
-                                try:
-                                    lie = LieAlgebra(CartanMatrix("SU", int(group[-1])))
-                                except ValueError:
-                                    exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
+                                lie = self._declare_algebra(group)
                                 # get all the irreps with dim <=
                                 sign_irrep = sign(irrep)
                                 res = sorted([el for el in lie.repsUpToDimN(abs(irrep)) if lie.dimR(el) == abs(irrep)])
@@ -555,6 +558,29 @@ class Idbquerry(cmd.Cmd):
                 conjs.append(False)
                 invs.append(el)
         return invs, conjs
+
+    def _declare_algebra(self, group, irrep=[]):
+        """
+        creates the algebra depending on the info
+        :param infos:
+        :return:
+        """
+        if 'SU' in group:
+            if irrep:
+                if not len(irrep) == int(group[2:]) - 1:
+                    raise IdbquerryInconsistentIrreps()
+            try:
+                lie = LieAlgebra(CartanMatrix("SU", int(group[2:])))
+            except ValueError:
+                    exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
+        elif 'SO' in group:
+            try:
+                lie = LieAlgebra(CartanMatrix("SO", int(group[2:])))
+            except ValueError:
+                exit("Error in creating the SO(n) gauge group.")
+        else:
+            exit("Exit group not implemented yet: `{}`".format(group[:2]))
+        return lie
 
     def _add_to_db(self, attributes, res):
         # add a given result to the database this way

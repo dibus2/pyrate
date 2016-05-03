@@ -1,0 +1,68 @@
+# YAML 1.1
+---
+Author: Emanuele A. Bagnaschi
+Date: 07.09.2015
+Name: THDM
+Groups: {'U1': U1, 'SU2L': SU2, 'SU3c': SU3}
+
+
+##############################
+#Fermions assumed weyl spinors
+##############################
+Fermions: {
+   Qbar: {Gen: 3, Qnb:{ U1: -1/6, SU2L: -2, SU3c: -3}},
+   Lbar: {Gen: 3, Qnb:{ U1: 1/2, SU2L: -2, SU3c: 1}},
+   uR: {Gen: 3, Qnb:{ U1: 2/3, SU2L: 1, SU3c: [1,0]}},
+   dR: {Gen: 3, Qnb:{ U1: -1/3, SU2L: 1, SU3c: 3}},
+   eR: {Gen: 3, Qnb:{ U1: -1, SU2L: 1, SU3c: 1}},
+}
+
+#############
+#Real Scalars
+#############
+
+RealScalars: {
+  Pi1: {U1: 1/2, SU2L: 2, SU3c: 1},
+  Sigma1: {U1: 1/2, SU2L: 2, SU3c: 1},
+  Pi2: {U1: 1/2, SU2L: 2, SU3c: 1},
+  Sigma2: {U1: 1/2, SU2L: 2, SU3c: 1},  
+}
+
+##########################################################################
+#Complex Scalars : have to be expressed in terms of Real Scalars see above
+##########################################################################
+
+CplxScalars: {
+  H1: {RealFields: [Pi1,I*Sigma1], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, SU2L: 2, SU3c: 1}},
+  H1*: {RealFields: [Pi1,-I*Sigma1], Norm: 1/Sqrt(2), Qnb : {U1: -1/2, SU2L: -2, SU3c: 1}},
+  H2: {RealFields: [Pi2,I*Sigma2], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, SU2L: 2, SU3c: 1}},
+  H2*: {RealFields: [Pi2,-I*Sigma2], Norm: 1/Sqrt(2), Qnb : {U1: -1/2, SU2L: -2, SU3c: 1}}
+}
+
+Potential: {
+
+#######################################
+# All particles must be defined above !
+#######################################
+ 
+Yukawas:{
+  'Y_{u}': {Fields: [Qbar,uR,H2*], Norm: 1},
+  'Y_{d}': {Fields: [Qbar,dR,H1], Norm: 1},
+  'Y_{e}': {Fields: [Lbar,eR,H1], Norm: 1},
+ },
+QuarticTerms: {
+ '\lambda_1' : {Fields : [H1,H1*,H1,H1*], Norm : 1},
+ '\lambda_2' : {Fields : [H2,H2*,H2,H2*], Norm : 1},
+ '\lambda_3' : {Fields : [H1,H1*,H2,H2*], Norm : 1},
+ '\lambda_4' : {Fields : [H2,H1*,H1,H2*], Norm : 1},
+ '\lambda_5' : {Fields : [[H2,H1*,H2,H1*],[H1,H2*,H1,H2*]], Norm : 1/2}
+ },
+ScalarMasses: {
+ 'm122' : {Fields : [[H2,H1*],[H1,H2*]], Norm : -1},
+ 'm112' : {Fields : [H1*,H1], Norm : 1},
+ 'm222' : {Fields : [H2*,H2], Norm : 1}
+ },
+FermionMasses: {
+}
+
+}

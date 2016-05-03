@@ -15,18 +15,19 @@ class SUn(object):
         self._absname = 'SU{}'.format(N)
         self.Algebra = 'A'
         self.N = N
+        # Repr of the algebra or the fundamental
+        self.Fond = self.idb.do_FondR(self.idb.toline([self._absname]))
+        self.Adj = self.idb.do_AdjR(self.idb.toline([self._absname]))
+        self.dimAdj = self.idb.do_DimAdj(self._absname)
         # dim of the adjoint
         self.d = self.CompDimAdj()
         self.g = symbols('g_{}'.format(self.name))
         self.singlet = '1'
         self.Dynksinglet = tuple((self.N - 1) * [0])
-        # Repr of the algebra or the fundamental
-        self.Fond = self.idb.do_FondR(self.idb.toline([self._absname]))
-        self.Adj = self.idb.do_AdjR(self.idb.toline([self._absname]))
         self.fabc = self.idb.do_Struc(self.idb.toline([self._absname]))
         # transformation
-        self.fabc = (tuple(flatten(self.fabc)), self.fabc.shape)
         # Convert the  matrices into tuples that can be passed to the symbolic functions
+        self.fabc = (tuple(flatten(self.fabc)), self.fabc.shape)
         self.U = False
 
     def __repr__(self):
@@ -54,19 +55,6 @@ class SUn(object):
             )[(ferm1[0], ferm2[0])]
         return mat
 
-    def OuterMatrixProduct(self, M1, M2):
-        """Calculates the outer products of two matrices"""
-        p1, q1 = M1.shape
-        p2, q2 = M2.shape
-        outM = zeros((p1 + p2, q1 + q2))
-        outM[:p1, :q1] = M1
-        outM[p1:, q1:] = M2
-        return outM
-
-    def CompDimAdj(self):
-        """return the dim of the Adjoint representation"""
-        return self.N ** 2 - 1
-
     def C2(self, irrep):
         """
         Casimir for the different irepp of SU(N)
@@ -93,11 +81,36 @@ class SUn(object):
         else:
             loggingCritical("Error: no such irrep {}".format(irrep), verbose=True)
 
-    def sumperso(self, list):
-        out = list[0]
-        for el in list[1:]:
-            out += el
-        return out
+
+# New as of May 2016 Implementation of SO(2n) groups
+
+
+class SOn(SUn):
+    def __init__(self, N, name, idb):
+        self.idb = idb
+        self.name = name
+        # The type of Lie algebra needs to be determined
+        self.N = N
+        if self.N % 2 == 0:
+            self.Algebra = 'D'  # SO(2n)
+        else:
+            self.Algebra = 'B'  # SO(2n+1)
+        self._absname = 'SO{}'.format(N)
+        self.n = self.N / 2  # small n
+        # dim of the adjoint
+        self.Dynksinglet = tuple((self.n) * [0])
+        # Repr of the algebra or the fundamental
+        self.Fond = self.idb.do_FondR(self.idb.toline([self._absname]))
+        self.Adj = self.idb.do_AdjR(self.idb.toline([self._absname]))
+        self.dimAdj = self.idb.do_DimAdj(self._absname)
+        self.fabc = self.idb.do_Struc(self.idb.toline([self._absname]))
+        self.g = symbols('g_{}'.format(self.name))
+        self.singlet = '1'
+        self.U = False
+
+    def __repr__(self):
+        """Change the representation of SO(N)"""
+        return "Instance of SO({}) group".format(self.N)
 
 
 class U1(object):

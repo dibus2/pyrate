@@ -276,6 +276,9 @@ class Model(object):
                 self.GaugeGroups.append([GroupName, SUn(int(group.split('U')[1]),'{}'.format(GroupName),  self.idb), False])
                 # add the dim so that we know over which indices to sum later on
                 self.IndGaugeGroups.append(self.GaugeGroups[-1][1].N)
+            elif group.split('O')[0] == 'S':  # it is a SO n group factor. new May 2016 for v2.0.0
+                pudb.set_trace()
+                self.GaugeGroups.append([GroupName, SOn(int(group[2:]), GroupName, self.idb)])
             else:
                 loggingCritical("ERROR gauge group {} is not known, exiting.".format(group), verbose=True)
                 exit()
