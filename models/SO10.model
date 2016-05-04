@@ -36,4 +36,8 @@ Potential: {
 # All particles must be defined above !
 #######################################
 #
+Yukawas:{
+  'Y_{10}': {Fields: [Psi, H, Psi], Norm: 1},
+  'Y_{126}': {Fields: [Psi, Delta*, Psi], Norm: 14400},
+ },
 }
