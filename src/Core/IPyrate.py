@@ -136,7 +136,7 @@ class Idbquerry(cmd.Cmd):
                                              |_|  \_, |____|_\___|
                                                   |__/
         \n\n\n"""
-    intro += "\t==============================================================================================\n\t\tPyLie: Python and Lie Algebra. PyLie had been written specifically for PyR@TE.\n\t\tIt is a python re-write of the relevant Mathematica routines of Susyno v3.4.\n\t\tFlorian Lyonnet: flyonnet@smu.edu 2015\n\t==============================================================================================\n"
+    intro += "\t==============================================================================================\n\t\tPyLie: Python and Lie Algebra. PyLie has been written specifically for PyR@TE.\n\t\tIt is a python re-write of the relevant Mathematica routines of Susyno v3.4.\n\t\tFlorian Lyonnet: flyonnet@smu.edu 2015\n\t==============================================================================================\n"
 
     def __init__(self, noprint=False):
         cmd.Cmd.__init__(self)
@@ -221,14 +221,11 @@ class Idbquerry(cmd.Cmd):
                     if 'SU' in ls[0] and ls[0] != 'SU2':
                         if not (all([len(el) == int(ls[0][-1]) - 1 for el in ls[1]])):
                             raise IdbquerryInconsistentIrreps()
-                    # Let's restrict it to SU(n) for now
-                    if 'SU' not in ls[0]:
+                    # Let's restrict it to SU(n) and SO(N)
+                    if ls[0][:2] not in ['SU', 'SO']:
                         raise IdbquerryMissingArgument('gauge')
                     # Create the LieAlgebra object
-                    try:
-                        lie = LieAlgebra(CartanMatrix('SU', int(ls[0][-1])))
-                    except ValueError:
-                        exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
+                    lie = self._declare_algebra(ls[0])
                     if not self.is_in_db([ls[0], self.convert[whichinvariant], ls[1]]):
                         invs, conjs = self._split_inputs(ls[1])
                         res = lie.invariants(invs, conj=conjs, pyrate_normalization=True, returnTensor=True)
@@ -263,6 +260,8 @@ class Idbquerry(cmd.Cmd):
         contstruct a human readable output of the contraction a la susyno
         """
         Contraction = ""
+        if contraction == []:
+            return "[]"
         if type(contraction[0]) != list:
             contraction = [contraction]
         for ii, ell in enumerate(contraction):
@@ -372,18 +371,19 @@ class Idbquerry(cmd.Cmd):
             else:
                 if not self.is_in_db([args[0], function]):
                     # TODO REDO THAT USING THE DECLARE A LGEBREA METHOD
-                    if 'SU' in args[0]:
-                        try:
-                            lie = LieAlgebra(CartanMatrix("SU", int(args[0][2:])))
-                        except ValueError:
-                            exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
-                    elif 'SO' in args[0]:
-                        try:
-                            lie = LieAlgebra(CartanMatrix("SO", int(args[0][2:])))
-                        except ValueError:
-                            exit("Error in creating the SO(n) gauge group.")
-                    else:
-                        exit("Gauge group not implemented.")
+                    #if 'SU' in args[0]:
+                    #    try:
+                    #        lie = LieAlgebra(CartanMatrix("SU", int(args[0][2:])))
+                    #    except ValueError:
+                    #        exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
+                    #elif 'SO' in args[0]:
+                    #    try:
+                    #        lie = LieAlgebra(CartanMatrix("SO", int(args[0][2:])))
+                    #    except ValueError:
+                    #        exit("Error in creating the SO(n) gauge group.")
+                    #else:
+                    #    exit("Gauge group not implemented.")
+                    lie = self._declare_algebra(args[0])
                     if function == '_get_struct()' or function == 'dimAdj':
                         res = eval('lie.{}'.format(function))
                     else:
