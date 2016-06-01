@@ -9,6 +9,7 @@ from ScalarMass import *
 from Trilinear import *
 from ScalarAnomalous import *
 from FermionAnomalous import *
+import pudb
 
 
 def Translate(RGE, model, RunSettings):
@@ -63,8 +64,9 @@ def Translate(RGE, model, RunSettings):
                 if powe[1] == 3 and RunSettings['Two-Loop']:
                     # The last step is to calculate the yukawa part
                     Translated[x[0]][ipow][0] = Y4F(powe, model, x)
-                    loggingInfo('\t\t\t Calculating the Y4(F) term...done', verbose=RunSettings['vInfo'])
+                    pudb.set_trace()
                     Translated[x[0]][ipow][0] = Translated[x[0]][ipow][0].doit()
+                    loggingInfo('\t\t\t Calculating the Y4(F) term...done', verbose=RunSettings['vInfo'])
             Translated[x[0]] = CompileGaugeCouplings(model, Translated, x[0], RunSettings['Weyl'],
                                                      RunSettings['SetGutNorm'])
         # Kinetic mixing terms

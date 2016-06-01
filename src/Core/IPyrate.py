@@ -17,7 +17,7 @@ try:
     import pickle
     import os
     from Logging import *
-    sys.path.append('src/pylie')
+    sys.path.append(os.path.relpath(os.path.dirname(__file__)+'/../pylie'))
     from PyLie import *
     import gzip
 except:
