@@ -3,6 +3,7 @@
 Defines the function needed to do the contraction of different fields"""
 from Logging import *
 
+
 import pudb
 
 try:
@@ -172,37 +173,65 @@ class FF(Function):
             else:
                 return Integer(0)
 
+#class FFcustom(Function):
+#    narg = 2
+#    is_commutative = True
+#
+#    @classmethod
+#    def eval(cls, args, contraction):
+#        """
+#        implement generic Factor function
+#        """
+#        if all([el.is_integer for el in args]):
+#            for el in contraction:
+#                if el[:-1] == args:
+#                    return el[-1]
+#            return Integer(0)
 
-class FactorFunction(object):
-    """create a class to store the function
-    that calculates the contraction factors
-    """
+#            Components = [el[:-1] for el in contraction]
+#            Idx = [iel for iel, el in enumerate(Components) if el == args]
+#            if Idx != []:
+#                assert len(Idx) == 1
+#                return contraction[Idx[0]][-1]
+#            else:
+#                return Integer(0)
 
-    def __init__(self, contraction, Kr=1, indices=[]):
-        self.contraction = tuple(contraction)
-        # Get the number if indices needed
-        self.nbind = len(self.contraction[0]) - 1  # any one would do the trick
-        # Get max value for the indices
-        self.nmaxind = max([max(el) for el in self.contraction])
-        self.Kr = Kr
-        self.indices = tuple(indices)
+    def __repr__(cls):
+        return 'FF({})'.format(cls.args[0])
 
-    # replace the deriv indices by the exterior ones
 
-    def __repr__(self):
-        return "FF"
 
-    def CF(self, indices):
-        """creates an instance of the FF class with the corresponding contraction and indices"""
-        if all([type(el) == int for el in indices]):
-            assert len(indices) == self.nbind
-            assert max(indices) <= self.nmaxind
-        # For all the indices we have to do the replacement in FF
-        f = evaluate_deltas((FF(self.indices, self.contraction) * self.Kr).expand())
-        for ie, ind in enumerate(indices):  # matching of the tp indices to the actual ones
-            f = f.subs('deriv{}'.format(ie + 1), ind)
-        return f
 
-    def update(self, fac):
-        """update the GetContractionFactor method"""
-        self.__init__(self.contraction, fac[0], fac[1])
+#class FactorFunction(object):
+#    """create a class to store the function
+#    that calculates the contraction factors
+#    """
+#
+#    def __init__(self, contraction, Kr=1, indices=[]):
+#        self.contraction = tuple(contraction)
+#        # Get the number if indices needed
+#        self.nbind = len(self.contraction[0]) - 1  # any one would do the trick
+#        # Get max value for the indices
+#        self.nmaxind = max([max(el) for el in self.contraction])
+#        self.Kr = Kr
+#        self.indices = tuple(indices)
+#
+#    # replace the deriv indices by the exterior ones
+#
+#    def __repr__(self):
+#        return "FF"
+#
+#    def CF(self, indices):
+#        """creates an instance of the FF class with the corresponding contraction and indices"""
+#        if all([type(el) == int for el in indices]):
+#            assert len(indices) == self.nbind
+#            assert max(indices) <= self.nmaxind
+#        # For all the indices we have to do the replacement in FF
+#        f = evaluate_deltas((FF(self.indices, self.contraction) * self.Kr).expand())
+#        for ie, ind in enumerate(indices):  # matching of the tp indices to the actual ones
+#            f = f.subs('deriv{}'.format(ie + 1), ind)
+#        return f
+#
+#    def update(self, fac):
+#        """update the GetContractionFactor method"""
+#        self.__init__(self.contraction, fac[0], fac[1])

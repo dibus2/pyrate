@@ -1,6 +1,5 @@
 import sys
 import time
-import pudb
 sys.path.append('./src/GroupTheory')
 from GroupDefinitions import *
 from RGEsmathModule import *
@@ -11,6 +10,9 @@ try:
     from types import MethodType
 except ImportError:
     loggingCritical("Error while loading modules", verbose=True)
+
+
+
 
 
 class Model(object):
@@ -57,6 +59,8 @@ class Model(object):
         self.ListTri = []
         self.ToOnly = {}
         self.Combination = {}
+        self.icgcs = 0
+        globals()['CGCs'] = {}
         # declare an interactive db access object
         self.idb = Idbquerry(noprint=True)
         # Validate the entries
@@ -513,7 +517,9 @@ class Model(object):
                                 propindices[idd] = [[part.indices[idd], getdimIrrep(
                                     self.Particles[str(part.args[0])].Qnb[self.NonUGaugeGroups[idd][0]],
                                     self.NonUGaugeGroups[idd][1], self.idb)] for part in subll[0] if part.indices[idd] != 0]
-                                Factor[idd] = FF(indicesff[idd], fac)
+                                Factor[idd] = FFcustom(indicesff[idd], self.icgcs)
+                                globals()['CGCs'][self.icgcs] = fac
+                                self.icgcs += 1
                             else:
                                 # particles are not charged under this group
                                 Factor[idd] = 1
@@ -2555,9 +2561,10 @@ class Model(object):
             else:
                 res = self.Expand(((_Y, s1, f1, p1), (_Ya, s1, p1, f2)), Layer=1, dotrace=False)
             if res != 0:
-                res = res.doit()
+                res = self.doit(res)
             self.InvariantResults[key] = res
         return res
+
 
 
     def Yab2S(self, parts, indices):
@@ -2871,6 +2878,29 @@ class Model(object):
             return all([el in self.Scalars for el in listParticles])
 
 
+
+
+    def doit(self, res):
+        """
+        this is a wrapper for the doit method of sympy splitting the sums into single terms and doit on each one of them
+        """
+        temp = []
+        if type(res) == Add:
+            tosum = res.args
+        else:
+            tosum = [res]
+        for el in res.args:
+            terms, indices = el.args[0], el.args[1:]
+            # check if the terms is a sum of terms
+            terms = terms.expand()
+            if type(terms) == Add:
+                tobesummed = terms.args
+                for ell in tobesummed:
+                    temp.append(Sum(ell, *indices).doit())
+        temp = sum(temp)
+        return temp
+
+
 ###################
 # Indices Generation
 ###################
@@ -2973,3 +3003,19 @@ class Index(object):
         self.dummy = 0
         self.grextind = 0
         self.grintind = 0
+
+
+class FFcustom(Function):
+    narg = 2
+    is_commutative = True
+
+    @classmethod
+    def eval(cls, args, icgcs):
+        """
+        implement generic Factor function
+        """
+        if all([el.is_integer for el in args]):
+            for el in globals()['CGCs'][icgcs]:
+                if el[:-1] == args:
+                    return el[-1]
+            return Integer(0)

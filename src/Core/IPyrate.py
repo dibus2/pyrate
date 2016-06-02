@@ -23,6 +23,7 @@ try:
 except:
     exit("Error while loading one of the modules: `cmd, os, readline, rlcompleter, pickle, gzip, PyLie`")
 try:
+    Version = False
     from sympy import symbols, Symbol, Rational, sqrt, IndexedBase, Matrix, \
         Wild, Symbol, Function, symbols, pi, Rational, zeros, I, sqrt, eye, MatrixSymbol, \
         KroneckerDelta, flatten, pprint, IndexedBase, Idx, Integer, Add, Mul, Indexed, Sum, conjugate, adjoint, \
