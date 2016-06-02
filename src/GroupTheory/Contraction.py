@@ -155,23 +155,23 @@ class Ts(Function):
 # Factor Function
 ################
 
-class FF(Function):
-    narg = 2
-    is_commutative = True
-
-    @classmethod
-    def eval(cls, args, contraction):
-        """
-        implement generic Factor function
-        """
-        if all([el.is_integer for el in args]):
-            Components = [el[:-1] for el in contraction]
-            Idx = [iel for iel, el in enumerate(Components) if el == args]
-            if Idx != []:
-                assert len(Idx) == 1
-                return contraction[Idx[0]][-1]
-            else:
-                return Integer(0)
+#class FF(Function):
+#    narg = 2
+#    is_commutative = True
+#
+#    @classmethod
+#    def eval(cls, args, contraction):
+#        """
+#        implement generic Factor function
+#        """
+#        if all([el.is_integer for el in args]):
+#            Components = [el[:-1] for el in contraction]
+#            Idx = [iel for iel, el in enumerate(Components) if el == args]
+#            if Idx != []:
+#                assert len(Idx) == 1
+#                return contraction[Idx[0]][-1]
+#            else:
+#                return Integer(0)
 
 #class FFcustom(Function):
 #    narg = 2
@@ -196,8 +196,8 @@ class FF(Function):
 #            else:
 #                return Integer(0)
 
-    def __repr__(cls):
-        return 'FF({})'.format(cls.args[0])
+#    def __repr__(cls):
+#        return 'FF({})'.format(cls.args[0])
 
 
 

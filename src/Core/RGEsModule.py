@@ -63,10 +63,10 @@ def Translate(RGE, model, RunSettings):
                     Translated[x[0]][ipow][0] = Translated[x[0]][ipow][0].doit()
                 if powe[1] == 3 and RunSettings['Two-Loop']:
                     # The last step is to calculate the yukawa part
+                    loggingInfo('\t\t\t Calculating the Y4(F) term...', verbose=RunSettings['vInfo'])
                     Translated[x[0]][ipow][0] = Y4F(powe, model, x)
-                    pudb.set_trace()
                     Translated[x[0]][ipow][0] = Translated[x[0]][ipow][0].doit()
-                    loggingInfo('\t\t\t Calculating the Y4(F) term...done', verbose=RunSettings['vInfo'])
+                    loggingInfo('\t\t\t ...done', verbose=RunSettings['vInfo'])
             Translated[x[0]] = CompileGaugeCouplings(model, Translated, x[0], RunSettings['Weyl'],
                                                      RunSettings['SetGutNorm'])
         # Kinetic mixing terms

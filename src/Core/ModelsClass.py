@@ -2561,7 +2561,7 @@ class Model(object):
             else:
                 res = self.Expand(((_Y, s1, f1, p1), (_Ya, s1, p1, f2)), Layer=1, dotrace=False)
             if res != 0:
-                res = self.doit(res)
+                res = res.doit()
             self.InvariantResults[key] = res
         return res
 
@@ -2879,25 +2879,41 @@ class Model(object):
 
 
 
-
     def doit(self, res):
         """
         this is a wrapper for the doit method of sympy splitting the sums into single terms and doit on each one of them
         """
         temp = []
-        if type(res) == Add:
+        res = res.expand()
+        if isinstance(res, Add):
             tosum = res.args
         else:
             tosum = [res]
-        for el in res.args:
-            terms, indices = el.args[0], el.args[1:]
-            # check if the terms is a sum of terms
-            terms = terms.expand()
-            if type(terms) == Add:
-                tobesummed = terms.args
-                for ell in tobesummed:
-                    temp.append(Sum(ell, *indices).doit())
-        temp = sum(temp)
+        final = []
+        for el in tosum:
+            if isinstance(el, Mul):
+                temp = 1
+                for ell in el.args:
+                    if not isinstance(ell, Sum):
+                        temp = temp * ell
+                    else:
+                        temp = temp * self._doit_aux(ell)
+            elif isinstance(el, Sum):
+                temp = self._doit_aux(el)
+            else:
+                pudb.set_trace()
+            final.append(temp)
+        return sum(final)
+
+    def _doit_aux(self, ell):
+        pudb.set_trace()
+        if isinstance(ell.args[0], Add):
+            temp = []
+            for elem in ell.args[0].args:
+                temp.append(Sum(elem, *ell.args[1:]).doit())
+            temp = sum(temp)
+        else:
+            temp = Sum(ell.args[0], *ell.args[1:]).doit()
         return temp
 
 
@@ -3019,3 +3035,7 @@ class FFcustom(Function):
                 if el[:-1] == args:
                     return el[-1]
             return Integer(0)
+
+
+    def diff(self, arg):
+        return Integer(0)
