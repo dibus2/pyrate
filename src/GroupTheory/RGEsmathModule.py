@@ -351,7 +351,6 @@ def DeterminOrdering(model, Final):
 def determinordering(model, Final):
     """Determin the ordering of the Structure"""
     OrderedTerm = []
-    pudb.set_trace()
     for term in Final:
         args = term.args
         Out, In, Factor = [], [], []
