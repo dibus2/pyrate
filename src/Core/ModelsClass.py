@@ -11,6 +11,7 @@ try:
 except ImportError:
     loggingCritical("Error while loading modules", verbose=True)
 
+sys.setrecursionlimit(10000)
 
 
 
@@ -2248,7 +2249,7 @@ class Model(object):
                         f2kr = [ind for idi, ind in enumerate(indices[2]) if idi != idgr]
                         # create a symbolic function for the matrix
                         # generate the index
-                        Indx = [('{}A{}'.format(indlabel, label[0])), 0, grp.d - 1]
+                        Indx = [('{}A{}'.format(indlabel, label[0])), 0, grp.dimAdj - 1]
                         # create the product of kronecker to conserve the other qnb
                         Ind = [[f1kr[i][0], f2kr[i][0]] for i in range(len(f1kr)) if
                                len(str(f1kr[i][0]).split('dum')) != 2]
@@ -2311,7 +2312,7 @@ class Model(object):
                     else:
                         # create a symbolic function for the matrix
                         # generate the index
-                        Indx = [('{}A{}'.format(indlabel, label[0])), 0, grp.d - 1]
+                        Indx = [('{}A{}'.format(indlabel, label[0])), 0, grp.dimAdj - 1]
                         # create the product of kronecker to conserve the other qnb
                         Ind = [[f1kr[i][0], f2kr[i][0]] for i in range(len(f1kr)) if
                                len(str(f1kr[i][0]).split('dum')) != 2]
@@ -2878,43 +2879,6 @@ class Model(object):
             return all([el in self.Scalars for el in listParticles])
 
 
-
-    def doit(self, res):
-        """
-        this is a wrapper for the doit method of sympy splitting the sums into single terms and doit on each one of them
-        """
-        temp = []
-        res = res.expand()
-        if isinstance(res, Add):
-            tosum = res.args
-        else:
-            tosum = [res]
-        final = []
-        for el in tosum:
-            if isinstance(el, Mul):
-                temp = 1
-                for ell in el.args:
-                    if not isinstance(ell, Sum):
-                        temp = temp * ell
-                    else:
-                        temp = temp * self._doit_aux(ell)
-            elif isinstance(el, Sum):
-                temp = self._doit_aux(el)
-            else:
-                pudb.set_trace()
-            final.append(temp)
-        return sum(final)
-
-    def _doit_aux(self, ell):
-        pudb.set_trace()
-        if isinstance(ell.args[0], Add):
-            temp = []
-            for elem in ell.args[0].args:
-                temp.append(Sum(elem, *ell.args[1:]).doit())
-            temp = sum(temp)
-        else:
-            temp = Sum(ell.args[0], *ell.args[1:]).doit()
-        return temp
 
 
 ###################

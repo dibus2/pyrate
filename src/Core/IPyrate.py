@@ -509,6 +509,8 @@ class Idbquerry(cmd.Cmd):
                                     return res
                     else:
                         if function == 'repMatrices':
+                            if len(irrep) == 1:
+                                irrep = (irrep[0], conjugate_matrix)
                             if not HB:
                                 res = self.db[group][function][irrep]
                             else:
@@ -659,8 +661,12 @@ class Idbquerry(cmd.Cmd):
         res = cp.deepcopy(tuple(sparse)), tp
         return res
 
-    def toline(self, atttributes):
-        return ' '.join([str(el) for el in atttributes]).replace('(', '[').replace(')', ']')
+    def toline(self, attributes):
+        temp = [str(el) for el in attributes]
+        if len(attributes) >=2:
+            return ' '.join([temp[0],''.join(temp[1:])]).replace('(', '[').replace(')', ']').replace(', ',',')
+        else:
+            return ' '.join(temp).replace('(', '[').replace(')', ']')
 
     def _filter_su2_irrep(self, line, domatrices=False):
         if 'SU2' in line:

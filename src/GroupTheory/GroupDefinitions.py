@@ -40,7 +40,7 @@ class SUn(object):
             assert ferm1 == ferm2
             mat = self.idb.do_Matrices(
                 self.idb._filter_su2_irrep(
-                    self.idb.toline([self._absname, ferm1[1]]), domatrices=True
+                    self.idb.toline([self._absname, ferm1]), domatrices=True
                 ), HB=False
             )
 
