@@ -316,6 +316,13 @@ class Idbquerry(cmd.Cmd):
     def do_DimAdj(self, line):
         return self.do_generic_onearg(line, 'dimAdj')
 
+    def do_ReduceProduct(self, line):
+        self.noprint = True
+        res = self.do_generic(line, 'reduceRepProduct')
+        res = [(el, self.do_generic(line.split(' ')[0]+' '+str(el[0]), 'dimR')) for el in res]
+        self.noprint = False
+        print(res)
+
     def complete_FondR(self, text, line, begidx, endidx):
         return self.complete_onearg(text, line, begidx, endidx, 'Fond')
 
@@ -371,19 +378,6 @@ class Idbquerry(cmd.Cmd):
                 raise IdbquerryWrongFormat(onlygauge=True)
             else:
                 if not self.is_in_db([args[0], function]):
-                    # TODO REDO THAT USING THE DECLARE A LGEBREA METHOD
-                    #if 'SU' in args[0]:
-                    #    try:
-                    #        lie = LieAlgebra(CartanMatrix("SU", int(args[0][2:])))
-                    #    except ValueError:
-                    #        exit("Error in creating the SU(n) gauge group. Possible groups are SU2,SU3,...")
-                    #elif 'SO' in args[0]:
-                    #    try:
-                    #        lie = LieAlgebra(CartanMatrix("SO", int(args[0][2:])))
-                    #    except ValueError:
-                    #        exit("Error in creating the SO(n) gauge group.")
-                    #else:
-                    #    exit("Gauge group not implemented.")
                     lie = self._declare_algebra(args[0])
                     if function == '_get_struct()' or function == 'dimAdj':
                         res = eval('lie.{}'.format(function))
@@ -448,7 +442,10 @@ class Idbquerry(cmd.Cmd):
                 group, irrep = args
                 irrep = eval(irrep)
                 if istuple:
-                    irrep = tuple(irrep)
+                    if type(irrep[0]) == list:
+                        irrep = tuple([tuple(elem) for elem in irrep])
+                    else:
+                        irrep = tuple(irrep)
                 if group and irrep:
                     if conjugate_matrix is not None:
                         irrep_tag = (irrep[0], conjugate_matrix)
@@ -681,8 +678,15 @@ class Idbquerry(cmd.Cmd):
             if 'False' in ls[-1]:
                 ls[-1] = ls[-1].replace('False', '')
                 line = ' '.join(ls)
-                return line
-            return line
+                if domatrices:
+                    return line, False
+                else:
+                    return line
+            else:
+                if domatrices:
+                    return line, False
+                else:
+                    return line
         else:
             return line
 
