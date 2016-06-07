@@ -1,8 +1,17 @@
-Model: models/SM.model
-Quartic-Couplings: False
-ScalarTerms: False
+# YAML 1.1
+---
+Model: ./models/SM.model
+verbose: True
 Gauge-Couplings: True
+Quartic-Couplings: False
 Yukawas: True
-TwoLoop: False
-Results: results/demo
-verbose: False
+ScalarMass: False
+FermionMass: False
+Two-Loop: False
+Pickle : False
+Results: ./results/demo/
+LatexOutput : False
+LogFile : SM.log
+Weyl: True
+ToM: False
+ToMF: SM.txt
