@@ -1,0 +1,8 @@
+Model: models/SM.model
+Quartic-Couplings: False
+ScalarTerms: False
+Gauge-Couplings: True
+Yukawas: True
+TwoLoop: False
+Results: results/demo
+verbose: False

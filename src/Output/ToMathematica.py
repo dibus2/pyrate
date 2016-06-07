@@ -93,6 +93,8 @@ def ToMathematicaNotation(vall, model, FlagSquare=True):
             vall = roundToSquareForFunction('SP', vall)
         while 'Dagger(' in vall:
             vall = roundToSquareForFunction('Dagger', vall)
+        while 'adjoint(' in vall:
+            vall = roundToSquareForFunction('adjoint', vall)
         while 'trace(' in vall:
             vall = roundToSquareForFunction('trace', vall)
         while 'transpose(' in vall:
@@ -111,7 +113,7 @@ def ToMathematicaNotation(vall, model, FlagSquare=True):
             vall = extractSymbol(fmsymb, vall)
     vall = vall.replace('conjugate', 'conj').replace('MatM', 'MatMul').replace('SP', 'ScalarProd').replace('Dagger',
                                                                                                            'Adj').replace(
-        'transpose', 'Tp').replace('[ ]', '')
+        'transpose', 'Tp').replace('[ ]', '').replace('adjoint', 'Adj')
     # Simplify the Symbols to get rid of the LateX structure
     symbs = model.ListYukawa + model.ListFM + model.ListLbd + model.ListScM + model.ListTri
     ll = []
