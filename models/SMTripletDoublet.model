@@ -45,8 +45,8 @@ Yukawas:{
   'Y_{u}': {Fields: [Qbar,uR,H*], Norm: 1},
   'Y_{d}': {Fields: [Qbar,dR,H], Norm: 1},
   'Y_{e}': {Fields: [Lbar,eR,H], Norm: 1},
-  'g_{d}': {Fields: [T,D,H], Norm: -3**(1/4)/sqrt(2)},#The norm here is necessary because the normalization of CGCs has changed in the new version
-  'g_{u}': {Fields: [T,Dc,H*] ,Norm: 3**(1/4)/sqrt(2)}
+ 'g_{d}': {Fields: [T,D,H], Norm: -1/sqrt(2)},#The norm here is necessary because the normalization of CGCs has changed in the new version
+ 'g_{u}': {Fields: [T,Dc,H*] ,Norm: 1/sqrt(2)}
  },
 QuarticTerms: {
  '\lambda_1' : {Fields : [H,H*,H,H*], Norm : 1/2},
@@ -56,6 +56,6 @@ ScalarMasses: {
  },
 FermionMasses: { 
  'm_{T}' : {Fields: [T,T], Norm: 1/2},
- 'm_{D}' : {Fields: [D,Dc], Norm: 1}
+ 'm_{D}' : {Fields: [D,Dc], Norm: -1}
 }
 }
