@@ -81,7 +81,6 @@ def CLSabc(powe, comb, model):
                   ]
         reskin = sum(reskin)
     res += reskin
-    print(reskin)
     powe[0] = powe[0].subs(LSabc, res)
     return powe[0]
 

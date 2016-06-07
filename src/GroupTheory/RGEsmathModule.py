@@ -459,22 +459,27 @@ def determinordering(model, Final):
                         # breaking conditions for in and out terms
                         if len(Term) == 1:
                             # Reconstruct the skip terms
-                            skip = [
-                                model.Classes[str(el[0])](el[1]) if str(el[0]) in model.Classes and el[1] != () and len(
-                                    el[1]) == 2 else (
-                                model.Classes[str(el[0])](el[1][0]) if str(el[0]) in model.Classes and el[
-                                                                                                           1] != () and len(
-                                    el[1]) == 1 else
-                                (
-                                Symbol(str(el[0].args[0]), commutative=True).conjugate() if type(el[0]) == conjugate and
-                                                                                            el[1] == () else (
-                                    Symbol(str(el[0]), commutative=True) if str(el[0]) in model.Classes and el[
-                                                                                                                1] == () else
-                                    el[0]))) for el in skip]
+                            for iel, el in enumerate(skip):
+                                if str(el[0]) in model.Classes and el[1] != ():
+                                    if len(el[1]) == 2:
+                                        skip[iel] = model.Classes[str(el[0])](el[1])
+                                    elif len(el[1]) == 1:
+                                        skip[iel] = model.Classes[str(el[0])](el[1][0])
+                                else:
+                                    if type(el[0]) == conjugate and el[1] == ():
+                                        skip[iel] = Symbol(str(el[0].args[0]), commutative=True).conjugate()
+                                    elif type(el[0]) == transpose and el[1] == (): # remove the transpose it is a scalar
+                                        skip[iel] = Symbol(str(el[0].args[0]), commutative=True)
+                                    else:
+                                        skip[iel] = Symbol(str(el[0]), commutative=True)
+
                             # In case Term is a Yukawa it is necessarily the last one of skip
-                            if str(Term[0]) in model.Classes:
+                            if str(Term[0]) in model.Classes or str(Term[0].args[0]) in model.Classes: # in case there is a transposition or conjugate
                                 if (len(Indices) == 1 and Indices[0] == ()) or Indices == []:
-                                    Term = Symbol(str(Term[0]), commutative=True)
+                                    if isinstance(Term[0], transpose):
+                                        Term = Symbol(str(Term[0].args[0]), commutative=True) # remove the transpose
+                                    else:
+                                        Term = Symbol(str(Term[0]), commutative=True)
                                 elif Indices != []:
                                     if len(Indices) == 1 and skip != [] and type(skip[0]) == MatM:
                                         if len(Indices[-1]) >= 2 and Indices[-1][0] == Indices[-1][1] and len(
@@ -483,13 +488,8 @@ def determinordering(model, Final):
                                                 str(Indices[-1][1]).split('_')[0] + '1_f')
                                         Term = model.Classes[str(Term[0])](*Indices[-1]).transpose()
                                     else:
-                                        # <<<<<<< HEAD
-                                        #										if len(Indices[-1]) >= 2 and Indices[-1][0] == Indices[-1][1] and len(str(Indices[-1][1]).split('_')) == 2 :
-                                        # =======
-                                        # Let's keep the version from 1.2.7_beta
                                         if len(Indices[-1]) == 2 and Indices[-1][0] == Indices[-1][1] and len(
                                                 str(Indices[-1][1]).split('_')) == 2:
-                                            # >>>>>>> online
                                             Indices[-1] = Indices[-1][0], Symbol(
                                                 str(Indices[-1][1]).split('_')[0] + '1_f')
                                         Term = model.Classes[str(Term[0])](*Indices[-1])
