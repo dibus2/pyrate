@@ -318,30 +318,31 @@ def ExportBetaFunction(name, model):
     CodeStr += "\t#This is the mapping between rges and y[i]\n\t#{}\n".format(Mapping)
     temp1L = temp2L = ''
     for ii, val in FinalExpr.items():
-        for label, expr in val.items():
-            if ii == 'Gauge-Couplings':
-                label = model.GetGroupFromName[label].g
-            # Get the 1loop contribution
-            if ii != 'Yukawas' and ii != 'FermionMass':
-                temp1L += '\tb{} = ({})*kappa\n'.format(
-                    maps[label],
-                    TranslateToNumerics((kappa * expr).expand().subs(1 / pi ** 2, 0), ListSymbs, maps[label], Ids,
-                                        model, Mapping, isScalar=True))
-                # Get the 2loop contribution
-                temp2L += '\t\tb{0} = b{0} + ({1})*kappa**2\n'.format(
-                    maps[label],
-                    TranslateToNumerics((kappa ** 2 * expr).expand().subs(pi, 0), ListSymbs, maps[label], Ids, model,
-                                        Mapping, isScalar=True))
-            else:
-                temp1L += '\tbeta{} = ({})*kappa\n'.format(
-                    maps[label],
-                    TranslateToNumerics((kappa * expr).expand().subs(1 / pi ** 2, 0), ListSymbs, maps[label], Ids,
-                                        model, Mapping, isScalar=False))
-                # Get the 2loop contribution
-                temp2L += '\t\tbeta{0} = beta{0} + ({1})*kappa**2\n'.format(
-                    maps[label],
-                    TranslateToNumerics((kappa ** 2 * expr).expand().subs(pi, 0), ListSymbs, maps[label], Ids, model,
-                                        Mapping, isScalar=False))
+        if ii != 'ScalarAnomalous' and ii != 'FermionAnomalous':
+            for label, expr in val.items():
+                if ii == 'Gauge-Couplings':
+                    label = model.GetGroupFromName[label].g
+                # Get the 1loop contribution
+                if ii != 'Yukawas' and ii != 'FermionMass':
+                    temp1L += '\tb{} = ({})*kappa\n'.format(
+                        maps[label],
+                        TranslateToNumerics((kappa * expr).expand().subs(1 / pi ** 2, 0), ListSymbs, maps[label], Ids,
+                                            model, Mapping, isScalar=True))
+                    # Get the 2loop contribution
+                    temp2L += '\t\tb{0} = b{0} + ({1})*kappa**2\n'.format(
+                        maps[label],
+                        TranslateToNumerics((kappa ** 2 * expr).expand().subs(pi, 0), ListSymbs, maps[label], Ids, model,
+                                            Mapping, isScalar=True))
+                else:
+                    temp1L += '\tbeta{} = ({})*kappa\n'.format(
+                        maps[label],
+                        TranslateToNumerics((kappa * expr).expand().subs(1 / pi ** 2, 0), ListSymbs, maps[label], Ids,
+                                            model, Mapping, isScalar=False))
+                    # Get the 2loop contribution
+                    temp2L += '\t\tbeta{0} = beta{0} + ({1})*kappa**2\n'.format(
+                        maps[label],
+                        TranslateToNumerics((kappa ** 2 * expr).expand().subs(pi, 0), ListSymbs, maps[label], Ids, model,
+                                            Mapping, isScalar=False))
     # We regroup all the 1 loop and 2 loop contributions to avoid multiple if statements
     CodeStr += temp1L
     CodeStr += "\tif Assumptions['two-loop']:\n{}".format(temp2L)
@@ -417,7 +418,7 @@ def ExportBetaFunction(name, model):
     CodeStrI = '\"\"\"\nThis Code is generated automatically by pyR@TE, {} for the model : {}\nIt demonstrates how to use the beta_function file produced by pyR@TE using the -e option to solve the rges using the RGEsclass.py module\"\"\"\n'.format(
         date, model._Name)
     CodeStrI += "#!/usr/bin/env python\nimport sys\n#This line should be modified if you move the result file\nsys.path.append('{}')\n#Same as above.The RGEsclass.py should be accessible\nsys.path.append('{}')\ntry :\n\tfrom RGEclass import *\nexcept ImportError :\n\texit('RGEclass.py not found.')\ntry :\n\timport scipy.interpolate as scp\nexcept ImportError :\n\texit('error while loading scipy')\nfrom {} import *\n".format(
-        settings['Results'], '{}/Source/Output'.format(wd), Name.split('.')[0])
+        settings['Results'], '{}/src/Output'.format(wd), Name.split('.')[0])
     CodeStrI += "#In Order to use your result you have to create an instance of the RGE class following this\nrge = RGE(beta_function_{},{},labels={})\n#Note here that the labels are just used to label the results but should match the order in which the RGEs are solved.\n".format(
         model._Name, NbRGEs, TagsFull)
     CodeStrI += "\"\"\"\nOne can access the physical parameters as the top mass, the up quark yukawas, Z mass ...\nSince they are all attributes of the class object we have just created. The list is the following :\n\tPi = np.pi\n\talpha = 1./128.91\n\talphaS = 0.1184\n\tsinthetasq = 0.2316 #Sin squared\n\tMz = 91.1876 #in GeV\n\tMw = 80.399 # in GeV\n\tGf = 1.16637e-5 #in GeV ^-2\n\tCF = 4./3. #Casimir of the SU3 color\n\tNc = 3.\n\tQtop = 2./3.#top quark chargs\n\tvev = 246.22 # From (sqrt(2)Gf)^-1/2\n\tMt = 173.3 # the pole mass of the top\n\tU = [2.4e-3,1.27,165.3308]#mu,mc,mt (MSbar)mt=(Mt/(1+4alphas/3Pi))\n\tD = [4.75e-3,104e-3,4.19]#md,ms,mb\n\tL = [0.511e-3,105.66e-3,1.777]\n\tyU = [sqrt(2)/self.vev * el for el in self.U]\n\tyD = [sqrt(2)/self.vev * el for el in self.D]\n\tyL = [sqrt(2)/self.vev * el for el in self.L] \n\tg10 = sqrt(4*self.Pi * self.alpha)/sqrt(1-self.sinthetasq)#Initial value\n\tg20 = sqrt(4*self.Pi * self.alpha)/sqrt(self.sinthetasq)#Initial value\n\tg30 =  sqrt(4*self.Pi * self.alphaS)#Initial value\n\n\nTo modify one of them one would do :\n\"\"\"\nrge.Mt = 171.0\n"
