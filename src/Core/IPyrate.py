@@ -319,9 +319,13 @@ class Idbquerry(cmd.Cmd):
     def do_ReduceProduct(self, line):
         self.noprint = True
         res = self.do_generic(line, 'reduceRepProduct')
-        res = [(el, self.do_generic(line.split(' ')[0]+' '+str(el[0]), 'dimR')) for el in res]
+        if res:
+            res = [(el, self.do_generic(line.split(' ')[0]+' '+str(el[0]), 'dimR')) for el in res]
+            print(res)
         self.noprint = False
-        print(res)
+
+    def complete_ReduceProduct(self, text, line, begidx, endidx):
+        return self.complete_generic(text, line, begidx, endidx, 'reduceRepProduct')
 
     def complete_FondR(self, text, line, begidx, endidx):
         return self.complete_onearg(text, line, begidx, endidx, 'Fond')
@@ -365,6 +369,9 @@ class Idbquerry(cmd.Cmd):
 
     def do_Struc(self, line):
         return self.do_generic_onearg(line, '_get_struct()')
+
+    def complete_Struc(self, text, line, begidx, endidx):
+        return self.complete_onearg(text, line, begidx, endidx, '_get_struct()')
 
     def complete_Matrices(self, text, line, begidx, endidx):
         return self.complete_generic(text, line, begidx, endidx, 'Matrices')
@@ -437,15 +444,23 @@ class Idbquerry(cmd.Cmd):
                 args.remove(ll[1])
                 args.remove(ll[2])
             line = ' '.join(args)
+        elif len(args) == 1:
+            try:
+                raise IdbquerryMissingArgument()
+            except IdbquerryMissingArgument:
+                return None
         if istuple:
             tocheck = list
         else:
             tocheck = int
         try:
-            if not (type(eval(args[-1])) == tocheck):
-                raise IdbquerryWrongFormat(istuple)
+            try:
+                if not (type(eval(args[-1])) == tocheck):
+                    raise IdbquerryWrongFormat(istuple)
+            except SyntaxError:
+                raise IdbquerryWrongFormat(args[-1])
         except IdbquerryWrongFormat:
-            return
+            return None
         try:
             if len(args) == 3 and args[0] == 'SU2':
                 args[1] = line[4:]
