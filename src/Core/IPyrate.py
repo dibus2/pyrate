@@ -402,6 +402,19 @@ class Idbquerry(cmd.Cmd):
         except (IdbquerryWrongFormat, IdbquerryMissingArgument):
             pass
 
+
+    def do_RepsUpTo(self, line):
+        args = line.split(' ')
+        if len(args) != 2:
+            raise IdbquerryMissingArgument()
+        group, dim = args
+        lie = self._declare_algebra(group)
+        # call the proper method from PyLie
+        res = lie.repsUpToDimN(int(dim))
+        res = [(lie.dimR(el), el) for el in res]
+        print(res)
+
+
     def complete_onearg(self, text, line, begidx, endidx, function):
         ls = line.split(' ')
         if len(ls) == 2:
