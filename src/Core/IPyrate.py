@@ -582,7 +582,11 @@ class Idbquerry(cmd.Cmd):
         """
         if 'SU' in group:
             if irrep:
-                if not len(irrep) == int(group[2:]) - 1:
+                if type(irrep[0]) == tuple or type(irrep[0]) == list:
+                    for ell in irrep:
+                        if not len(ell) == int(group[2:]) -1:
+                            raise IdbquerryInconsistentIrreps()
+                elif not len(irrep) == int(group[2:]) - 1:
                     raise IdbquerryInconsistentIrreps()
             try:
                 lie = LieAlgebra(CartanMatrix("SU", int(group[2:])))
