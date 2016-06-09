@@ -424,6 +424,7 @@ class Idbquerry(cmd.Cmd):
                 sn = Sn()
                 try:
                     res = sn.snIrrepDim(eval(args))
+                    print(res)
                 except SyntaxError:
                     raise IdbquerryWrongFormat(args)
         except (IdbquerryWrongFormat, IdbquerryMissingArgument):

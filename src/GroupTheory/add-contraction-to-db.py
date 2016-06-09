@@ -17,7 +17,6 @@ output = pickles[0]
 for ip,pp in enumerate(pickles[1:]): 
     print("adding {} to the database {}".format(filenames[ip+1], filenames[0]))
     for key,val in pp.items():
-        pudb.set_trace()
         if key in output:
             if type(val) == dict:
                 for kkey,vval in val.items():

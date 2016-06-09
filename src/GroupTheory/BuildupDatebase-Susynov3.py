@@ -14,11 +14,10 @@ import re
 import copy
 import subprocess
 import itertools,functools
-import pudb
 # <codecell>
 
 #open the file as a string do the replacement un put it back before loading it
-f = open('CGCsnewsu4compute.m','r')
+f = open('CGCssu315p6tri.m','r')
 dic = f.readlines()
 f.close()
 #
@@ -34,44 +33,72 @@ while re.search('sqrt\([0-9]*/[0-9]*\)',dic) != None :
 
 while re.search('[0-9]{3}/[0-9]{4}',dic) != None :
    src = re.search('([0-9]{3})/([0-9]{4})',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 
 while re.search('[0-9]{2}/[0-9]{4}',dic) != None :
    src = re.search('([0-9]{2})/([0-9]{4})',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 
 while re.search('[0-9]{1}/[0-9]{4}',dic) != None :
    src = re.search('([0-9]{1})/([0-9]{4})',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 
 while re.search('[0-9]{3}/[0-9]{3}',dic) != None :
    src = re.search('([0-9]{3})/([0-9]{3})',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 
 while re.search('[0-9]{2}/[0-9]{3}',dic) != None :
    src = re.search('([0-9]{2})/([0-9]{3})',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 
 while re.search('[0-9]{1}/[0-9]{3}',dic) != None :
    src = re.search('([0-9]{1})/([0-9]{3})',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 
 while re.search('[0-9]{2}/[0-9]{2}',dic) != None :
    src = re.search('([0-9]{2})/([0-9]{2})',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
-
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 while re.search('[0-9]{1}/[0-9]{2}',dic) != None :
    src = re.search('([0-9]{1})/([0-9]{2})',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 
 while re.search('[0-9]{2}/[0-9]',dic) != None :
    src = re.search('([0-9]{2})/([0-9])',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 
 while re.search('[0-9]/[0-9]',dic) != None :
    src = re.search('([0-9])/([0-9])',dic)
-   dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
-
+   if not dic[src.end()] == '*':
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'(Rational({},{}))'.format(src.group(1),src.group(2)))
+   else:
+     dic = dic.replace('{}/{}'.format(src.group(1),src.group(2)),'{}/({})'.format(src.group(1),src.group(2)))
 f = open('CGCsnew.py','w')
 f.write('from sympy import sqrt,Rational,I\n')
 f.write(dic)
@@ -111,7 +138,7 @@ tp = {}
 #			db[group]['Quartic'][kk] = Quarticelem[ikk] 
 tp = {}
 tpbar = {}
-pudb.set_trace()
+#pudb.set_trace()
 if 'SU2' in db['DynkinToDim']:
     for key,val in db['DynkinToDim']['SU2'].items():
         tp[(key,)] = val
@@ -133,7 +160,7 @@ for key,val in db['DynkinToDim'].items():
         db[key]['DimToDynkin'][1] = tuple([0]*(int(key.split('SU')[-1])-1))
         db[key]['DynkinToDim'] = copy.deepcopy(val)
         db[key]['DynkinToDim'][tuple([0]*(int(key.split('SU')[-1])-1))] = 0
-for key,val in db['Matrices'].items() :
+for key,val in db['Matrices'].items():
     tp = {}
     tpA = {}
     if key == 'SU2' :
@@ -284,43 +311,43 @@ def sumperso(list) :
 
 check = True
 structures = {}
-for group, val in db.items():
-	if group != 'date':
-		print "Group: {}".format(group)
-		N = int(group.split('SU')[-1])
-		d = N**2-1
-		W = MatrixSymbol('W',d,1)
-		V = MatrixSymbol('V',d,1)
-		Vec1 = sumperso([W[i,0]*Matrix(val['Matrices'][val['Fond']]['mat'][i]) for i in range(d)])
-		Vec2 = sumperso([V[i,0]*Matrix(val['Matrices'][val['Fond']]['mat'][i]) for i in range(d)])
-		print"\t calculating ResTrace..."
-		ResTrace =[sum([
-			-2*(Matrix(val['Matrices'][val['Fond']]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(val['Matrices'][val['Fond']]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j]
-			for j in range(N)
-			for k in range(N)
-			for l in range(N)
-			for m in range(N)
-			if (Matrix(val['Matrices'][val['Fond']]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(val['Matrices'][val['Fond']]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j] != 0])
-			for i in range(d)]
-		print"\t done."
-		Structures = [[[I*(el.diff(W[i,0])).diff(V[j,0]) for i in range(d)] for j in range(d)]for el in ResTrace]
-		Structures = np.array(Structures).reshape(d,d,d)
-		print"\t Structure finished, check..."
-		structures[group] = copy.deepcopy(Structures)
-		if check :
-			Check = [Matrix(val['Matrices'][val['Fond']]['mat'][i])*Matrix(val['Matrices'][val['Fond']]['mat'][j]) - Matrix(val['Matrices'][val['Fond']]['mat'][j])*Matrix(val['Matrices'][val['Fond']]['mat'][i]) + sumperso([I*Structures[i,j,k]*Matrix(val['Matrices'][val['Fond']]['mat'][k])
-					for k in range(d)])
-					for i in range(d)
-					for j in range(d)
-					]
-			Check = all([el == zeros((N,N)) for el in Check])
-			if Check:
-				print"Check ok"
-			else : 
-				print "ERROR while determining the structure constants"
-		else :
-			pass
-
+#for group, val in db.items():
+#	if group != 'date':
+#		print "Group: {}".format(group)
+#		N = int(group.split('SU')[-1])
+#		d = N**2-1
+#		W = MatrixSymbol('W',d,1)
+#		V = MatrixSymbol('V',d,1)
+#		Vec1 = sumperso([W[i,0]*Matrix(val['Matrices'][val['Fond']]['mat'][i]) for i in range(d)])
+#		Vec2 = sumperso([V[i,0]*Matrix(val['Matrices'][val['Fond']]['mat'][i]) for i in range(d)])
+#		print"\t calculating ResTrace..."
+#		ResTrace =[sum([
+#			-2*(Matrix(val['Matrices'][val['Fond']]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(val['Matrices'][val['Fond']]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j]
+#			for j in range(N)
+#			for k in range(N)
+#			for l in range(N)
+#			for m in range(N)
+#			if (Matrix(val['Matrices'][val['Fond']]['mat'][i])[j,k]*KroneckerDelta(l,m) - Matrix(val['Matrices'][val['Fond']]['mat'][i])[l,m]*KroneckerDelta(k,j))*Vec1[k,l]*Vec2[m,j] != 0])
+#			for i in range(d)]
+#		print"\t done."
+#		Structures = [[[I*(el.diff(W[i,0])).diff(V[j,0]) for i in range(d)] for j in range(d)]for el in ResTrace]
+#		Structures = np.array(Structures).reshape(d,d,d)
+#		print"\t Structure finished, check..."
+#		structures[group] = copy.deepcopy(Structures)
+#		if check :
+#			Check = [Matrix(val['Matrices'][val['Fond']]['mat'][i])*Matrix(val['Matrices'][val['Fond']]['mat'][j]) - Matrix(val['Matrices'][val['Fond']]['mat'][j])*Matrix(val['Matrices'][val['Fond']]['mat'][i]) + sumperso([I*Structures[i,j,k]*Matrix(val['Matrices'][val['Fond']]['mat'][k])
+#					for k in range(d)])
+#					for i in range(d)
+#					for j in range(d)
+#					]
+#			Check = all([el == zeros((N,N)) for el in Check])
+#			if Check:
+#				print"Check ok"
+#			else : 
+#				print "ERROR while determining the structure constants"
+#		else :
+#			pass
+#
 #I comment the sparse matrices for the moment thats not what is important
 for group,val in db.items():
 	if group != 'date':
@@ -330,7 +357,7 @@ for group,val in db.items():
 		db[group]['Matrices'] = copy.deepcopy(NewMatrix[group])
 		db[group]['HBmat'] = copy.deepcopy(NewHBmatrix[group])
 		db[group]['HBAmat'] = copy.deepcopy(NewAHBmatrix[group])
-		db[group]['Struc'] = copy.deepcopy(structures[group])
+		#db[group]['Struc'] = copy.deepcopy(structures[group])
 
 Groups = ['SU2','SU3','SU4','SU5','SU6']
 p,q = Wild('p'),Wild('q')
@@ -350,25 +377,24 @@ for gg in Groups:
                             temp = inv[0][-1].match(sqrt(p)*q)
                             if not(temp is None) : 
                                 if notlist:
-                                    db[gg][key][ivs] = [tuple(list(ell)[:-1]+[ell[-1]/(sqrt(temp[p])*temp[q])]) for ell in inv]
+                                    db[gg][key][ivs] = [tuple(list(ell)[:-1]+[ell[-1]/(temp[q]*sqrt(temp[p]))]) for ell in inv]
                                 else :
                                     db[gg][key][ivs][iv] = [tuple(list(ell)[:-1]+[ell[-1]/(sqrt(temp[p])*temp[q])]) for ell in inv]
+
 
 
 subprocess.call(["rm","CGCsnew.py"])
 
 #<codecell>
 
-f = open('CGCsnewsu4compute.pickle','w')
+f = open('CGCssu315p6tri.pickle','w')
 pickle.dump(db,f)
 f.close()
 
 # <codecell>
 
-g = open('CGCsnewsu2.pickle','r')
+g = open('CGCssu315p6tri.pickle','r')
 data = pickle.load(g)
 g.close()
 
 # <codecell>
-
-
