@@ -321,6 +321,7 @@ class Idbquerry(cmd.Cmd):
         res = self.do_generic(line, 'reduceRepProduct')
         if res:
             res = [(el, self.do_generic(line.split(' ')[0]+' '+str(el[0]), 'dimR')) for el in res]
+            res = sorted(res, key=lambda x: x[-1])
             print(res)
         self.noprint = False
 
@@ -409,6 +410,24 @@ class Idbquerry(cmd.Cmd):
         except (IdbquerryWrongFormat, IdbquerryMissingArgument):
             pass
 
+    def do_PermutationSymmetryOfInvs(self, line):
+        # Returns the permutation symmetry of the invariants under the form: (group1,group2), ((irrepSn1),mul), ((irrepSn2),mul))
+        return self.do_generic(line, 'permutationSymmetryOfInvariants')
+
+    def do_SnIrrepDim(self, line):
+        args = line.split('SnDimIrrep')
+        try:
+            if len(args) != 1:
+                raise IdbquerryMissingArgument()
+            else:
+                args = ''.join(args).replace(' ','')
+                sn = Sn()
+                try:
+                    res = sn.snIrrepDim(eval(args))
+                except SyntaxError:
+                    raise IdbquerryWrongFormat(args)
+        except (IdbquerryWrongFormat, IdbquerryMissingArgument):
+            return
 
     def do_RepsUpTo(self, line):
         args = line.split(' ')
