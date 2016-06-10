@@ -2198,7 +2198,7 @@ class Model(object):
         # create a symbolic Function
         if not (gr.U):
             fabc = gr.fabc
-            indlabel = [['{}fabc{}'.format(el, gr.name), 0, gr.d - 1] for el in indlabel]
+            indlabel = [['{}fabc{}'.format(el, gr.name), 0, gr.dimAdj - 1] for el in indlabel]
             res = Fabc(fabc[0], fabc[1], indlabel[0][0], indlabel[1][0], indlabel[2][0], indlabel[3][0], indlabel[4][0],
                        indlabel[5][0])
             return res, indlabel
