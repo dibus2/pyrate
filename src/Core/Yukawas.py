@@ -165,9 +165,9 @@ def CYukGaugeIIg2(powe, comb, model):
             + Rational(9, 2) * (model.Expand2(((_Ckins, s1), ([[(_Y, s1, f1, p1), (_Ya, s1, p1, p2), (_Y, sc, p2, f2)],
                                                                [(_Y, sc, f1, p1), (_Ya, s1, p1, p2),
                                                                 (_Y, s1, p2, f2)]])), dotrace=False)
-                                )
-            + 6 * (model.Expand(((_TakinT, f1), (_Y, sc, f1, p1), (_Ya, s1, p1, p2), (_Takin, p2), (_Y, s1, p2, f2)))
-                   + model.Expand(((_Y, s1, f1, p1), (_TkinT, p1), (_Ya, s1, p1, p2), (_Y, sc, p2, f2), (_Tkin, f2)))
+                               )
+            + 6 * (model.Expand(((_TakinT, f1), (_Y, sc, f1, p1), (_Ya, s1, p1, p2), (_Takin, p2), (_Y, s1, p2, f2)), dotrace=False)
+                   + model.Expand(((_Y, s1, f1, p1), (_TkinT, p1), (_Ya, s1, p1, p2), (_Y, sc, p2, f2), (_Tkin, f2)), dotrace=False)
                    )
         )
     res += reskin
