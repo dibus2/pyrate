@@ -2365,7 +2365,7 @@ class Model(object):
         """Calculates the invariant Y2FabSkin Eq. 27 with replacement rules for C2(F)"""
         key = tuple(['Y2FabSkin'] + parts + flatten(indices))
         if key in self.InvariantResults:
-            loggingInfo("reading Y2FabSkin")
+            loggingDebug("reading Y2FabSkin")
             res = self.InvariantResults[key]
         else:
             sc1, sc2 = self.getparts(parts, indices)
@@ -2554,7 +2554,7 @@ class Model(object):
         key = tuple(['Y2F'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
-            loggingInfo("reading Y2F")
+            loggingDebug("reading Y2F")
         else:
             f1, f2 = self.getparts(parts, indices)
             if not (adj):
@@ -2573,7 +2573,7 @@ class Model(object):
         key = tuple(['Yab2S'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
-            loggingInfo("reading Yab2S")
+            loggingDebug("reading Yab2S")
         else:
             sc1, sc2 = self.getparts(parts, indices)
             res = Rational(1, 2) * (
@@ -2630,7 +2630,7 @@ class Model(object):
         key = tuple(['Hab'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
-            loggingInfo("reading Hab")
+            loggingDebug("reading Hab")
         else:
             sc1, sc2 = self.getparts(parts, indices)
             # res = (self.Expand(((_Y,sc1,p1,p2),(_Ya,sc2,p2,p3),(_mf,p3,p4),(_mfa,p4,p1)),Layer=1)
@@ -2658,7 +2658,7 @@ class Model(object):
         key = tuple(['L2abS'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
-            loggingInfo("reading L2abs")
+            loggingDebug("reading L2abs")
         else:
             a, b = self.getparts(parts, indices)
             res = Rational(1, 6) * self.Expand(((_L, a, s1, s2, s3), (_L, b, s1, s2, s3)), Layer=1)
@@ -2672,7 +2672,7 @@ class Model(object):
         """Calculates the invariant Y2FabS Eq. 27"""
         key = tuple(['Y2FabS'] + parts + flatten(indices))
         if key in self.InvariantResults:
-            loggingInfo("reading Y2FabS")
+            loggingDebug("reading Y2FabS")
             res = self.InvariantResults[key]
         else:
             grp, sc1, sc2 = self.getparts(parts, indices)
