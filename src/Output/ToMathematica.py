@@ -115,7 +115,10 @@ def ToMathematicaNotation(vall, model, FlagSquare=True):
                                                                                                            'Adj').replace(
         'transpose', 'Tp').replace('[ ]', '').replace('adjoint', 'Adj')
     # Simplify the Symbols to get rid of the LateX structure
-    symbs = model.ListYukawa + model.ListFM + model.ListLbd + model.ListScM + model.ListTri
+    if model.kinmixing:
+        symbs = [str(el) for el in model.UsectorMatrix] + [str(el[1].g) for el in model.NonUGaugeGroups] + model.ListYukawa + model.ListFM + model.ListLbd + model.ListScM + model.ListTri
+    else:
+        symbs = [str(el[1].g) for el in model.GaugeGroups] + model.ListYukawa + model.ListFM + model.ListLbd + model.ListScM + model.ListTri
     ll = []
     for el in symbs:
         if len(reg.split('{(.*)}', el)) == 3 or len(reg.split('\\\(.*)', el)) == 3:

@@ -3,7 +3,6 @@ try:
     import os
     import platform
     import string as st
-    import pudb
 
     cwd = os.getcwd()
     sys.path.append('../GroupTheory')
@@ -17,7 +16,6 @@ from ToMathematica import ToMathematicaNotation, findclosingbracket
 def ExportBetaFunction(model, FinalExpr, settings, StrucYuk):
     # kappa
     kappa = (4 * pi) ** 2
-    pudb.set_trace()
     # WARNING the scalars arre summed to all components of teh matrices
     date = time.localtime()
     date = "{}-{}-{}\t {}:{}:{}".format(date[0], date[1], date[2], date[3], date[4], date[5])
@@ -40,18 +38,21 @@ def ExportBetaFunction(model, FinalExpr, settings, StrucYuk):
     # We've got to get all the different RGEs and create variables
     NbRGEs = 0
     # List of all the symbols
-    ListSymbs = [el[1].g for el in model.GaugeGroups] + model.ListLbd + model.ListScM + model.ListTri
+    if not model.kinmixing:
+        ListSymbs = [el[1].g for el in model.GaugeGroups] + model.ListLbd + model.ListScM + model.ListTri
+    else:
+        ListSymbs = [str(el) for el in model.UsectorMatrix] + [el[1].g for el in model.NonUGaugeGroups] + model.ListLbd + model.ListScM + model.ListTri
     for iel, el in enumerate(ListSymbs):
         if len(reg.split('{(.*)}', str(el))) == 3 or len(reg.split('\\\(.*)', str(el))) == 3:
             # F: merging, online version:
             ListSymbs[iel] = ''.join(reg.split('\\\(.*)', ''.join(reg.split('{|}|_', str(el))))).replace('_',
                                                                                                          '').replace(
                 '\\', '').replace('\\\\', '').replace(' ', '')
-            # ListSymbs[iel] = ''.join(reg.split('\\\(.*)',''.join(reg.split('{(.*)}',str(el)))))
             ListSymbs[iel] = ''.join(reg.split('\\\(.*)', ''.join(reg.split('{|}|_', str(el))))).replace('_', '').replace('\\', '').replace('\\\\', '').replace('^','').replace(' ', '')
             maps[el] = ListSymbs[iel]
         else:
-            maps[el] = el
+            ListSymbs[iel] = str(el).replace('_', '').replace('\\', '').replace('\\\\', '').replace('^','').replace(' ', '')
+            maps[el] = ListSymbs[iel]
     # First the scalar quatities
     NbRGEs += len(ListSymbs)
     # Now the non scalars quantities go through all of them and count the multiplicity due to the number of Generations
@@ -114,29 +115,46 @@ def ExportBetaFunction(model, FinalExpr, settings, StrucYuk):
     for ii, val in FinalExpr.items():
         if ii != 'ScalarAnomalous' and ii != 'FermionAnomalous':
             for label, expr in val.items():
-                if ii == 'Gauge-Couplings':
-                    label = model.GetGroupFromName[label].g
-                # Get the 1loop contribution
-                if ii != 'Yukawas' and ii != 'FermionMass':
-                    temp1L += '\tb{} = ({})*kappa\n'.format(
-                        maps[label],
-                        TranslateToNumerics((kappa * expr).expand().subs(1 / pi ** 2, 0), ListSymbs, maps[label], Ids,
-                                            model, Mapping, isScalar=True))
-                    # Get the 2loop contribution
-                    temp2L += '\t\tb{0} = b{0} + ({1})*kappa**2\n'.format(
-                        maps[label],
-                        TranslateToNumerics((kappa ** 2 * expr).expand().subs(pi, 0), ListSymbs, maps[label], Ids, model,
-                                            Mapping, isScalar=True))
+                # deal with kinetic mixing
+                if label == 'abelian':
+                    # need to iterate over the size of the matrix
+                    row, col = model.UsectorMatrix.shape
+                    for irow in range(row * col):
+                        label = str(model.UsectorMatrix[irow])
+                        temp1L +='\tb{} = ({})*kappa\n'.format(
+                            maps[label],
+                            TranslateToNumerics((kappa * expr[irow]).expand().subs(1 / pi ** 2, 0), ListSymbs, maps[label], Ids,
+                                                model, Mapping, isScalar=True)
+                        )
+                        temp2L += '\t\tb{0} = b{0} + ({1})*kappa**2\n'.format(
+                            maps[label],
+                            TranslateToNumerics((kappa ** 2 * expr[irow]).expand().subs(pi, 0), ListSymbs, maps[label], Ids, model,
+                                                Mapping, isScalar=True)
+                        )
                 else:
-                    temp1L += '\tbeta{} = ({})*kappa\n'.format(
-                        maps[label],
-                        TranslateToNumerics((kappa * expr).expand().subs(1 / pi ** 2, 0), ListSymbs, maps[label], Ids,
-                                            model, Mapping, isScalar=False))
-                    # Get the 2loop contribution
-                    temp2L += '\t\tbeta{0} = beta{0} + ({1})*kappa**2\n'.format(
-                        maps[label],
-                        TranslateToNumerics((kappa ** 2 * expr).expand().subs(pi, 0), ListSymbs, maps[label], Ids, model,
-                                            Mapping, isScalar=False))
+                    if ii == 'Gauge-Couplings':
+                        label = model.GetGroupFromName[label].g
+                    # Get the 1loop contribution
+                    if ii != 'Yukawas' and ii != 'FermionMass':
+                        temp1L += '\tb{} = ({})*kappa\n'.format(
+                            maps[label],
+                            TranslateToNumerics((kappa * expr).expand().subs(1 / pi ** 2, 0), ListSymbs, maps[label], Ids,
+                                                model, Mapping, isScalar=True))
+                        # Get the 2loop contribution
+                        temp2L += '\t\tb{0} = b{0} + ({1})*kappa**2\n'.format(
+                            maps[label],
+                            TranslateToNumerics((kappa ** 2 * expr).expand().subs(pi, 0), ListSymbs, maps[label], Ids, model,
+                                                Mapping, isScalar=True))
+                    else:
+                        temp1L += '\tbeta{} = ({})*kappa\n'.format(
+                            maps[label],
+                            TranslateToNumerics((kappa * expr).expand().subs(1 / pi ** 2, 0), ListSymbs, maps[label], Ids,
+                                                model, Mapping, isScalar=False))
+                        # Get the 2loop contribution
+                        temp2L += '\t\tbeta{0} = beta{0} + ({1})*kappa**2\n'.format(
+                            maps[label],
+                            TranslateToNumerics((kappa ** 2 * expr).expand().subs(pi, 0), ListSymbs, maps[label], Ids, model,
+                                                Mapping, isScalar=False))
     # We regroup all the 1 loop and 2 loop contributions to avoid multiple if statements
     CodeStr += temp1L
     CodeStr += "\tif Assumptions['two-loop']:\n{}".format(temp2L)
