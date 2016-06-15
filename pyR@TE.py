@@ -627,12 +627,16 @@ else:
                     del (RGEs[0]['abelian'])
 
                 strres = [str(el).replace('Dagger', 'adjoint') for el in RGEs]
+                if model.kinmixing:
+                    gaugegroups = [str(el) for el in model.UsectorMatrix] + [str(el[1].g) for el in model.NonUGaugeGroups]
+                else:
+                    gaugegroups = [str(el[-1]) for el in model.ListGroups]
                 strsettings = ([str(el) for el in model.ListYukawa],
                                [str(el) for el in model.ListFM],
                                [str(el) for el in model.ListTri],
                                [str(el) for el in model.ListLbd],
                                [str(el) for el in model.ListScM],
-                               [str(el[-1]) for el in model.ListGroups],
+                               [el for el in gaugegroups],
                                [str(el[0]) for el in model.GaugeGroups],
                                [str(el) for el in model.Particles.keys()],
                                [str(el) + '_f' for el in model.Particles.keys()],
