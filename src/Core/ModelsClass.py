@@ -2752,7 +2752,6 @@ class Model(object):
         """Calculates a Chain of four Yukawas"""
         key = tuple(['Chain4Y'] + parts + flatten(indices)) if not (adj) else tuple(['Chain4Ya'] + flatten(indices))
         if key in self.InvariantResults:
-            print("Reading")
             res = self.InvariantResults[key]
         else:
             sc1, sc2, sc3, sc4, f1, f2 = self.getparts(parts, indices)
