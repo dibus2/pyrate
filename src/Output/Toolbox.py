@@ -93,18 +93,35 @@ def ExportToPickle(Name, Xpr, model, description=''):
     fPickle = open(Name, 'w')
     # create a string of the result
     print "Dumping the results in a pickle file..."
-    strres = [str(el).replace('Dagger', 'adjoint') for el in Xpr]
+    if 'abelian' in Xpr:
+        for iel, el in enumerate(flatten(model.UsectorMatrix)):
+            RGEs[0][str(el)] = RGEs[0]['abelian'][iel]
+        del (RGEs[0]['abelian'])
+    if type(Xpr) == dict:
+        strres = [str(el).replace('Dagger', 'adjoint') for el in [Xpr]]
+    else:
+        strres = [str(el).replace('Dagger', 'adjoint') for el in Xpr]
+    if model.kinmixing:
+        gaugegroups = [str(el) for el in model.UsectorMatrix] + [str(el[1].g) for el in model.NonUGaugeGroups]
+    else:
+        gaugegroups = [str(el[-1]) for el in model.ListGroups]
     strsettings = ([str(el) for el in model.ListYukawa],
                    [str(el) for el in model.ListFM],
                    [str(el) for el in model.ListTri],
                    [str(el) for el in model.ListLbd],
                    [str(el) for el in model.ListScM],
-                   [str(el[-1]) for el in model.ListGroups],
+                   [el for el in gaugegroups],
                    [str(el[0]) for el in model.GaugeGroups],
                    [str(el) for el in model.Particles.keys()],
-                   [str(el) + '_f' for el in model.Particles.keys()]  # for the indices of the generations
-				   )
-    pickle.dump([strres, strsettings, description], fPickle)
+                   [str(el) + '_f' for el in model.Particles.keys()],
+                   [str(el) + '1_f' for el in model.Particles.keys()],  # for the indices of the generations
+                   ['xi', 'g_SUndum']
+                   )
+    # Fix for the Sudummy gauge group
+    if 'SUndum' in strsettings[-4]:
+        strsettings[-5].append('g_SUndum')
+
+    pickle.dump([strres, strsettings, model.saveSettings, description], fPickle)
     fPickle.close()
     print"\t\t...done"
 
@@ -112,23 +129,13 @@ def ExportToPickle(Name, Xpr, model, description=''):
 def loadmodel(name):
     # open the file
     Of = open('{}'.format(name), 'r')
-    strres, strsettings, description = pickle.load(Of)
+    strres, strsettings, modelsettings, description = pickle.load(Of)
     # we first declare all the variables and we also have to declare the classes to make sense of the different expressions
     Replace = []
     for ill, ll in enumerate(strsettings):
         # simplify the symbol to get rid of the LateX structure
         lln1 = [(iel, ''.join(reg.split('{(.*)}', el))) for iel, el in enumerate(ll)]
-        # lln1 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate([elem[1] for elem in lln1])]
         lln1 = [(iel, ''.join(reg.split(r'\\', el))) for iel, el in enumerate([elem[1] for elem in lln1])]
-        # if lln1 != [] :
-        #    lln2 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate([elem[1] for elem in lln1]) if len(reg.split('\\\(.*)',el)) == 3 ]
-        #    #erase the first step
-        #    if lln2 != [] :
-        #        lln1 = []
-        # else :
-        #    lln2 = [(iel,''.join(reg.split('\\\(.*)',el))) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) == 3 ]
-        # lln3 = [(iel,el) for iel,el in enumerate(ll) if len(reg.split('\\\(.*)',el)) != 3 and len(reg.split('{(.*)}',el)) != 3  ]
-        # lln = lln1 + lln2 + lln3
         lln = lln1
         Replace.append([(ll[iel], el) for iel, el in lln])
         # Declare all the symbols
@@ -144,10 +151,11 @@ def loadmodel(name):
     res = [eval(el) for el in strres]
     # translate the keys into the symbols
     Nres = {}
+    pudb.set_trace()
     for elem in res:
         for key, vals in elem.items():
             Nres[key] = vals
-    return Nres, description
+    return Nres, description, modelsettings
 
 
 def getoneloop(llist):
