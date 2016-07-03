@@ -17,7 +17,7 @@ import itertools,functools
 # <codecell>
 
 #open the file as a string do the replacement un put it back before loading it
-f = open('CGCssu315p6tri.m','r')
+f = open('CGCssu315pbi.m','r')
 dic = f.readlines()
 f.close()
 #
@@ -387,13 +387,13 @@ subprocess.call(["rm","CGCsnew.py"])
 
 #<codecell>
 
-f = open('CGCssu315p6tri.pickle','w')
+f = open('CGCssu315pbi.pickle','w')
 pickle.dump(db,f)
 f.close()
 
 # <codecell>
 
-g = open('CGCssu315p6tri.pickle','r')
+g = open('CGCssu315pbi.pickle','r')
 data = pickle.load(g)
 g.close()
 

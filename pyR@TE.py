@@ -72,8 +72,8 @@ parser.add_argument('--Only', '-onl', dest='Only', action='store', default=[],
                     help='Set a dictionary of terms you want to calculate: "QuarticTerms,Yukawas,TrilearTerms,FermionMasses,ScalarMasses". E.g. "{\'QuarticTerms\': [\'\lambda_1\',\'\lambda_2\']}". Note that if passed in the command line the whole argument must be a string')
 parser.add_argument('--Skip', '-sk', dest='Skip', action='store', default='',
                     help='Set the different terms to neglect in the calculation. E.g. ["CAabcd","CL2abcd"]. The list of terms that can be neglected are listed in src/Core/RGEsDefinition.py')
-parser.add_argument('--interactive-db', '-idb', dest='interactivedb', action='store_true', default=False,
-                    help='Starts the interactive database mode. Allows one to check what are the CGCs implemented for a given contraction and more (Casimir, Dynkin,...)')
+parser.add_argument('--Pylie', '-ipl', dest='interactivedb', action='store_true', default=False,
+                    help='Starts the interactive PyLie mode. Allows one to check what are the CGCs implemented for a given contraction and more (Casimir, Dynkin,...)')
 parser.add_argument('--ScalarAnomalous', '-sa', dest='ScalarAnomalous', action='store_true', default=False,
                     help='Set the calculation of scalar anomalous dimensions to True')
 parser.add_argument('--FermionAnomalous', '-fa', dest='FermionAnomalous', action='store_true', default=False,
@@ -416,7 +416,7 @@ else:
                if valonly in val.keys():
                    # we have identified which kind of coupling it is
                    for vv in val.keys():
-                       if vv != valonly:
+                       if not vv in RunSettings['Only']:
                            trans[key].__delitem__(vv)
                            loggingDebug("\tIgnoring `{}` from `{}` according to `Only` settings".format(vv,key),verbose=True)
 
