@@ -80,7 +80,6 @@ class Model(object):
         # Kinetic mixing
         ################################################
         self.Id = eye(len(self.UsectorMatrix))
-        # to be removed but during the modification Ill keep the two files GaugeCouplings and GaugeCouplingsKin separate
         self.kinmixing = Settings['KinMix']
         if len(self.UsectorMatrix) > 1:
             self.kinmixing = True
@@ -193,7 +192,8 @@ class Model(object):
                             _SsCkinf: ['f'], _SsCkins: ['s'], _SfCkins: ['s'], _Tkin: ['f'], _Takin: ['f'],
                             _TkinT: ['f'], _TakinT: ['f'], 'Theta2g2kin': ['s', 's', 's', 's'],
                             'Thetakin': ['s', 's', 's', 's'], 'Thetakin4W': ['s', 'f', 's', 'f'],
-                            'ThetakinWsWf': ['s', 'f'], 'ThetakinC4': ['s', 's', 's', 's'], 'ThetakinWsWs': ['s', 's']}
+                            'ThetakinWsWf': ['s', 'f'],'ThetakinC4s': ['s', 's', 's', 's'], 'ThetakinC4f': ['s', 's', 's', 's'], 'ThetakinWsWs': ['s', 's'],
+                            'deltatilde': ['s','s']}
 
     def __repr__(self):
         """Change the representation of Model instances"""
@@ -230,12 +230,15 @@ class Model(object):
                 setts['Norm'] = self.translatenorm(setts['Norm'])
                 self.CplxScalars[part] = higgsField(part, setts, self.GaugeGroups, self.idb)
                 # declare the real degress of freedom associated to the complex ones
-                if not (str(self.CplxScalars[part].RealPart) in self.Scalars):
+                #if not (str(self.CplxScalars[part].RealPart) in self.Scalars):
+                if not '*' in part:
                     self.Scalars[str(self.CplxScalars[part].RealPart)] = particle(self.CplxScalars[part].RealPart,
                                                                                   {'Gen': 1,
                                                                                    'Qnb': self.CplxScalars[part].Qnb},
                                                                                   self.GaugeGroups, self.idb, FromCplx=True)
-                if not (str(self.CplxScalars[part].CplxPart) in self.Scalars):
+                #if not (str(self.CplxScalars[part].CplxPart) in self.Scalars):
+                #TODO remove
+                if not '*' in part:
                     self.Scalars[str(self.CplxScalars[part].CplxPart)] = particle(self.CplxScalars[part].CplxPart,
                                                                                   {'Gen': 1,
                                                                                    'Qnb': self.CplxScalars[part].Qnb},
@@ -1574,11 +1577,17 @@ class Model(object):
                 elif tp == 'ThetakinWsWf':
                     res = self.ThetakinWsWf(temp[:2], indicesFull[:2])
                     STOP, temp, indicesFull = tempupdate(2, temp, indicesFull)
-                elif tp == 'ThetakinC4':
-                    res = self.ThetakinC4(temp[:4], indicesFull[:4])
+                elif tp == 'ThetakinC4s':
+                    res = self.ThetakinC4s(temp[:4], indicesFull[:4])
+                    STOP, temp, indicesFull = tempupdate(4, temp, indicesFull)
+                elif tp == 'ThetakinC4f':
+                    res = self.ThetakinC4f(temp[:4], indicesFull[:4])
                     STOP, temp, indicesFull = tempupdate(4, temp, indicesFull)
                 elif tp == 'ThetakinWsWs':
                     res = self.ThetakinWsWs(temp[:2], indicesFull[:2])
+                    STOP, temp, indicesFull = tempupdate(2, temp, indicesFull)
+                elif tp =='deltatilde':
+                    res = self.deltatilde(temp[:2], indicesFull[:2])
                     STOP, temp, indicesFull = tempupdate(2, temp, indicesFull)
                 else:
                     exit("Expand Function : not implemented yet")
@@ -1827,15 +1836,11 @@ class Model(object):
                 StartingV = None
             elif elem[0] == 'Y2F' or elem[0] == 'Y2Fa' or elem[0] == _mf or elem[0] == _mfa:
                 StartingV = elem[1]
-            elif elem[0] == 'Yab2S' or elem[0] == 'Theta2' or elem[0] == 'Theta4' or elem[0] == _Th or elem[
-                0] == 'Agabcd' or elem[0] == 'Theta2g2kin' or elem[0] == 'Thetakin' or elem[0] == 'Thetakin4W' or elem[
-                0] == 'ThetakinWsWf' or elem[0] == 'ThetakinWsWs' or elem[0] == 'ThetakinC4':
+            elif elem[0] in ['Yab2S', 'Theta2', 'Theta4', 'Agabcd', 'Theta2g2kin', 'Thetakin', 'Thetakin4W', 'ThetakinWsWf',
+                            'ThetakinWsWs', 'ThetakinC4f', 'ThetakinC4s',  'deltatilde', 'Y2FabS', 'Hab', 'Hbar2abS', 'Hbarabc', 'Habc',
+                             'H2abS', 'Habcd','L2abS', 'Habc']:
                 StartingV = None
-            elif elem[0] == 'Y2FabS' or elem[0] == _ms or elem[0] == 'Hab':
-                StartingV = None
-            elif elem[0] == 'Hbar2abS' or elem[0] == 'Hbarabc' or elem[0] == 'Habc':
-                StartingV = None
-            elif elem[0] == 'H2abS' or elem[0] == 'Habcd' or elem[0] == 'L2abS' or elem[0] == 'Habc':
+            elif elem[0] == _ms or elem[0] == _Th:
                 StartingV = None
             elif elem[0] == 'Chain2Y' or elem[0] == 'Chain2Ya':
                 StartingV = elem[3]
@@ -1914,11 +1919,10 @@ class Model(object):
                 StartingV = None
             elif elem[0] == 'Y2F' or elem[0] == 'Y2Fa' or elem[0] == _mf or elem[0] == _mfa:
                 StartingV = elem[1]
-            elif elem[0] == 'Yab2S' or elem[0] == 'Theta2' or elem[0] == 'Theta4' or elem[0] == _Th or elem[
-                0] == 'Agabcd' or elem[0] == 'Theta2g2kin' or elem[0] == 'Thetakin' or elem[0] == 'Thetakin4W' or elem[
-                0] == 'ThetakinWsWf' or elem[0] == 'ThetakinWsWs' or elem[0] == 'ThetakinC4':
+            elif elem[0] in ['Yab2S','Theta2','Theta4', 'Hab', 'Y2FabS', 'Agabcd','Theta2g2kin','Thetakin',
+                             'Thetakin4W', 'ThetakinWsWf','ThetakinWsWs','ThetakinC4f', 'ThetakinC4s']:
                 StartingV = None
-            elif elem[0] == 'Y2FabS' or elem[0] == _ms or elem[0] == 'Hab':
+            elif elem[0] == _ms or elem[0] == _Th:
                 StartingV = None
             elif elem[0] == 'Hbar2abS' or elem[0] == 'Hbarabc' or elem[0] == 'Habc':
                 StartingV = None
@@ -2393,7 +2397,6 @@ class Model(object):
 
     def Theta2g2kin(self, parts, indices):
         """Implements the matrix part of Eq 22"""
-        # TODO MAKE SURE THAT TAKING THE SUM OVER G1 DOES NOT CHANGE THE RESULT !!!!
         key = tuple(['Theta2g2kin'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
@@ -2407,15 +2410,15 @@ class Model(object):
 
 
     def Thetakin(self, parts, indices):
-        """Implemts the right part of Eq. 22. Implements C(a,b,c,d) = W^T_a W_b * del_ab * del_cd"""
+        """Implemts the right part of Eq. 22. Implements C(a,b,c,d) = W^T_a W_c * del_ab * del_cd"""
         key = tuple(['Thetakin'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
         else:
             sc1, sc2, sc3, sc4 = parts
             # Whatch out, here the deltatilde_double is del_ac del_bd !
-            res = self.Scalars[str(sc1)].W.transpose() * self.Scalars[str(sc2)].W * self.deltatilde_double(sc1, sc3,
-                                                                                                           sc2, sc4)
+            res = self.Scalars[str(sc1)].W.transpose() * self.Scalars[str(sc3)].W * \
+                  self.deltatilde_double(sc1, sc3, sc2, sc4, [indices[0], indices[2], indices[1], indices[3]])
             res = sum(res)
             self.InvariantResults[key] = res
         return res
@@ -2435,16 +2438,31 @@ class Model(object):
         return res
 
 
-    def ThetakinC4(self, parts, indices):
-        """Implements the right hand side of Eq.23."""
-        key = tuple(['ThetakinC4'] + parts + flatten(indices))
+    def ThetakinC4s(self, parts, indices):
+        """Implements the right hand side of Eq.23.C4(a,b,c,d) = deltat(ab)*deltat(cd)*W_a^TW_p W_p^T W_c"""
+        key = tuple(['ThetakinC4s'] + parts + flatten(indices))
         if key in self.InvariantResults:
             res = self.InvariantResults[key]
         else:
             sc1, sc2, sc3, sc4 = parts
             # del_ab del_cd need to switch because of def deltatilde_double
-            res = sum([sum(self.Scalars[str(sc1)].W.transpose() * pp.W * pp.W.transpose() * self.Scalars[str(sc2)].W)
-                       for pp in self.Scalars.values()]) * self.deltatilde_double(sc1, sc3, sc2, sc4)
+            res = sum([sum(self.Scalars[str(sc1)].W.transpose() * pp.W * pp.W.transpose() * self.Scalars[str(sc3)].W)
+                       for pp in self.Scalars.values()]) * self.deltatilde_double(sc1, sc3, sc2, sc4,
+                                                                                  [indices[0], indices[2], indices[1], indices[3]])
+            self.InvariantResults[key] = res
+        return res
+
+    def ThetakinC4f(self, parts, indices):
+        """Implements the right hand side of Eq.23. C4(a,b,c,d) = deltat(ab)*deltat(cd)*W_a^TW_p W_p^T W_c"""
+        key = tuple(['ThetakinC4f'] + parts + flatten(indices))
+        if key in self.InvariantResults:
+            res = self.InvariantResults[key]
+        else:
+            sc1, sc2, sc3, sc4 = parts
+            # del_ab del_cd need to switch because of def deltatilde_double
+            res = sum([sum(self.Scalars[str(sc1)].W.transpose() * pp.W * pp.W.transpose() * self.Scalars[str(sc3)].W)
+                       for pp in self.Fermions.values()]) * self.deltatilde_double(sc1, sc3, sc2, sc4,
+                                                                                  [indices[0], indices[2], indices[1], indices[3]])
             self.InvariantResults[key] = res
         return res
 
@@ -2474,24 +2492,28 @@ class Model(object):
             self.InvariantResults[key] = res
         return res
 
-
-    def deltatilde(self, sc1, sc2):
-        """Implements the deltatilde. """
-        if type(sc1) == list:
-            sc1 = sc1[0]
-        if type(sc2) == list:
-            sc2 = sc2[0]
+    def deltatilde(self, parts, indices):
+        """Implements the product of two deltatilde as in they appear in Eq. 22. WARNING! THIS IS delatatilde(a,b) = del_ab"""
+        # One has to check that sc1,sc2 are the real and imaginary parts of an eigenvalue of U(1
+        sc1, sc2 = parts
         if all([self.Particles[str(sci)].FromCplx for sci in [sc1, sc2]]):
             cplxsc1, cplxsc2 = self.getHiggsFromScalar[sc1], self.getHiggsFromScalar[sc2]
             assert len(cplxsc1) >= 1 and len(cplxsc2) >= 1
+            # cplxsc1 contains the complex scalar and its conjugate. Since they have the same real and complex part it does not matter which one we use to check
             rsc1, isc1 = self.Particles[cplxsc1[0]].RealPart, self.Particles[cplxsc1[0]].CplxPart
             rsc2, isc2 = self.Particles[cplxsc2[0]].RealPart, self.Particles[cplxsc2[0]].CplxPart
+            # Checking that sci scj come from the same eigenvalue is equivalent to checkin that the real and complex parts are the same rsc1 == rsc2 and isc1 == isc2
             res = 1
+            indices12 = [(elem[0][0], elem[1][0]) for elem in zip(*indices)]
+            # remove the dummy indices, if not charged it should not be considered (unity)
+            indices12 = [el for el in indices12 if not 'dum' in el[0] and not 'dum' in el[1]]
+            delta_indices12 = reduce(operator.mul, [DeltaTildeF(el) for el in indices12], 1)
             if rsc1 == rsc2 and isc1 == isc2:
+                # Then we can check the different possibiliies i.e. sci is the real and scj the imaginary or vice versa
                 if (sc1 == rsc1 and sc2 == isc2):
-                    res = res * I
-                elif (sc1 == isc1 and sc2 == rsc2):
-                    res = res * (-I)
+                    res = res * I * delta_indices12
+                elif (sc1 == isc1 and sc2 == rsc2):  # the tensor is anti-symmetric
+                    res = res * (-I) * delta_indices12
                 else:
                     res = 0
             else:
@@ -2500,9 +2522,8 @@ class Model(object):
             res = 0
         return res
 
-
-    def deltatilde_double(self, sc1, sc2, sc3, sc4):
-        """Implements the product of two deltatilde as in they appear in Eq. 22. WARNING! THIS IS C(a,b,c,d) = del_ac del_bd"""
+    def deltatilde_double(self, sc1, sc2, sc3, sc4, indices):
+        """Implements the product of two deltatilde as in they appear in Eq. 22. WARNING! THIS IS delatatilde_double(a,b,c,d) = del_ac del_bd"""
         # One has to check that sc1,sc2 are the real and imaginary parts of an eigenvalue of U(1
 
         if all([self.Particles[str(sci)].FromCplx for sci in [sc1, sc2, sc3, sc4]]):
@@ -2517,18 +2538,25 @@ class Model(object):
             rsc4, isc4 = self.Particles[cplxsc4[0]].RealPart, self.Particles[cplxsc4[0]].CplxPart
             # Checking that sci scj come from the same eigenvalue is equivalent to checkin that the real and complex parts are the same rsc1 == rsc2 and isc1 == isc2
             res = 1
+            indices13 = [(elem[0][0], elem[2][0]) for elem in zip(*indices)]
+            indices24 = [(elem[1][0], elem[3][0]) for elem in zip(*indices)]
+            # remove the dummy indices, if not charged it should not be considered (unity)
+            indices13 = [el for el in indices13 if not 'dum' in el[0] and not 'dum' in el[1]]
+            indices24 = [el for el in indices24 if not 'dum' in el[0] and not 'dum' in el[1]]
+            delta_indices13 = reduce(operator.mul, [DeltaTildeF(el) for el in indices13], 1)
+            delta_indices24 = reduce(operator.mul, [DeltaTildeF(el) for el in indices24], 1)
             if rsc1 == rsc3 and isc1 == isc3 and rsc2 == rsc4 and isc2 == isc4:
                 # Then we can check the different possibiliies i.e. sci is the real and scj the imaginary or vice versa
                 if (sc1 == rsc1 and sc3 == isc3):
-                    res = res * I
+                    res = res * I * delta_indices13
                 elif (sc1 == isc1 and sc3 == rsc3):  # the tensor is anti-symmetric
-                    res = res * (-I)
+                    res = res * (-I)* delta_indices13
                 else:
                     res = 0
                 if (sc2 == rsc2 and sc4 == isc4):
-                    res = res * I
+                    res = res * I * delta_indices24
                 elif (sc2 == isc2 and sc4 == rsc4):
-                    res = res * (-I)
+                    res = res * (-I) * delta_indices24
                 else:
                     res = 0
             else:
@@ -2536,7 +2564,6 @@ class Model(object):
         else:
             res = 0
         return res
-
 
     ##########################################
     # DEFINITION of the INVARIANTS
@@ -3002,3 +3029,20 @@ class FFcustom(Function):
 
     def diff(self, arg):
         return Integer(0)
+
+
+class DeltaTildeF(Function):
+    narg = 2
+    is_commutative = True
+    @classmethod
+    def eval(cls, args):
+        assert len(args) == 2
+        if all([el.is_integer for el in args]):
+            if args[0] == args[1]:
+                return Integer(1)
+            else:
+                return Integer(0)
+
+    def diff(self, arg):
+        return Integer(0)
+
