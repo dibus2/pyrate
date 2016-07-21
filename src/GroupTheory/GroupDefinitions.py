@@ -29,6 +29,9 @@ class SUn(object):
         self.fabc = (tuple(flatten(self.fabc)), self.fabc.shape)
         self.U = False
 
+    def dimR(self, irrep):
+        return self.idb.do_DimR(self.idb.toline([self._absname, irrep]))
+
     def __repr__(self):
         """Change the representation of SU(N)"""
         return "Instance of SU({}) group".format(self.N)

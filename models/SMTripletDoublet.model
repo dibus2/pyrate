@@ -57,5 +57,8 @@ ScalarMasses: {
 FermionMasses: { 
  'm_{T}' : {Fields: [T,T], Norm: 1/2},
  'm_{D}' : {Fields: [D,Dc], Norm: -1}
+},
+FermionAnomalous: {
+ '\gamma_{D_c,D,1,1}': {Fields: [D,Dc], Norm: 1, Indices: {'SU2L': [1,1]}}
 }
 }

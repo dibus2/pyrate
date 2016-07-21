@@ -9,7 +9,6 @@ from ScalarMass import *
 from Trilinear import *
 from ScalarAnomalous import *
 from FermionAnomalous import *
-import pudb
 
 
 def Translate(RGE, model, RunSettings):

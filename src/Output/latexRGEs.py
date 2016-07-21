@@ -335,7 +335,7 @@ def writeScalarAnomalous(LatexText, FinalRGE, model, RunSettings, counter):
         # Split the Equations
         ExprI = SplitEq(ExprI)
         ExprII = SplitEq(ExprII)
-        mab = '\\gamma_{{{},{}}}'.format(*[latex(el[0]) for el in model.ScalarAnomalousToCalculate[mab][-1]])
+        #mab = '\\gamma_{{{},{}}}'.format(*[latex(el[0]) for el in model.ScalarAnomalousToCalculate[mab][-1]])
         LatexText = WriteEqs(LatexText, ExprI, ExprII, mab, RunSettings, ScalarAnomalous=True)
         LatexText = Polishing(LatexText, model)
     else:
@@ -361,7 +361,8 @@ def writeFermionAnomalous(LatexText, FinalRGE, model, RunSettings, counter):
         # Get the 2Loop result
         ExprII = (((Eq * (4 * pi) ** 4).subs(Symbol('kappa'), Rational(1, 2))).expand()).subs(pi, 0)
         # Replace the name of the particles with the new indices for readability
-        Fermions = [el.args[0] for el in model.FermionAnomalousToCalculate[y][0] if str(el.args[0]) in model.Fermions]
+        #Fermions = [el.args[0] for el in model.FermionAnomalousToCalculate[y][0] if str(el.args[0]) in model.Fermions]
+        Fermions = [el[0] for el in model.FermionAnomalousToCalculate[y][2] if str(el[0]) in model.Fermions]
         if len(Fermions) == 2 and Fermions[0] == Fermions[1]:
             ExprI = ExprI.subs(str(Fermions[0]) + '_f', Indices[0])
             ExprI = ExprI.subs(str(Fermions[0]) + '1_f', Indices[1])

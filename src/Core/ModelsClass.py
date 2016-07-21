@@ -14,8 +14,6 @@ except ImportError:
 sys.setrecursionlimit(10000)
 
 
-
-
 class Model(object):
     """Takes the Settings read from the YAML file and eventually filtered in RGEs.py and construct the class Model out of it incorporating the groups"""
 
@@ -137,21 +135,54 @@ class Model(object):
         # extract the scalar masses terms
         if 'ScalarMasses' in self.Potential:
             self.Potential['ScalarMasses'], self.ScMToCalculate, self.ListScM = self.ExtractTerm('ScalarMasses')
-            self.ScalarAnomalousToCalculate = copy.deepcopy(self.ScMToCalculate)
+            ####
+            # Deprecated
+            ####
+            #self.ScalarAnomalousToCalculate = copy.deepcopy(self.ScMToCalculate)
             #modify the name for the output
-            for sc in self.ScalarAnomalousToCalculate.keys():
-                ind = [ix for ix, xx in enumerate(sc) if xx != '\\']
-                if ind != []:
-                    ind = ind[0]
-                scnew = sc[:ind] + r'gamma_{{{}}}'.format(sc[ind:])
-                self.ScalarAnomalousToCalculate[scnew] = self.ScalarAnomalousToCalculate[sc]
-                del self.ScalarAnomalousToCalculate[sc]
+            #for sc in self.ScalarAnomalousToCalculate.keys():
+            #    ind = [ix for ix, xx in enumerate(sc) if xx != '\\']
+            #    if ind != []:
+            #        ind = ind[0]
+            #    scnew = sc[:ind] + r'gamma_{{{}}}'.format(sc[ind:])
+            #    self.ScalarAnomalousToCalculate[scnew] = self.ScalarAnomalousToCalculate[sc]
+            #    del self.ScalarAnomalousToCalculate[sc]
+            ####
+            # End Deprecated
+            ####
+        if 'ScalarMasses' in self.Potential and not 'ScalarAnomalous' in self.Potential:
+            #Let's construct the full anomalous dimension matrix
+            self.dimensionAnomalous = {}
+            for scalar in self.Scalars.values():
+                self.dimensionAnomalous[scalar._name] = [gg[1].dimR(list(scalar.Qnb[gg[0]])) for gg in self.NonUGaugeGroups]
+                self.dimensionAnomalous[scalar._name] = list(itertools.product(*[range(1, el+1) if el != 1 else [0] for el in self.dimensionAnomalous[scalar._name]]))
+                self.dimensionAnomalous[scalar._name] = [flatten([scalar, list(el)]) for el in self.dimensionAnomalous[scalar._name]]
+            self.dimensionAnomalous['matrix'] = list(itertools.product([tuple(el) for el in sum(self.dimensionAnomalous.values(),[])],repeat=2))
+            for el in self.dimensionAnomalous['matrix']:
+                self.ScalarAnomalousToCalculate[r'\gamma({},{})'.format(str(el[0]), str(el[1]))] = [el[0][0], el[1][0]], 1, el
+
+        if 'ScalarAnomalous' in self.Potential:
+            for gamma, valg in self.Potential['ScalarAnomalous'].items():
+                valg['Indices'] = [valg['Indices'][gg[0]] if gg[0] in valg['Indices'] else [0]*2 for gg in self.NonUGaugeGroups]
+                indicescombination = zip([self.Scalars[el]._name for el in valg['Fields']], [list(ell) for ell in zip(*valg['Indices'])])
+                indicescombination = [flatten(el) for el in indicescombination]
+                self.ScalarAnomalousToCalculate[gamma] = valg['Fields'], self.translatenorm(valg['Norm']), indicescombination
 
         ###Extract the Fermion mass terms
         if 'FermionMasses' in self.Potential:
             self.Potential['FermionMasses'], self.FMToCalculate, self.ListFM = self.ExtractTerm('FermionMasses')
-            for fmkey, fmval in self.FMToCalculate.items():
-                self.FermionAnomalousToCalculate['gamma_{{{}{}}}'.format(fmval[-1][0][0], fmval[-1][1][0])] = fmval
+            ####
+            #Deprecated
+            #for fmkey, fmval in self.FMToCalculate.items():
+            #    self.FermionAnomalousToCalculate[r'\gamma_{{{}{}}}'.format(fmval[-1][0][0], fmval[-1][1][0])] = fmval
+            #End Deprecated
+            ####
+        if 'FermionAnomalous' in self.Potential:
+            for gamma, valg in self.Potential['FermionAnomalous'].items():
+                valg['Indices'] = [valg['Indices'][gg[0]] if gg[0] in valg['Indices'] else [0]*2 for gg in self.NonUGaugeGroups]
+                indicescombination = zip([self.Fermions[el]._name for el in valg['Fields']], [list(ell) for ell in zip(*valg['Indices'])])
+                indicescombination = [flatten(el) for el in indicescombination]
+                self.FermionAnomalousToCalculate[gamma] = [self.Fermions[el] for el in valg['Fields']], self.translatenorm(valg['Norm']), indicescombination
         if 'TrilinearTerms' in self.Potential:
             self.Potential['TrilinearTerms'], self.TriToCalculate, self.ListTri = self.ExtractTerm('TrilinearTerms')
         # Check that there is no symbols that look like M or tM or atM or MatM because it interfers with the output
@@ -424,7 +455,8 @@ class Model(object):
         ########################
         # End Auxiliary functions
         ########################
-        translation = {'Yukawas': 3, 'QuarticTerms': 4, 'ScalarMasses': 2, 'TrilinearTerms': 3, 'FermionMasses': 2}
+        translation = {'Yukawas': 3, 'QuarticTerms': 4, 'ScalarMasses': 2, 'TrilinearTerms': 3, 'FermionMasses': 2,
+                       'ScalarAnomalous': 2}
         ################################
         ##Test to disentengle the terms
         Skipterms = 0
