@@ -104,7 +104,7 @@ def CC2SC2S(powe, comb, model):
     assert powe[1] == 4
     sc1, sc2 = comb
     conserv = functools.reduce(operator.mul, [KroneckerDelta(a, b) for a, b in zip(sc1, sc2)])
-    if conserv != 0:
+    if conserv == 1:
         res = model.Expand(((_G, gg1), (_G, gg2), (_Cs, gg1, sc1), (_Cs, gg2, sc1)))
     else:
         res = 0
@@ -117,7 +117,7 @@ def CScalarAnoII(powe, comb, model):
     assert powe[1] == 4
     sc1, sc2 = comb
     conserv = functools.reduce(operator.mul, [KroneckerDelta(a, b) for a, b in zip(sc1, sc2)])
-    if conserv != 0:
+    if conserv == 1:
         res = ((Rational(35, 3) - 2 * xi - Rational(1, 4) * xi ** 2) * model.Expand(
             ((_G, gg1), (_G, gg1), (_Cs, gg1, sc1), (_Cg, gg1)))
                - Rational(10, 3) * kappa * model.Expand(((_G, gg1), (_G, gg1), (_Cs, gg1, sc1), (_S, gg1)))
