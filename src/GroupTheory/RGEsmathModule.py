@@ -2,6 +2,7 @@
 """We define mathematical functions and tools used for the different calculations."""
 from GroupDefinitions import *
 
+
 def Epsilon(lis):
     """wrapper for the Eijk function of sympy in order to have it work with a list of arg of arbitrary length"""
     # contruct the string of indices
@@ -154,6 +155,8 @@ class trace(Function):
     def transpose(self):
         return trace(*[el.transpose() for el in self.arg][::-1])
 
+    def rotateleft(self, ind):
+        return trace(*self.arg[ind:] + self.arg[:ind])
 
 class Tr(Function):
     def __init__(self, arguments):
@@ -359,7 +362,7 @@ def determinordering(model, Final):
             if hasattr(el, 'is_trace'):
                 In.append(el.arg)
             elif hasattr(el, 'arg') and not (hasattr(el, 'is_trace')) or (
-                    type(el) == adjoint and hasattr(el.args[0], 'arg')):
+                            type(el) == adjoint and hasattr(el.args[0], 'arg')):
                 Out.append(el)
             else:
                 Factor.append(el)
@@ -468,16 +471,18 @@ def determinordering(model, Final):
                                 else:
                                     if type(el[0]) == conjugate and el[1] == ():
                                         skip[iel] = Symbol(str(el[0].args[0]), commutative=True).conjugate()
-                                    elif type(el[0]) == transpose and el[1] == (): # remove the transpose it is a scalar
+                                    elif type(el[0]) == transpose and el[
+                                        1] == ():  # remove the transpose it is a scalar
                                         skip[iel] = Symbol(str(el[0].args[0]), commutative=True)
                                     else:
                                         skip[iel] = Symbol(str(el[0]), commutative=True)
 
                             # In case Term is a Yukawa it is necessarily the last one of skip
-                            if str(Term[0]) in model.Classes or str(Term[0].args[0]) in model.Classes: # in case there is a transposition or conjugate
+                            if str(Term[0]) in model.Classes or str(
+                                    Term[0].args[0]) in model.Classes:  # in case there is a transposition or conjugate
                                 if (len(Indices) == 1 and Indices[0] == ()) or Indices == []:
                                     if isinstance(Term[0], transpose):
-                                        Term = Symbol(str(Term[0].args[0]), commutative=True) # remove the transpose
+                                        Term = Symbol(str(Term[0].args[0]), commutative=True)  # remove the transpose
                                     else:
                                         Term = Symbol(str(Term[0]), commutative=True)
                                 elif Indices != []:
@@ -524,14 +529,15 @@ def determinordering(model, Final):
                             skip0 = functools.reduce(operator.mul, skip, 1)
                             # At this stage it might be that the skip term is a trace
                             if type(Term) == MatM and (
-                                        len(Term.indices) == 2 and Term.indices[0] == Term.indices[1] and len(
-                                    str(Term.indices[0]).split('_')) == 1):
+                                                len(Term.indices) == 2 and Term.indices[0] == Term.indices[1] and len(
+                                        str(Term.indices[0]).split('_')) == 1):
                                 # it is a trace
                                 Term = trace(*Term.arg)
                             # At this stage it might be that the skip term is a trace
                             if type(skip0) == MatM and (
-                                        len(skip0.indices) == 2 and skip0.indices[0] == skip0.indices[1] and len(
-                                    str(skip0.indices[0]).split('_')) == 1):
+                                                len(skip0.indices) == 2 and skip0.indices[0] == skip0.indices[
+                                            1] and len(
+                                        str(skip0.indices[0]).split('_')) == 1):
                                 # it is a trace
                                 skip0 = trace(*skip0.arg)
                             Term = skip0 * Term
@@ -559,6 +565,7 @@ def determinordering(model, Final):
                             else:
                                 skip.append((tterm[0], ()))
                                 Indices.insert(0, indices[0])
+            Res = reorganize_traces(Res, model)
             OrderedTerm.append(Factor * functools.reduce(operator.mul, Res, 1))
     res = sum(OrderedTerm)
     # replace the symbols
@@ -624,13 +631,13 @@ def analyseterm(term, structure, model):
                 out = MatM((term[1], term[0].transpose()), structure[1][0])
             else:
                 out = MatM((term[1], term[0]), structure[1][0])
-            # out = MatM((term[1],term[0]),structure[1][0])
+                # out = MatM((term[1],term[0]),structure[1][0])
         elif structure[0][0] == structure[1][0]:  # transpose
             if str(type(term[0])) == 'Dagger' or str(type(term[0])) == 'transpose':
                 out = MatM((term[1].transpose(), term[0].transpose()), structure[1][1])
             else:
                 out = MatM((term[1].transpose(), term[0]), structure[1][1])
-            #		out = MatM((term[1].transpose(),term[0]),structure[1][1])
+                #		out = MatM((term[1].transpose(),term[0]),structure[1][1])
         else:
             loggingCritical("Error this is not implemented, contact the authors", verbose=True)
         return out.update()
@@ -666,3 +673,35 @@ def analyseterm(term, structure, model):
     else:
         loggingCritical("Error this is not implemented, contact the authors", verbose=True)
         exit()
+
+
+def reorganize_traces(Res, model):
+    # Reorganize the traces trying to always have a dagger in first position and limit the number of transpose and conjugate
+    yuk = model.YukToCalculate.keys()
+    for iell, ell in enumerate(Res):
+        if type(ell) == trace:
+            if any([type(elem) == transpose for elem in ell.args]):
+                ell = ell.transpose()
+            index0 = getindex(yuk, ell.args[0])
+            # Order the yuk according to yuk
+            while True:
+                index = [ind for ind, elem in enumerate(ell.args[1:])
+                         if getindex(yuk, elem) < index0
+                         ]
+                if index:
+                    index0 = getindex(yuk, ell.args[1:][index[0]])
+                    ell = ell.rotateleft(index[0]+1)
+                else:
+                    break
+            # Finally if the first and last one have the same index put the non adjoint first
+            if getindex(yuk, ell.args[0]) == getindex(yuk, ell.args[-1]) and type(ell.args[0]) == adjoint:
+                ell = ell.rotateleft(-1)
+            Res[iell] = ell
+    return Res
+
+
+def getindex(yuk, el):
+    if not type(el) == Symbol:
+        return yuk.index(str(el.args[0]))
+    else:
+        return yuk.index(str(el))

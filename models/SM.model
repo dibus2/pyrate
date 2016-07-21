@@ -48,5 +48,8 @@ QuarticTerms: {
  },
 ScalarMasses: {
  '\mu_1' : {Fields : [H*,H], Norm : 1}
- }
+ },
+ScalarAnomalous: {
+  '\gamma_{\Sigma\Pi,1,1}': {Fields: [Pi, Pi], Indices: {'SU2L': [1,1]}, Norm: 1},
+},
 }
