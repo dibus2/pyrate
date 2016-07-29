@@ -38,7 +38,7 @@ class particle(object):
             return int(dic['Gen'])
 
     def buildupQ(self, Groups):
-        """Construct the W vector of charges under the U1 sector treated as a whole. New in version 2 """
+        """Construct the Q vector of charges under the U1 sector treated as a whole. New in version 2 """
         out = []
         ic = 0
         for gg, val, U in Groups:

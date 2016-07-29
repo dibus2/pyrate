@@ -293,7 +293,7 @@ class Idbquerry(cmd.Cmd):
         return self.complete_generic(text, line, begidx, endidx, 'Casimir')
 
     def do_DimR(self, line):
-        return self.do_generic(line, 'dimR')
+        return self.do_generic(self._filter_su2_irrep(line), 'dimR')
 
     def complete_DimR(self, text, line, begidx, endidx):
         return self.complete_generic(text, line, begidx, endidx, 'DynkinToDim')
@@ -508,7 +508,7 @@ class Idbquerry(cmd.Cmd):
                             if function == 'repMatrices':
                                 if conjugate_matrix is not None:
                                     if conjugate_matrix:
-                                        res = [el.conjugate() for el in res]
+                                        res = [-el.conjugate() for el in res]
                                     irrep = (irrep[0], conjugate_matrix)
                                 res = self._build_sparse_matrices(res)
                             self._add_to_db([group, function, irrep], res)
