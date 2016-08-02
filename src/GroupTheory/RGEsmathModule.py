@@ -243,7 +243,7 @@ def summatrix(llist):
 
 def DynkinIndex(Mod, x, ScalarsOrFermions):
     """Calculates the Dynkin Index for a given group in a given model and for the Scalar or Fermions representation."""
-    out = sum([x[1].S2(val.Qnb[x[0]]) * multiplicity(x, part, val, Mod)
+    out = sum([x[1].S2(val.Qnb[x[0]]) * multiplicity(x, val, Mod)
                for part, val in Mod.__getattribute__('{}'.format(ScalarsOrFermions)).items()
                if val.Qnb[x[0]] != x[1].Dynksinglet])
     return out
@@ -253,7 +253,6 @@ def DynkinCasimir(Mod, x, ScalarsOrFermions):
     """Calculates the Dynkin times the Casimir for a given group in a given model and for either the scalar or Fermions representation."""
     out = sum(sum([[
                        x[1].g ** 3 * y[1].g ** 2 * y[1].C2(val.Qnb[y[0]]) * x[1].S2(val.Qnb[x[0]]) * multiplicity(x,
-                                                                                                                  part,
                                                                                                                   val,
                                                                                                                   Mod)
                        for part, val in Mod.__getattribute__('{}'.format(ScalarsOrFermions)).items()
@@ -263,7 +262,7 @@ def DynkinCasimir(Mod, x, ScalarsOrFermions):
     return out
 
 
-def multiplicity(x, part, val, Mod):
+def multiplicity(x, val, Mod):
     """Calculate the degeneracy."""
     # We get rid of the - signs for the bar representations and take the quantum numbers of all the groups but the one under which we calculate the RGE and the U1 factors
     Multiplicity = [getdimIrrep(charge, Mod.GetGroupFromName[group], Mod.idb)
