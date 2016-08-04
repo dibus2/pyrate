@@ -25,8 +25,6 @@ RealScalars: {
 ##########################################################################
 
 CplxScalars: {
- # H: {RealFields: [Pi,I*Sigma], Norm: 1, Qnb : {SO10: 10}},
- # H*: {RealFields: [Pi,-I*Sigma], Norm: 1, Qnb : {SO10: -10}},
   Delta: {RealFields: [PiD, I*SigD], Norm: 1, Qnb: {SO10: 126}},
   Delta*: {RealFields: [PiD, -I*SigD], Norm: 1, Qnb: {SO10: -126}}
 }
@@ -38,16 +36,16 @@ Potential: {
 #######################################
 #
 Yukawas: {
-  #'Y_{10}': {Fields: [Psi, H, Psi], Norm: 1},
+  'Y_{10}': {Fields: [Psi, H, Psi], Norm: 1},
   'Y_{16}': {Fields: [Psi, Delta*, Psi], Norm: 1},
  },
  ScalarMasses: {
   #'m_{126}': {Fields: [Delta*, Delta], Norm: 1},
  },
  QuarticTerms: {
-  'lambda_1': {Fields: [H,H,H,H], Norm: 1},
-  'lambda_2': {Fields: [[H, H, Delta*, Delta*],[H,H,Delta,Delta]], Norm: 1/120},
-  'lambda_3': {Fields: [[H, Delta*, H, Delta*],[H,Delta,H,Delta]], Norm: 1/24},
-  'lambda_4': {Fields: [[Delta*, Delta*, Delta*, Delta*],[Delta,Delta,Delta,Delta]], Norm: 1/14400}
+  #'lambda_1': {Fields: [H,H,H,H], Norm: 1},
+  #'lambda_2': {Fields: [[H, H, Delta*, Delta*],[H,H,Delta,Delta]], Norm: 1/120},
+  #'lambda_3': {Fields: [[H, Delta*, H, Delta*],[H,Delta,H,Delta]], Norm: 1/24},
+  #'lambda_4': {Fields: [[Delta*, Delta*, Delta*, Delta*],[Delta,Delta,Delta,Delta]], Norm: 1/14400}
   }
  }
