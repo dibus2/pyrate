@@ -28,3 +28,4 @@ logFile*.log
 test*
 RunPyRate_RGEs.m_bck
 RGEsmathModule.py_bck
+*.pickle

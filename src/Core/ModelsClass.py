@@ -438,8 +438,6 @@ class Model(object):
                     ff.append(0)
                     NotCharge.append(True)
             inm += 1  # count the group
-        #Add the U1 charges only used for the kinematic corrections
-        #outparticles = [el + list(Term[0][iel].args[len(self.NonUGaugeGroups)+1:]) for iel, el in enumerate(outparticles)]
         return LHfactor, outparticles
 
     def ExtractTerm(self, term):
@@ -951,11 +949,6 @@ class Model(object):
                              else Integer(0) for igg, g in enumerate(self.NonUGaugeGroups)]
                     tempC = ['j{}{}'.format(IndicesCounters[igg] + 1, igg) if f.Qnb[g[0]] != g[1].Dynksinglet
                              else Integer(0) for igg, g in enumerate(self.NonUGaugeGroups)]
-            #        # add U(1) charges
-            #        tempR = tempR + [f.Qnb[gg[0]] for gg in self.UGaugeGroups]
-            #        tempC = tempC + [f.Qnb[gg[0]] for gg in self.UGaugeGroups]
-                    #Out.append([IndexedBase(f.RealPart)[tempR] + f.Coeff * IndexedBase(f.CplxPart)[tempC], f.norm])
-
                     Out.append([IndexedBase(f.RealPart)[['i{}{}'.format(IndicesCounters[igg] + 1, igg) if f.Qnb[g[0]] != g[1].Dynksinglet
                                                          else Integer(0) for igg, g in enumerate(self.NonUGaugeGroups)]]
                                 + f.Coeff * IndexedBase(f.CplxPart)[['i{}{}'.format(IndicesCounters[igg] + 1, igg)
@@ -964,11 +957,6 @@ class Model(object):
 
 
                     ToDerive.append([IndexedBase(f.RealPart)[tempR], IndexedBase(f.CplxPart)[tempC]])
-                    #ToDerive.append([IndexedBase(f.RealPart)[[
-                    #    'j{}{}'.format(IndicesCounters[igg] + 1, igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0)
-                    #    for igg, g in enumerate(self.NonUGaugeGroups)]], IndexedBase(f.CplxPart)[[
-                    #    'j{}{}'.format(IndicesCounters[igg] + 1, igg) if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0)
-                    #    for igg, g in enumerate(self.NonUGaugeGroups)]]])
                     # Increment the proper indices
                 elif f.Cplx and Singlet:
                     # If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14
@@ -1004,7 +992,6 @@ class Model(object):
                 functools.reduce(operator.mul, el, 1) if type(el) == list else el for el in Out], 1)).expand()
             # Now we can sum the terms and derive them all together
             for toderive in ToDerive:
-                #FOut.append([toderive, derivTensor(Out, [el.args[0][el.args[1:len(self.NonUGaugeGroups)+1]] for el in toderive])])
                 FOut.append([toderive, derivTensor(Out, toderive)])
             ## At this point we have all the derivatives for this term
             CollectDummy = [[(el, Integer(0)) for el in elem[1].atoms() if len(str(el).split('dum')) != 1] for elem in
@@ -3015,7 +3002,6 @@ class Index(object):
 #                Gout.append([self.nextind(part[0], Layer, ext=True, u1factor=True, dummy=True), part[len(self.mod.NonUGaugeGroups) + ig +1], part[len(self.mod.NonUGaugeGroups) + ig+1]])
         return Gout
 
-    #def nextind(self, pp, Layer, ext=False, dummy=False, group=False, u1factor=False):
     def nextind(self, pp, Layer, ext=False, dummy=False, group=False):
         # exterior indices are not sum in the first place
         if not (ext):
@@ -3050,16 +3036,6 @@ class Index(object):
                 tempstring = 'dum{}{}'.format(self.dummy, Layer)
                 self.mod.declareSymbol(tempstring)
                 return tempstring
-#            elif not u1factor:
-#                self.dummy += 1
-#                tempstring = 'dum{}{}'.format(self.dummy, Layer)
-#                self.mod.declareSymbol(tempstring)
-#                return tempstring
-#            else:
-#                self.u1factor +=1
-#                tempstring = 'u1ind{}{}'.format(self.u1factor, Layer)
-#                self.mod.declareSymbol(tempstring)
-#                return tempstring
 
     def reset(self):
         self.intind = 0
