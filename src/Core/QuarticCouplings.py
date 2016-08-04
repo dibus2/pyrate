@@ -3,7 +3,6 @@ import time
 
 from RGEsDefinition import *
 from RGEsmathModule import SimplifyTraces, DeterminOrdering
-import pudb
 
 
 ##################################################################################

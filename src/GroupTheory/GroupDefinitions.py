@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from Contraction import *
-import pudb
 
 """ In this file we define all tdhe symbols and conS*nstants of the groups that are used i.e. SU(N) U(1)"""
 m, n, o, p, q, r, s, t, u, v = map(Wild, ['m', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v'])

@@ -1,6 +1,5 @@
 #!/usr/bin/env python 
 try:
-    import pudb
     import yaml
     import sys
     import argparse
@@ -631,7 +630,6 @@ else:
                     gaugegroups = [str(el) for el in model.UsectorMatrix] + [str(el[1].g) for el in model.NonUGaugeGroups]
                 else:
                     gaugegroups = [str(el[-1]) for el in model.ListGroups]
-                pudb.set_trace()
                 strsettings = ([str(el) for el in model.ListYukawa],
                                [str(el) for el in model.ListFM],
                                [str(el) for el in model.ListTri],

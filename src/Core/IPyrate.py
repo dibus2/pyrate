@@ -7,7 +7,6 @@ directly from PyLie.
 """
 
 try:
-    import pudb
     import cmd
     import os
     from sys import exit

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import pudb
 from sympy import Symbol, Rational, I, sqrt
 import sys
 

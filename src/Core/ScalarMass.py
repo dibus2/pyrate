@@ -1,7 +1,6 @@
 #!/usr/bin/env python 
 from RGEsDefinition import *
 from RGEsmathModule import SimplifyTraces, DeterminOrdering
-import pudb
 
 
 ##################################################################################

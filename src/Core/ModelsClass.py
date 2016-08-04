@@ -1876,7 +1876,6 @@ class Model(object):
             res = self.Thetakin(temp[:4], indicesFull[:4])
             return [res, 4]
         else:
-            pudb.set_trace()
             exit("Expand Function : not implemented yet, contact the authors")
 
     def DeterminTraces2(self, argsS, Structure):
