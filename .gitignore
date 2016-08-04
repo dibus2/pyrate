@@ -2,16 +2,13 @@
 results/
 
 #private model files not public
-#
 
 models/private/
+docs/.ipynb_checkpoints/
 
-#all .pyc
-#
 *.pyc
 *.m
 *.nb
-
 change_matrices.py
 contraction-15-15-15-s.py
 update-database.py
@@ -24,8 +21,12 @@ CGCsnewsu2v34.py
 #logfiles
 logFile*.log
 .idea
-.ipynb_checkpoints
-test*
 RunPyRate_RGEs.m_bck
 RGEsmathModule.py_bck
 *.pickle
+ToToolbox.ipynb
+BuildupDatebase-Susynov3.py
+BuildupDatebase.py
+add-contraction-to-db-pklz.py
+add-contraction-to-db.py
+combine-database-separate-groups.py
