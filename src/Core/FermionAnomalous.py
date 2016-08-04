@@ -1,7 +1,7 @@
 #!/usr/bin/env python 
 from RGEsDefinition import *
 from ModelsClass import Model, loggingInfo, loggingDebug, loggingCritical
-from RGEsmathModule import DynkinIndex, DynkinCasimir, multiplicity, SimplifyTraces, DeterminOrdering, Tr
+from RGEsmathModule import DynkinIndex, DynkinCasimir, SimplifyTraces, DeterminOrdering, Tr
 
 
 ###########################

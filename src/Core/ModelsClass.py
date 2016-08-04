@@ -2501,7 +2501,7 @@ class Model(object):
         else:
             sc1, sc2, sc3, sc4 = parts
             # del_ab del_cd need to switch because of def deltatilde_double
-            res = sum([sum(multiplicity([''], pp, self) * self.Scalars[str(sc1)].W.transpose() * pp.W * pp.W.transpose() * self.Scalars[str(sc3)].W)
+            res = sum([sum(multiplicityKin(pp, self) * self.Scalars[str(sc1)].W.transpose() * pp.W * pp.W.transpose() * self.Scalars[str(sc3)].W)
                        for pp in self.Scalars.values()]) * self.deltatilde_double(sc1, sc3, sc2, sc4,
                                                                                   [indices[0], indices[2], indices[1],
                                                                                    indices[3]])
@@ -2516,7 +2516,7 @@ class Model(object):
         else:
             sc1, sc2, sc3, sc4 = parts
             # del_ab del_cd need to switch because of def deltatilde_double Don't forget the multiplicity
-            res = sum([sum(multiplicity([''], pp, self) * self.Scalars[str(sc1)].W.transpose() * pp.W * pp.W.transpose() * self.Scalars[str(sc3)].W)
+            res = sum([sum(multiplicityKin(pp, self) * self.Scalars[str(sc1)].W.transpose() * pp.W * pp.W.transpose() * self.Scalars[str(sc3)].W)
                        for pp in self.Fermions.values()]) * self.deltatilde_double(sc1, sc3, sc2, sc4,
                                                                                    [indices[0], indices[2], indices[1],
                                                                                     indices[3]])
