@@ -121,7 +121,7 @@ def ExportToPickle(Name, Xpr, model, description=''):
     if 'SUndum' in strsettings[-4]:
         strsettings[-5].append('g_SUndum')
 
-    pickle.dump([strres, strsettings, model.saveSettings, description], fPickle)
+    pickle.dump([strres, strsettings, description], fPickle)
     fPickle.close()
     print"\t\t...done"
 
@@ -129,7 +129,7 @@ def ExportToPickle(Name, Xpr, model, description=''):
 def loadmodel(name):
     # open the file
     Of = open('{}'.format(name), 'r')
-    strres, strsettings, modelsettings, description = pickle.load(Of)
+    strres, strsettings, description = pickle.load(Of)
     # we first declare all the variables and we also have to declare the classes to make sense of the different expressions
     Replace = []
     for ill, ll in enumerate(strsettings):
@@ -151,11 +151,10 @@ def loadmodel(name):
     res = [eval(el) for el in strres]
     # translate the keys into the symbols
     Nres = {}
-    pudb.set_trace()
     for elem in res:
         for key, vals in elem.items():
             Nres[key] = vals
-    return Nres, description, modelsettings
+    return Nres, description
 
 
 def getoneloop(llist):
@@ -444,7 +443,7 @@ def ExportBetaFunction(name, model):
     CodeStrI = '\"\"\"\nThis Code is generated automatically by pyR@TE, {} for the model : {}\nIt demonstrates how to use the beta_function file produced by pyR@TE using the -e option to solve the rges using the RGEsclass.py module\"\"\"\n'.format(
         date, model._Name)
     CodeStrI += "#!/usr/bin/env python\nimport sys\n#This line should be modified if you move the result file\nsys.path.append('{}')\n#Same as above.The RGEsclass.py should be accessible\nsys.path.append('{}')\ntry :\n\tfrom RGEclass import *\nexcept ImportError :\n\texit('RGEclass.py not found.')\ntry :\n\timport scipy.interpolate as scp\nexcept ImportError :\n\texit('error while loading scipy')\nfrom {} import *\n".format(
-        settings['Results'], '{}/src/Output'.format(wd), Name.split('.')[0])
+        os.path.basename(['Results'][0]), '{}/src/Output'.format(wd), Name.split('.')[0])
     CodeStrI += "#In Order to use your result you have to create an instance of the RGE class following this\nrge = RGE(beta_function_{},{},labels={})\n#Note here that the labels are just used to label the results but should match the order in which the RGEs are solved.\n".format(
         model._Name, NbRGEs, TagsFull)
     CodeStrI += "\"\"\"\nOne can access the physical parameters as the top mass, the up quark yukawas, Z mass ...\nSince they are all attributes of the class object we have just created. The list is the following :\n\tPi = np.pi\n\talpha = 1./128.91\n\talphaS = 0.1184\n\tsinthetasq = 0.2316 #Sin squared\n\tMz = 91.1876 #in GeV\n\tMw = 80.399 # in GeV\n\tGf = 1.16637e-5 #in GeV ^-2\n\tCF = 4./3. #Casimir of the SU3 color\n\tNc = 3.\n\tQtop = 2./3.#top quark chargs\n\tvev = 246.22 # From (sqrt(2)Gf)^-1/2\n\tMt = 173.3 # the pole mass of the top\n\tU = [2.4e-3,1.27,165.3308]#mu,mc,mt (MSbar)mt=(Mt/(1+4alphas/3Pi))\n\tD = [4.75e-3,104e-3,4.19]#md,ms,mb\n\tL = [0.511e-3,105.66e-3,1.777]\n\tyU = [sqrt(2)/self.vev * el for el in self.U]\n\tyD = [sqrt(2)/self.vev * el for el in self.D]\n\tyL = [sqrt(2)/self.vev * el for el in self.L] \n\tg10 = sqrt(4*self.Pi * self.alpha)/sqrt(1-self.sinthetasq)#Initial value\n\tg20 = sqrt(4*self.Pi * self.alpha)/sqrt(self.sinthetasq)#Initial value\n\tg30 =  sqrt(4*self.Pi * self.alphaS)#Initial value\n\n\nTo modify one of them one would do :\n\"\"\"\nrge.Mt = 171.0\n"
