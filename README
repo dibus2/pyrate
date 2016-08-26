@@ -5,6 +5,9 @@ New in v2.0.0:
 • The group theory is now handled by the PyLie module that was developped for this purpose. It is a python re-write of the relevant Mathematica routines of Susyno (R. Fonseca). This has the double advantage to remove the large database from the source files and to allow the use of potentially arbitrary fields irreps. Note that there is still a database, CGCs.pklz which is being populated as the user uses PyR@TE to allow even faster execution.
 • We made available the anamalous dimension for the scalar and fermion fields to two-loop.
 
+Dependencies for v2.0.0:
+
+SymPy v1.0.0, NumPy, PyYaml
 ----------
 
 This is the README file of PyR@TE version 1.1.4 and onward. 
