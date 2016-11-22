@@ -290,7 +290,7 @@ else:
                                 # copy it this is case 2)
                                 yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'],
                                                                         'Norm': [ll1['Norm']] * len(ll1['Fields'])}
-                            elif type(ll1['Fields'][0]) == list and type(ll1['Norm']) == list:
+                            elif type(ll1['Fields'][0]) == list and type(ll1['Norm']) == list and len(ll1['Norm']) == len(ll1['Fields']):
                                 pass
                             elif type(ll1['Fields'][0]) == str and (
                                             type(ll1['Norm']) == str or type(ll1['Norm']) == int):
