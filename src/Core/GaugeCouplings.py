@@ -20,12 +20,10 @@ def CompileGaugeCouplings(model, Translated, x, Weyl, GutNorm):
         FinalBeta = FinalBeta.subs(kappa, Rational(1, 2))
     else:
         FinalBeta = FinalBeta.subs(kappa, 1)
-    if not (model.kinmixing):  # I don't know how to do the normalization with multiple U1
-        if GutNorm and model.GetGroupFromName[x].U:
-            FinalBeta = sqrt(Rational(5, 3)) * FinalBeta.subs(model.UGaugeGroups[0][1].g,
-                                                              sqrt(Rational(3, 5)) * model.UGaugeGroups[0][1].g)
-        elif GutNorm:
-            FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g, sqrt(Rational(3, 5)) * model.UGaugeGroups[0][1].g)
+    if GutNorm:  # Apply any GUT normalization
+        FinalBeta = FinalBeta.subs(model.GutNorm)
+        if model.kinmixing and x == 'abelian':
+            FinalBeta = Matrix([el * model.facGutNorm[iel] for iel, el in enumerate(FinalBeta)]).reshape(2, 2).expand()
     FinalBeta = DeterminOrdering(model, FinalBeta)
     return FinalBeta
 

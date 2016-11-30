@@ -31,6 +31,7 @@ class Model(object):
         self.NonUGaugeGroups = []
         self.UsectorMatrix = []
         self.UGaugeGroups = []
+        self.GutNorm = self.saveSettings['GutNorm'] if 'GutNorm' in self.saveSettings else {}
         self.GaugeGroupsName = []
         self.NonUGroupName = []
         self.InvariantResults = {}  # for storing the results of the invariants calculated at one loop for the two loop case
@@ -98,6 +99,9 @@ class Model(object):
             self.kinmixing = False
         if self.kinmixing and not (Settings['KinMix']):
             self.kinmixing = False
+        # set the gut normalization for the abelian gauge groups
+        if 'GutNorm' in Settings and Settings['GutNorm']:
+            self.set_gut_normalization()
 
         # Update the database
         try:
@@ -306,6 +310,7 @@ class Model(object):
         """Create the different gauge groups"""
         for GroupName, group in self.GaugeGroupsSettings.items():
             # Identify the group and keep the information of wether or not it is a U1 factor this is a security in case people don't call U1 groups U...
+            # Also create the map with the associated normalization
             if group == 'U1':
                 self.GaugeGroups.append([GroupName, U1(GroupName), True])
             elif group.split('U')[0] == 'S':  # it a SUn group factor
@@ -337,6 +342,37 @@ class Model(object):
             self.GaugeGroupsName.append(name)
             self.GetGroupFromName[name] = g
 
+    def set_gut_normalization(self):
+        for el in self.UsectorMatrix:
+            if str(el) == 'g1':
+                self.GutNorm[el] = self.translatenorm(self.GutNorm['U1'])*el
+                del self.GutNorm['U1']
+            else:
+                tp = str(el).split('_')
+                if len(tp) == 2:
+                    if not tp[1] in self.GutNorm:
+                        loggingCritical("Error in processing the `GutNorm`: {}".format(el), verbose=True)
+                        exit()
+                    self.GutNorm[el] = self.translatenorm(self.GutNorm[tp[1]])*el
+                    del self.GutNorm[tp[1]]
+                else:
+                    if not 'U{}'.format(tp[2]) in self.GutNorm:
+                        if not 'U1_{}'.format(tp[2]) in self.GutNorm:
+                            loggingCritical("Error in processing the `GutNorm`. The off diagonal terms must be provided following the convention `Uij`: {}".format(el))
+                        else:
+                            self.GutNorm[el] = self.translatenorm(self.GutNorm['U1_{}'.format(tp[2])])*el
+                            del self.GutNorm['U1_{}'.format(tp[2])]
+                    else:
+                        self.GutNorm[el] = self.translatenorm(self.GutNorm['U{}'.format(tp[2])])*el
+                        del self.GutNorm['U{}'.format(tp[2])]
+        # Fill up the missing values with ones
+        for el in self.UsectorMatrix:
+            if not el in self.GutNorm:
+                self.GutNorm[el] = 1
+        self.facGutNorm = [1/(self.GutNorm[el]/el) for el in self.UsectorMatrix]
+
+
+
     def translatenorm(self, normdic):
         """Translate the norm of a given field"""
         if type(normdic) != str:
@@ -345,7 +381,17 @@ class Model(object):
         else:
             normdic = normdic.replace('Sqrt', 'sqrt').replace('i', 'I')
             if ('I' in normdic or 'sqrt' in normdic) and not ('**' in normdic):
-                return eval(normdic)
+                if '/' in normdic:
+                    src = re.search('([0-9]{1,2})/([0-9]{1,2})',normdic)
+                    if src:
+                        normdic = eval(normdic.replace('{}/{}'.format(src.group(1),src.group(2)), 'Rational({}, {})'.format(
+                            src.group(1),src.group(2)
+                        )))
+                        return normdic
+                    else:
+                        return eval(normdic)
+                else:
+                    return eval(normdic)
             elif '**' in normdic and '/' in normdic:
                 src = re.search('([0-9]{1,2})/([0-9])', normdic)
                 normdic = eval(normdic.replace('{}/{}'.format(src.group(1), src.group(2)),

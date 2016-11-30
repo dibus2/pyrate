@@ -21,8 +21,8 @@ def CompileTri(Translated, y, comb, model, Weyl, GutNorm):
         FinalBeta = FinalBeta.subs(kappa, Rational(1, 2))
     else:
         FinalBeta = FinalBeta.subs(kappa, 1)
-    if GutNorm:
-        FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g, sqrt(Rational(3, 5)) * model.UGaugeGroups[0][1].g)
+    if GutNorm:  # Apply any GUT normalization
+        FinalBeta = FinalBeta.subs(model.GutNorm)
     FinalBeta = FinalBeta.subs(tuple([(el, 0) for el in ListAllSymbols['TrilinearTerm']]))
     FinalBeta = DeterminOrdering(model, FinalBeta)
     return FinalBeta

@@ -1,4 +1,5 @@
-#!/usr/bin/env python 
+#!/usr/bin/env python
+import pudb
 try:
     import yaml
     import sys
@@ -382,13 +383,9 @@ else:
         "Creating the instance of the Model: {}, {}, by {}...done".format(yamlSettings['Name'], yamlSettings['Date'],
                                                                           yamlSettings['Author']),
         verbose=RunSettings['vCritical'])
-    if RunSettings['SetGutNorm'] and len(model.UGaugeGroups) == 1:
+    if RunSettings['SetGutNorm']:
         loggingInfo('Setting the Gut normalization for the U(1) group factor', verbose=RunSettings['vInfo'])
         RunSettings['SetGutNorm'] = True
-    elif RunSettings['SetGutNorm'] and not (len(model.UGaugeGroups) == 1):
-        loggingCritical('**Warning** the `SetGutNorm` switch ignored because multiple U(1) gauge groups found',
-                        verbose=RunSettings['vCritical'])
-        RunSettings['SetGutNorm'] = False
 
     # add the element in ToOnly to Only
     # IF only is defined then skip the other terms

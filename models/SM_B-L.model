@@ -3,20 +3,22 @@
 Author: Florian Lyonnet
 Date: 11.04.2013
 Name: B-L
-Groups: {'U1BL': U1,'U1': U1, 'SU2L': SU2, 'SU3c': SU3}
+Groups: {'U1_BL': U1,'UY': U1, 'SU2L': SU2, 'SU3c': SU3}
+# THIS IS A DUMMY EXAMPLE PLEASE MODIFY TO YOUR LIKING
+GutNorm: {'UY': sqrt(3/5)}
 
 ##############################
 #Fermions assumed weyl spinors
 ##############################
 Fermions: {
-   Lbar: {Gen: 3, Qnb:{ U1: 1/2,   U1BL: 1,  SU2L: -2, SU3c: 1}},
-   #Q: {Gen: 3, Qnb:{ U1: 1/6,  U1BL: 1/3, SU2L: 2, SU3c: 3}},
-   #uRb: {Gen: 3, Qnb:{   U1: -2/3,   U1BL: -1/3,  SU2L: 1,  SU3c: -3}},
-   Qbar: {Gen: 3, Qnb:{ U1: -1/6,  U1BL: -1/3, SU2L: -2, SU3c: -3}},
-   uR: {Gen: 3, Qnb:{   U1: 2/3,   U1BL: 1/3,  SU2L: 1,  SU3c: 3}},
-   dR: {Gen: 3, Qnb:{   U1: -1/3,  U1BL: 1/3,  SU2L: 1,  SU3c: 3}},
-   eR: {Gen: 3, Qnb:{   U1: -1,    U1BL: -1, SU2L: 1,  SU3c: 1}},
-   nuR: {Gen: 3, Qnb:{   U1: 0,    U1BL: -1, SU2L: 1,  SU3c: 1}}
+   Lbar: {Gen: 3, Qnb:{ UY: 1/2,   U1_BL: 1,  SU2L: -2, SU3c: 1}},
+   #Q: {Gen: 3, Qnb:{ UY: 1/6,  U1_BL: 1/3, SU2L: 2, SU3c: 3}},
+   #uRb: {Gen: 3, Qnb:{   UY: -2/3,   U1_BL: -1/3,  SU2L: 1,  SU3c: -3}},
+   Qbar: {Gen: 3, Qnb:{ UY: -1/6,  U1_BL: -1/3, SU2L: -2, SU3c: -3}},
+   uR: {Gen: 3, Qnb:{   UY: 2/3,   U1_BL: 1/3,  SU2L: 1,  SU3c: 3}},
+   dR: {Gen: 3, Qnb:{   UY: -1/3,  U1_BL: 1/3,  SU2L: 1,  SU3c: 3}},
+   eR: {Gen: 3, Qnb:{   UY: -1,    U1_BL: -1, SU2L: 1,  SU3c: 1}},
+   nuR: {Gen: 3, Qnb:{   UY: 0,    U1_BL: -1, SU2L: 1,  SU3c: 1}}
 }
 
 #############
@@ -31,10 +33,10 @@ RealScalars: {
 #################
 
 CplxScalars: {
-  H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: 1/2, U1BL: 0, SU2L: 2, SU3c: 1}},
-  H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {U1: -1/2,U1BL: 0, SU2L: -2, SU3c: 1}},
-  S*: {RealFields: [s1,-I*s2], Norm: 1/Sqrt(2), Qnb : {U1: 0, U1BL: -2, SU2L: 1, SU3c: 1}},
-  S: {RealFields: [s1,I*s2], Norm: 1/Sqrt(2), Qnb : {U1: 0, U1BL: 2, SU2L: 1, SU3c: 1}}
+  H: {RealFields: [Pi,I*Sigma], Norm: 1/Sqrt(2), Qnb : {UY: 1/2, U1_BL: 0, SU2L: 2, SU3c: 1}},
+  H*: {RealFields: [Pi,-I*Sigma], Norm: 1/Sqrt(2), Qnb : {UY: -1/2,U1_BL: 0, SU2L: -2, SU3c: 1}},
+  S*: {RealFields: [s1,-I*s2], Norm: 1/Sqrt(2), Qnb : {UY: 0, U1_BL: -2, SU2L: 1, SU3c: 1}},
+  S: {RealFields: [s1,I*s2], Norm: 1/Sqrt(2), Qnb : {UY: 0, U1_BL: 2, SU2L: 1, SU3c: 1}},
 }
 
 Potential: {

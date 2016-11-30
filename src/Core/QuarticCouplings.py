@@ -23,8 +23,8 @@ def CompileQuartic(Translated, lbd, comb, model, Weyl, GutNorm):
     else:
         FinalBeta = FinalBeta.subs(kappa, 1)
     # Set all the terms that have been skipped to zero
-    if GutNorm:
-        FinalBeta = FinalBeta.subs(model.UGaugeGroups[0][1].g, sqrt(Rational(3, 5)) * model.UGaugeGroups[0][1].g)
+    if GutNorm:  # Apply any GUT normalization
+        FinalBeta = FinalBeta.subs(model.GutNorm)
     FinalBeta = FinalBeta.subs(tuple([(el, 0) for el in ListAllSymbols['QuarticTerms']]))
     FinalBeta = DeterminOrdering(model, FinalBeta)
     return FinalBeta
