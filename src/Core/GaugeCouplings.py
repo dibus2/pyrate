@@ -24,6 +24,14 @@ def CompileGaugeCouplings(model, Translated, x, Weyl, GutNorm):
         FinalBeta = FinalBeta.subs(model.GutNorm)
         if model.kinmixing and x == 'abelian':
             FinalBeta = Matrix([el * model.facGutNorm[iel] for iel, el in enumerate(FinalBeta)]).reshape(2, 2).expand()
+        else:
+            if model.GetGroupFromName[x].U:
+                # find in which position is the corresponding factor
+                fac = [model.facGutNorm[iel] for iel,el in enumerate(model.UsectorMatrix) if el == model.GetGroupFromName[x].g]
+                if fac and len(fac) == 1:
+                    FinalBeta = (FinalBeta * fac[0]).expand()
+                elif fac and len(fac) != 1:
+                    loggingCritical("Error in applying Gut normalization, contact the authors", verbose=True)
     FinalBeta = DeterminOrdering(model, FinalBeta)
     return FinalBeta
 
