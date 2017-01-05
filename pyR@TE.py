@@ -289,7 +289,11 @@ else:
                             if type(ll1['Fields'][0]) == list and (
                                             type(ll1['Norm']) == str or type(ll1['Norm']) == int):
                                 # copy it this is case 2)
-                                yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'],
+                                if 'CGCs' in ll1:
+                                    yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'],
+                                                                            'Norm': [ll1['Norm']] * len(ll1['Fields']), 'CGCs': ll1['CGCs']}
+                                else:
+                                    yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'],
                                                                         'Norm': [ll1['Norm']] * len(ll1['Fields'])}
                             elif type(ll1['Fields'][0]) == list and type(ll1['Norm']) == list and len(ll1['Norm']) == len(ll1['Fields']):
                                 pass
@@ -305,10 +309,18 @@ else:
                             loggingInfo("Warning no Norm specify for {}, setting it to `1`".format(ll1),
                                         verbose=RunSettings['vInfo'])
                             if type(ll1['Fields'][0]) == list:
-                                yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'],
+                                if 'CGCs' in ll1:
+                                    yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'],
+                                                                        'Norm': [1] * len(ll1['Fields']),
+                                                                            'CGCs': ll1['CGCs']}
+                                else:
+                                    yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'],
                                                                         'Norm': [1] * len(ll1['Fields'])}
                             else:
-                                yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': 1}
+                                if 'CGCs' in ll1:
+                                    yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': 1, 'CGCs': ll1['CGCs']}
+                                else:
+                                    yamlSettings['Potential'][lab][ill1] = {'Fields': ll1['Fields'], 'Norm': 1}
     # import the module
     loggingInfo("Importing modules ...", verbose=RunSettings['vInfo'])
     from ModelsClass import *
