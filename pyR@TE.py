@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import pudb
 try:
     import yaml
     import sys
@@ -83,6 +82,8 @@ parser.add_argument('--SetGutNorm', '-gutn', dest='SetGutNorm', action='store_tr
                     help='Set the normalization to gut normalization in case there is a U(1) gauge group, it normalizes g1 -> sqrt(3/5)*g\'')
 parser.add_argument('--KinMix', '-kin', dest='KinMix', action='store_false', default=True,
                     help='Switch off the kinetic mixing terms if multiple U(1) gauge groups are present.')
+# We add a backdoor for the interface with FeynRules. Given a text file with the info needed pyrate calculates the required theory and writes them out into a file
+parser.add_argument('--CalcTheo', '-ct', dest='CalcTheo', action='store', default='', help='Reads the queries from a text file and produce the results in a txt format.')
 
 # Collect the arguments
 args = parser.parse_args()
@@ -156,6 +157,18 @@ if RunSettings['verbose']:
         RunSettings['vInfo'], RunSettings['vDebug'], RunSettings['vCritical'] = True, False, False
 else:
     RunSettings['vInfo'], RunSettings['vDebug'], RunSettings['vCritical'] = False, False, True
+
+######################################
+# Adding the query mode from yaml file
+######################################
+
+if 'CalcTheo' in RunSettings and RunSettings['CalcTheo']:
+    from RunPyLie import RunPyLie
+    loggingInfo("\nCalculating group theoretic information using PyLie.")
+    group_theory_engine = RunPyLie(RunSettings['CalcTheo'])
+    group_theory_engine.calcAll()
+    exit()
+
 
 # Interrogate the database
 if 'interactivedb' in RunSettings and RunSettings['interactivedb']:

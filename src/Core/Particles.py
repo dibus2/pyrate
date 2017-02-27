@@ -94,7 +94,7 @@ class higgsField(particle):
 
     def getRealFields(self):
         """return the field """
-        fieldssplitted = self.RealFields[0].split('I'), self.RealFields[1].split('I')
+        fieldssplitted = self.RealFields[0].split('I'), self.RealFields[1].split('I')  # if there is a I in the real field name it crashes...
         for fieldsplitted in fieldssplitted:
             if len(fieldsplitted) == 1:
                 self.RealPart = Symbol(fieldsplitted[0])
