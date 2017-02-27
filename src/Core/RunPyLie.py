@@ -80,6 +80,7 @@ class RunPyLie:
                     else:
                         fout.write('invalid entry\n')
             fout.close()
+        self._idb._update_db()  # update the database since we are here.
 
 
 

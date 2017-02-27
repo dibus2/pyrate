@@ -167,6 +167,7 @@ if 'CalcTheo' in RunSettings and RunSettings['CalcTheo']:
     loggingInfo("\nCalculating group theoretic information using PyLie.")
     group_theory_engine = RunPyLie(RunSettings['CalcTheo'])
     group_theory_engine.calcAll()
+    loggingInfo("\ndone.")
     exit()
 
 
