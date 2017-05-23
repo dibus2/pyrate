@@ -179,11 +179,18 @@ class U1(object):
         if hypercharge == 'G':
             return 0
         else:
-            return Rational(hypercharge) ** 2
+            try:
+                return Rational(hypercharge) ** 2
+            except TypeError as err:
+                return hypercharge**2
+
 
     def S2(self, hypercharge):
         """The dynkin index is equal to the Casimir operator for U1 i.e. the Y**2"""
         if hypercharge == 'G':
             return 0
         else:
-            return Rational(hypercharge) ** 2
+            try:
+                return Rational(hypercharge) ** 2
+            except TypeError as err:
+                return hypercharge**2

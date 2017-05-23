@@ -354,6 +354,11 @@ else:
                             yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = Rational(qnb)
                         except ValueError as err:
                             yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = eval(qnb)
+                        except TypeError as err:
+                            yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = parse_expr(qnb.replace('i','I'))
+                        except:
+                            loggingCritical("error trying to understand the quantum number `{}`".format(qnb),verbose=RunSettings['vCritical'])
+                            exit()
                     loggingInfo("Fermion {} with Qnb {} under {}".format(key, qnb, GaugeGroup))
             except ValueError as err:
                 loggingCritical(
@@ -370,7 +375,13 @@ else:
                     if type(qnb) == list:  # given in terms of the Dynkin label translate it into tuple
                         yamlSettings['RealScalars'][key]['Qnb'][GaugeGroup] = tuple(qnb)
                     else:
-                        yamlSettings['RealScalars'][key][GaugeGroup] = Rational(qnb)
+                        try:
+                            yamlSettings['RealScalars'][key][GaugeGroup] = Rational(qnb)
+                        except TypeError as err:
+                            yamlSettings['RealScalars'][key][GaugeGroup] = parse_expr(qnb.replace('i','I'))
+                        except:
+                            loggingCritical("error trying to understand the quantum number `{}`".format(qnb), verbose=RunSettings['vCritical'])
+                            exit()
                     loggingInfo("RealScalar {} with Qnb {} under {}".format(key, qnb, GaugeGroup))
             except ValueError as err:
                 loggingCritical(
@@ -380,6 +391,7 @@ else:
             except AttributeError as err:
                 loggingCritical("Error, the Qnb entry must be a dictionary", versbose=RunSettings['vCritical'])
                 exit()
+
     if 'CplxScalars' in yamlSettings:
         for key, value in yamlSettings['CplxScalars'].items():
             try:

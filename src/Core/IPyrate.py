@@ -34,6 +34,7 @@ try:
     # Shadowing of the piecewise mechanism of sympy that makes the code way too slow
     import sympy.concrete.expr_with_limits
     import sympy.concrete.delta
+    from sympy.parsing.sympy_parser import parse_expr
 
     def mypiecewise_fold(exp):
         return exp
