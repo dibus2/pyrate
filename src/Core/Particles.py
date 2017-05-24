@@ -5,6 +5,7 @@ import sys
 sys.path.append('./GroupTheory')
 from Contraction import GetDynkinLabel, getdimIrrep
 from numpy import matrix as npa
+from sympy.parsing.sympy_parser import parse_expr
 import copy
 
 
@@ -52,7 +53,12 @@ class particle(object):
         # PB is that I cannot manage to triger on the Integer type of sympy
         for key, val in dic.items():
             if type(val) == str:
-                val = Rational(val)
+                try:
+                    val = Rational(val)
+                except TypeError:
+                    val = parse_expr(val.replace('i','I').replace('Sqrt','sqrt'))
+                except:
+                    exit("Error, converting qnb of `{}: {}`".format(key,val))
                 dic[key] = val
             if type(val) == tuple:
                 pass

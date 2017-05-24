@@ -355,7 +355,7 @@ else:
                         except ValueError as err:
                             yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = eval(qnb)
                         except TypeError as err:
-                            yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = parse_expr(qnb.replace('i','I'))
+                            yamlSettings['Fermions'][key]['Qnb'][GaugeGroup] = parse_expr(qnb.replace('i','I').replace('Sqrt','sqrt'))
                         except:
                             loggingCritical("error trying to understand the quantum number `{}`".format(qnb),verbose=RunSettings['vCritical'])
                             exit()
@@ -378,7 +378,7 @@ else:
                         try:
                             yamlSettings['RealScalars'][key][GaugeGroup] = Rational(qnb)
                         except TypeError as err:
-                            yamlSettings['RealScalars'][key][GaugeGroup] = parse_expr(qnb.replace('i','I'))
+                            yamlSettings['RealScalars'][key][GaugeGroup] = parse_expr(qnb.replace('i','I').replace('Sqrt','sqrt'))
                         except:
                             loggingCritical("error trying to understand the quantum number `{}`".format(qnb), verbose=RunSettings['vCritical'])
                             exit()
@@ -399,7 +399,13 @@ else:
                     if type(qnb) == list:  # given in terms of the Dynkin label translate it into tuple
                         yamlSettings['CplxScalars'][key]['Qnb'][GaugeGroup] = tuple(qnb)
                     else:
-                        yamlSettings['CplxScalars'][key][GaugeGroup] = Rational(qnb)
+                        try:
+                            yamlSettings['CplxScalars'][key][GaugeGroup] = Rational(qnb)
+                        except TypeError as err:
+                            yamlSettings['CplxScalars'][key][GaugeGroup] = parse_expr(qnb.replace('i','I').replace('Sqrt','sqrt'))
+                        except:
+                            loggingCritical("error trying to understand the quantum number `{}`".format(qnb), verbose=RunSettings['vCritical'])
+                            exit()
                     loggingInfo("CplxScalar {} with Qnb {} under {}".format(key, qnb, GaugeGroup))
             except ValueError as err:
                 loggingCritical(
