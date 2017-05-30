@@ -49,7 +49,11 @@ class RunPyLie:
     def calcAll(self):
         # goes through the queries and sends them to PyLie
         for qr in self._queries:
-            res = eval("self._idb.do_{}('{}')".format(qr[0], self._idb.toline(qr[1])[:-1]))
+            if any(['tensor' in el for el in qr[1]]):
+                res = eval("self._idb.do_{}('{}', {})".format(qr[0], self._idb.toline(qr[1][:-1]), qr[1][-1]))
+            else:
+                res = eval("self._idb.do_{}('{}')".format(qr[0], self._idb.toline(qr[1])[:-1]))
+
             if not res:
                 qr[1].insert(0, qr[0])
                 loggingCritical("Error, calculating term `{}`.".format(' '.join(qr[1])))
@@ -71,11 +75,14 @@ class RunPyLie:
                 fout.write('# '+el)
                 if isinstance(self._results[iel], list):
                     fout.write('invs{} = {{'.format(iel+1))
-                    fout.write(','.join(self._results[iel]))
+                    if isinstance(self._results[iel], str):
+                        fout.write(','.join(self._results[iel]))
+                    else:
+                        self._results[iel] = [str(el) for el in self._results[iel]]
+                        fout.write(','.join(self._results[iel]))
                     fout.write('}\n')
                 else:
                     if self._results[iel]:
-                        pudb.set_trace()
                         fout.write(self._queries[iel][0]+'{} = '.format(iel) + str(self._results[iel])+'\n')
                     else:
                         fout.write('invalid entry\n')
