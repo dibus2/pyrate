@@ -16,11 +16,11 @@ try:
     import pickle
     import os
     from Logging import *
-    sys.path.append(os.path.relpath(os.path.dirname(__file__)+'/../pylie'))
-    from PyLie import *
     import gzip
 except:
     exit("Error while loading one of the modules: `cmd, os, readline, rlcompleter, pickle, gzip, PyLie`")
+    sys.path.append(os.path.relpath(os.path.dirname(__file__)+'/../pylie'))
+    from PyLie import *
 try:
     Version = False
     from sympy import symbols, Symbol, Rational, sqrt, IndexedBase, Matrix, \
