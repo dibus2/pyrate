@@ -7,7 +7,6 @@ directly from PyLie.
 """
 
 try:
-    import pudb
     import cmd
     import os
     from sys import exit
@@ -548,7 +547,11 @@ class Idbquerry(cmd.Cmd):
                                         if len(res) == 2:
                                             res = tuple(res[0]) if sign_irrep < 0 else tuple(res[1])
                                         elif len(res) == 1:
-                                            res = tuple(res[0])
+                                            # we finally need to check if we are dealing with the adjoint if so we need to return the True, False like for SU2
+                                            if group[:2] == 'SU' and np.all(res[0] == lie.adjoint[0]):
+                                                res = tuple(res[0]) if sign_irrep > 0 else (res[0][0], True)
+                                            else:
+                                                res = tuple(res[0])
                                         else:
                                             pass  # multiple answers
                                     else:
