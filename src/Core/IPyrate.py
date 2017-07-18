@@ -7,6 +7,7 @@ directly from PyLie.
 """
 
 try:
+    import pudb
     import cmd
     import os
     from sys import exit
@@ -220,7 +221,14 @@ class Idbquerry(cmd.Cmd):
                     if type(ls[1][0]) != tuple:
                         raise IdbquerryWrongFormatMultipleIrreps
                     if 'SU' in ls[0] and ls[0] != 'SU2':
-                        if not (all([len(el) == int(ls[0][-1]) - 1 for el in ls[1]])):
+                        # Ok so this is too restrictive for the adjoint case. We want to be able to conjugate adjoints as well
+                        # So I think I should allow the conjugation for everything actually so I should check 1. that there is only one True/False statement
+                        if any([isinstance(ell[-1], bool) for ell in ls[1]]):
+                            #let's remvoe them to do the check
+                            tocheck = [tuple([elem for elem in ell if not isinstance(elem, bool)]) for ell in ls[1]]
+                        else:
+                            tocheck = ls[1]
+                        if not (all([len(el) == int(ls[0][-1]) - 1 for el in tocheck])):
                             raise IdbquerryInconsistentIrreps()
                     # Let's restrict it to SU(n) and SO(N)
                     if ls[0][:2] not in ['SU', 'SO']:
