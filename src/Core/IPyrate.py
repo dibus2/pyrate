@@ -751,6 +751,8 @@ class Idbquerry(cmd.Cmd):
                 else:
                     return line
         else:
+            if 'SU' in line and ('True' in line or 'False' in line):
+                line = line.replace('True','').replace('False','')
             return line
 
 
