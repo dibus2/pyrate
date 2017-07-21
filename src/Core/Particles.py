@@ -100,9 +100,16 @@ class higgsField(particle):
 
     def getRealFields(self):
         """return the field """
-        fieldssplitted = self.RealFields[0].split('I'), self.RealFields[1].split('I')  # if there is a I in the real field name it crashes...
+        if self.RealFields[1] == 0: #This is used to implement adjoint transforming under the conjugate matrix
+            fieldssplitted = self.RealFields[0].split('I'), 0
+        else:
+            fieldssplitted = self.RealFields[0].split('I'), self.RealFields[1].split('I')  # if there is a I in the real field name it crashes...
+
         for fieldsplitted in fieldssplitted:
-            if len(fieldsplitted) == 1:
+            if fieldsplitted == 0:
+                self.CplxPart = 0
+                self.Coeff = 0
+            elif len(fieldsplitted) == 1:
                 self.RealPart = Symbol(fieldsplitted[0])
                 self.RealComponents.append(Symbol(fieldsplitted[0]))
             else:

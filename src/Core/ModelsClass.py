@@ -268,9 +268,9 @@ class Model(object):
                                                                                   self.GaugeGroups, self.idb,
                                                                                   FromCplx=True)
                 # if not (str(self.CplxScalars[part].CplxPart) in self.Scalars):
-                # TODO remove
                 if not '*' in part:
-                    self.Scalars[str(self.CplxScalars[part].CplxPart)] = particle(self.CplxScalars[part].CplxPart,
+                    if self.CplxScalars[part].CplxPart != 0:  # This is for dealing with real scalars that are implemented as complex in order to be able to conjugate the rep matrices
+                        self.Scalars[str(self.CplxScalars[part].CplxPart)] = particle(self.CplxScalars[part].CplxPart,
                                                                                   {'Gen': 1,
                                                                                    'Qnb': self.CplxScalars[part].Qnb},
                                                                                   self.GaugeGroups, self.idb,
@@ -995,14 +995,20 @@ class Model(object):
                              else Integer(0) for igg, g in enumerate(self.NonUGaugeGroups)]
                     tempC = ['j{}{}'.format(IndicesCounters[igg] + 1, igg) if f.Qnb[g[0]] != g[1].Dynksinglet
                              else Integer(0) for igg, g in enumerate(self.NonUGaugeGroups)]
-                    Out.append([IndexedBase(f.RealPart)[['i{}{}'.format(IndicesCounters[igg] + 1, igg) if f.Qnb[g[0]] != g[1].Dynksinglet
+                    if f.CplxPart != 0:
+                        Out.append([IndexedBase(f.RealPart)[['i{}{}'.format(IndicesCounters[igg] + 1, igg) if f.Qnb[g[0]] != g[1].Dynksinglet
                                                          else Integer(0) for igg, g in enumerate(self.NonUGaugeGroups)]]
                                 + f.Coeff * IndexedBase(f.CplxPart)[['i{}{}'.format(IndicesCounters[igg] + 1, igg)
                                 if f.Qnb[g[0]] != g[1].Dynksinglet else Integer(0)
                                 for igg, g in enumerate(self.NonUGaugeGroups)]], f.norm])
+                        ToDerive.append([IndexedBase(f.RealPart)[tempR], IndexedBase(f.CplxPart)[tempC]])
+                    else:
+                        Out.append([IndexedBase(f.RealPart)[['i{}{}'.format(IndicesCounters[igg] + 1, igg) if f.Qnb[g[0]] != g[1].Dynksinglet
+                                                             else Integer(0) for igg, g in enumerate(self.NonUGaugeGroups)]]
+                                    + Integer(0), f.norm])
+                        ToDerive.append([IndexedBase(f.RealPart)[tempR]])
 
 
-                    ToDerive.append([IndexedBase(f.RealPart)[tempR], IndexedBase(f.CplxPart)[tempC]])
                     # Increment the proper indices
                 elif f.Cplx and Singlet:
                     # If self.NonUGaugeGroups is an empty list it crashes F. on the 22.07.14

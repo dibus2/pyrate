@@ -1,3 +1,21 @@
+July 21 st 2017:
+There has been some work done around dealing with adjoint fields. Indeed, these representations are real but the representation matrices used in PyR@TE are always complex even for real representation,
+it is important to be able to conjugate the representation matrices. For instance, if one wants to obtained the following contraction for two triplets of SU(2): a[1]b[1]+ a[2]b[2] + a[3]b[3], it is
+indispensable to conjugate the second representation matrix as can be checked in the interactive mode:
+
+Invariant SU2 [[2],[2,True]]
+
+The way we implemented it is clear in the above example, and is the addon of the True/False key word at the end of the representation (Note that this already existed for SU(2) since the conj. rep. are degenerate with the regular ones).
+For the 8 of SU3 one would then obtained for instance:
+
+Invariants SU3 [[1,1,True],[1,1,False]]
+
+Now, if one wants to implement a real scalar, but conjugate one every two matrix representation, this is not possible using the entry RealScalars of PyR@TE since only one representation is given. However, one
+can then use the CplxScalars section and set the imaginary part to zero (Note that -8 for the conjugate irrep):
+
+S*: {RealFields: [Pi1,0], Norm: 1/Sqrt(2), Qnb : {U1: 0, SU2L: 1, SU3c: -8}}
+
+
 August 25th 2016:
 PyR@TE 2.0.0 released.
 
